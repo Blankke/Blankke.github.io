@@ -1,23 +1,3 @@
-// Initialize LeanCloud (Placeholder - You need to replace these)
-// 去 https://console.leancloud.app/ 注册账号，创建应用
-// 在 设置 > 应用凭证 中找到 AppID, AppKey 和 REST API Server URL
-const APP_ID = 'YOUR_APP_ID'; 
-const APP_KEY = 'YOUR_APP_KEY';
-const SERVER_URL = 'YOUR_SERVER_URL'; // 国际版不需要这个，国内版需要绑定域名
-
-let useCloud = false;
-
-if (APP_ID !== 'YOUR_APP_ID') {
-    AV.init({
-        appId: APP_ID,
-        appKey: APP_KEY,
-        serverURL: SERVER_URL
-    });
-    useCloud = true;
-} else {
-    console.log("LeanCloud 未配置，使用本地存储模式。");
-}
-
 // State
 let zIndexCounter = 100;
 
@@ -106,18 +86,18 @@ document.addEventListener('mouseup', () => {
 // 1. 登录 GitHub，进入 Settings > Developer settings > OAuth Apps
 // 2. 点击 "New OAuth App"
 // 3. 填写 Application Name (如: My Retro Blog)
-// 4. Homepage URL 填写你的网站地址 (本地测试填 http://localhost:3000)
-// 5. Authorization callback URL 同上
+// 4. Homepage URL 填写你的 GitHub Pages 网址 (例如: https://yourname.github.io/repo-name)
+// 5. Authorization callback URL 同上 (必须完全一致)
 // 6. 注册成功后，复制 Client ID 和 Client Secret 填入下方
-// 7. 创建一个新的 GitHub 仓库 (Repository) 用来存储评论，或者使用现有的
+// 7. 创建一个新的 GitHub 仓库 (Repository) 用来存储评论，或者直接使用你存放这个网页的仓库
 // ---------------------------------------------------
 
 const gitalk = new Gitalk({
-  clientID: 'YOUR_GITHUB_CLIENT_ID', // 替换为你的 Client ID
-  clientSecret: 'YOUR_GITHUB_CLIENT_SECRET', // 替换为你的 Client Secret
-  repo: 'YOUR_REPO_NAME',      // 存储评论的仓库名 (例如: 'my-blog-comments')
-  owner: 'YOUR_GITHUB_USERNAME', // 你的 GitHub 用户名
-  admin: ['YOUR_GITHUB_USERNAME'], // 管理员列表 (通常就是你自己)
+  clientID: 'Ov23lifhLcm9lmBzlp1d', // 替换为你的 Client ID
+  clientSecret: 'f9152db39b5d9b851839ee606371d9171c29a608', // 替换为你的 Client Secret
+  repo: 'Blankke.github.io',      // 存储评论的仓库名 (例如: 'my-blog-comments')
+  owner: 'Blankke', // 你的 GitHub 用户名
+  admin: ['Blankke'], // 管理员列表 (通常就是你自己)
   id: 'guestbook',      // 唯一标识，确保所有留言都在同一个 Issue 下
   distractionFreeMode: false  // 类似 Facebook 的无干扰模式
 });
