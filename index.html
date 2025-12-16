@@ -1,10 +1,128 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Blankke</title>
-  </head>
-  <body>
-    <h1>Hello, GitHub Pages</h1>
-  </body>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Retro Desktop</title>
+    <!-- 98.css for the core look and feel -->
+    <link rel="stylesheet" href="https://unpkg.com/98.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Desktop Icons -->
+    <div class="desktop-icons">
+        <div class="icon" ondblclick="openWindow('window-computer')">
+            <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-4.png" alt="My Computer">
+            <div class="icon-text">我的电脑</div>
+        </div>
+        <div class="icon" ondblclick="openWindow('window-guestbook')">
+            <img src="https://win98icons.alexmeub.com/icons/png/notepad-5.png" alt="Guestbook">
+            <div class="icon-text">留言板.txt</div>
+        </div>
+        <div class="icon" onclick="window.open('https://github.com', '_blank')">
+            <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_installer-2.png" alt="Internet">
+            <div class="icon-text">GitHub</div>
+        </div>
+    </div>
+
+    <!-- Window: My Computer (Personal Info) -->
+    <div id="window-computer" class="window" style="width: 400px;">
+        <div class="title-bar">
+            <div class="title-bar-text">我的电脑 - 个人介绍</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close" onclick="closeWindow('window-computer')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <div style="background: white; padding: 15px; border: 2px inset #dfdfdf; height: 250px; overflow-y: auto;">
+                <h3>👋 你好!</h3>
+                <p>欢迎来到我的个人主页。</p>
+                <p>这里是留空区域，你可以在 index.html 中编辑这段文字。</p>
+                <br>
+                <fieldset>
+                    <legend>关于我</legend>
+                    <ul>
+                        <li>职业: 开发者</li>
+                        <li>爱好: 编程, 复古游戏</li>
+                        <li>位置: 互联网</li>
+                    </ul>
+                </fieldset>
+            </div>
+            <div class="status-bar" style="margin-top: 10px;">
+                <p class="status-bar-field">3 Objects</p>
+                <p class="status-bar-field">12.5 MB</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Window: Guestbook -->
+    <div id="window-guestbook" class="window" style="width: 350px;">
+        <div class="title-bar">
+            <div class="title-bar-text">留言板.txt - 记事本</div>
+            <div class="title-bar-controls">
+                <button aria-label="Close" onclick="closeWindow('window-guestbook')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <ul role="menu-bar">
+                <li role="menu-item">文件</li>
+                <li role="menu-item">编辑</li>
+                <li role="menu-item">搜索</li>
+                <li role="menu-item">帮助</li>
+            </ul>
+            <div id="guestbook-messages" class="guestbook-messages">
+                <!-- Messages will be loaded here -->
+                <div class="message-entry">
+                    <div><span class="message-author">System</span> <span class="message-time">[Default]</span></div>
+                    <div>欢迎来到留言板！请随意留言。</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 5px; margin-top: 5px;">
+                <input type="text" id="guestbook-input" placeholder="输入消息..." style="flex-grow: 1;">
+                <button onclick="postMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu" class="start-menu">
+        <div class="start-menu-sidebar">
+            Windows 98
+        </div>
+        <div class="start-menu-items">
+            <div class="menu-item" onclick="openWindow('window-computer')">
+                <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-4.png">
+                <span>我的电脑</span>
+            </div>
+            <div class="menu-item" onclick="window.open('https://github.com', '_blank')">
+                <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png">
+                <span>我的 GitHub 项目</span>
+            </div>
+            <div class="menu-item">
+                <img src="https://win98icons.alexmeub.com/icons/png/settings_gear-4.png">
+                <span>设置</span>
+            </div>
+            <hr style="width: 100%; border-top: 1px solid #808080; border-bottom: 1px solid #fff;">
+            <div class="menu-item" onclick="alert('关机功能暂未实现 :)')">
+                <img src="https://win98icons.alexmeub.com/icons/png/shut_down_normal-4.png">
+                <span>关闭系统...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <button id="start-button" class="start-button">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" alt="win">
+            Start
+        </button>
+        <div class="taskbar-divider"></div>
+        <div class="taskbar-time" id="taskbar-time">12:00 PM</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>

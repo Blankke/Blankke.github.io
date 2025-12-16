@@ -1,0 +1,187 @@
+body {
+  background-color: #008080; /* Classic Win98 Teal */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent body scroll, windows move inside */
+  font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+}
+
+/* Desktop Icons */
+.desktop-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 70px;
+  cursor: pointer;
+  text-align: center;
+  color: white;
+  text-shadow: 1px 1px 0px black; /* Better readability on teal */
+}
+
+.icon img {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 5px;
+}
+
+.icon-text {
+  font-size: 12px;
+  padding: 2px;
+}
+
+.icon:active .icon-text {
+  background-color: #000080;
+  border: 1px dotted white;
+}
+
+/* Windows */
+.window {
+  position: absolute;
+  min-width: 300px;
+  display: none; /* Hidden by default */
+  z-index: 10;
+}
+
+.window-body {
+  margin: 0;
+}
+
+/* Taskbar */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: silver;
+  border-top: 2px solid white;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  z-index: 1000;
+  box-shadow: inset 1px 1px #dfdfdf, 1px 0 #000, 0 1px #000, 1px 1px #000;
+}
+
+.start-button {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  margin-right: 5px;
+}
+
+.start-button img {
+  width: 16px;
+  height: 16px;
+}
+
+.taskbar-divider {
+  flex-grow: 1;
+}
+
+.taskbar-time {
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  padding: 2px 10px;
+  margin-right: 2px;
+  background: silver;
+  font-size: 12px;
+}
+
+/* Start Menu */
+.start-menu {
+  position: fixed;
+  bottom: 32px;
+  left: 2px;
+  width: 200px;
+  background: silver;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow: 2px 2px 0px black;
+  display: none;
+  z-index: 2000;
+  padding: 2px;
+}
+
+.start-menu-sidebar {
+  width: 20px;
+  background: linear-gradient(to bottom, #000080, #1084d0);
+  color: white;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 5px 0;
+  float: left;
+  height: 100%;
+  min-height: 150px;
+}
+
+.start-menu-items {
+  margin-left: 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.menu-item:hover {
+  background-color: #000080;
+  color: white;
+}
+
+.menu-item img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Guestbook Specifics */
+.guestbook-messages {
+  height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  padding: 5px;
+  margin-bottom: 10px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.message-entry {
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 4px;
+}
+
+.message-author {
+  font-weight: bold;
+  color: #000080;
+}
+
+.message-time {
+  font-size: 0.8em;
+  color: #666;
+}
