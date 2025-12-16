@@ -1,0 +1,140 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background-color: #fff;
+}
+
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+header {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 60px;
+    align-items: flex-start;
+}
+
+.profile-section {
+    flex: 0 0 200px;
+    text-align: center;
+}
+
+.profile-photo {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background-color: #eee;
+    margin-bottom: 20px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.contact-info {
+    font-size: 0.9em;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-item img {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+
+.main-content {
+    flex: 1;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    color: #111;
+}
+
+.section-item {
+    margin-bottom: 20px;
+}
+
+.date-badge {
+    display: inline-block;
+    background-color: #f1f1f1;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: #555;
+    margin-right: 10px;
+    font-family: monospace;
+}
+
+.institution {
+    font-weight: 600;
+    color: #000;
+}
+
+.paper-title {
+    font-weight: 600;
+    color: #000;
+}
+
+.authors {
+    color: #555;
+    font-size: 0.95em;
+}
+
+.venue {
+    font-style: italic;
+    color: #666;
+}
+
+.links {
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+
+ul {
+    padding-left: 20px;
+    margin-top: 10px;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .profile-section {
+        margin-bottom: 30px;
+    }
+}
