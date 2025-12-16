@@ -7,6 +7,9 @@
     <!-- 98.css for the core look and feel -->
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <link rel="stylesheet" href="style.css">
+    <!-- Gitalk -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
 </head>
 <body>
 
@@ -73,16 +76,9 @@
                 <li role="menu-item">搜索</li>
                 <li role="menu-item">帮助</li>
             </ul>
-            <div id="guestbook-messages" class="guestbook-messages">
-                <!-- Messages will be loaded here -->
-                <div class="message-entry">
-                    <div><span class="message-author">System</span> <span class="message-time">[Default]</span></div>
-                    <div>欢迎来到留言板！请随意留言。</div>
-                </div>
-            </div>
-            <div style="display: flex; gap: 5px; margin-top: 5px;">
-                <input type="text" id="guestbook-input" placeholder="输入消息..." style="flex-grow: 1;">
-                <button onclick="postMessage()">发送</button>
+            <div class="guestbook-container" style="height: 300px; overflow-y: auto; background: white; padding: 10px; border: 2px inset #dfdfdf;">
+                <!-- Gitalk Container -->
+                <div id="gitalk-container"></div>
             </div>
         </div>
     </div>

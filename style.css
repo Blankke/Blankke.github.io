@@ -159,29 +159,28 @@ body {
 }
 
 /* Guestbook Specifics */
-.guestbook-messages {
-  height: 200px;
-  overflow-y: auto;
-  background: white;
-  border: 2px solid;
-  border-color: #808080 #ffffff #ffffff #808080;
-  padding: 5px;
-  margin-bottom: 10px;
-  font-family: 'Courier New', Courier, monospace;
+.guestbook-container {
+  /* Custom scrollbar for webkit to match retro feel slightly better */
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 #dfdfdf;
 }
 
-.message-entry {
-  margin-bottom: 8px;
-  border-bottom: 1px dashed #ccc;
-  padding-bottom: 4px;
+/* Overriding some Gitalk styles to fit better (Optional) */
+#gitalk-container .gt-container .gt-header-textarea {
+  border-radius: 0;
+  border: 2px inset #dfdfdf;
 }
 
-.message-author {
-  font-weight: bold;
-  color: #000080;
+#gitalk-container .gt-container .gt-btn {
+  border-radius: 0;
+  border: 2px outset #dfdfdf;
+  background-color: #c0c0c0;
+  color: black;
+  font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
 }
 
-.message-time {
-  font-size: 0.8em;
-  color: #666;
+#gitalk-container .gt-container .gt-btn:hover {
+  background-color: #000080;
+  color: white;
+  border-color: white;
 }
