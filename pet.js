@@ -29,10 +29,14 @@ class DesktopPet {
             filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
         `;
         
-        // 使用 emoji 羊作为宠物
-        this.element.innerHTML = '🐑';
-        this.element.style.fontSize = '48px';
-        this.element.style.lineHeight = '48px';
+        // 使用粉色猫咪图片
+        const img = document.createElement('img');
+        img.src = 'icon/icon.png';
+        img.style.width = '48px';
+        img.style.height = '48px';
+        img.style.display = 'block';
+        img.style.imageRendering = 'pixelated'; // 保持像素风格
+        this.element.appendChild(img);
         
         document.body.appendChild(this.element);
         
@@ -90,8 +94,8 @@ class DesktopPet {
     }
 
     setPosition(x, y) {
-        this.x = Math.max(0, Math.min(window.innerWidth - 32, x));
-        this.y = Math.max(0, Math.min(window.innerHeight - 32, y));
+        this.x = Math.max(0, Math.min(window.innerWidth - 48, x));
+        this.y = Math.max(0, Math.min(window.innerHeight - 48, y));
         this.element.style.left = this.x + 'px';
         this.element.style.top = this.y + 'px';
         
@@ -170,13 +174,14 @@ class DesktopPet {
     }
 
     startDialogSequence() {
-        // 初始对话序列 - 不要太明显的暗示
+        // 初始对话序列 - 刚进入就开始说话吸引注意
         const initialDialogs = [
-            { text: "咩~ 欢迎来到我的主人的网站！", delay: 3000, id: 'welcome' },
-            { text: "这里看起来很简单... 对吧？", delay: 12000, id: 'intro1' },
-            { text: "试试那些图标吧，都能用的~", delay: 25000, id: 'intro2' },
-            { text: "我主人说，真正重要的东西往往藏在表面之下。", delay: 45000, id: 'hint1' },
-            { text: "就像冰山... 你只能看到露出水面的那一小部分。", delay: 70000, id: 'hint2' }
+            { text: "喵~ 你好呀！欢迎来到这里！", delay: 800, id: 'welcome' },
+            { text: "我是这里的小向导，有什么需要帮助的吗？", delay: 6000, id: 'intro0' },
+            { text: "这里看起来很简单... 对吧？", delay: 15000, id: 'intro1' },
+            { text: "试试那些图标吧，都能用的~", delay: 30000, id: 'intro2' },
+            { text: "我主人说，真正重要的东西往往藏在表面之下。", delay: 50000, id: 'hint1' },
+            { text: "就像冰山... 你只能看到露出水面的那一小部分。", delay: 75000, id: 'hint2' }
         ];
         
         initialDialogs.forEach(dialog => {
@@ -214,6 +219,7 @@ class DesktopPet {
             dialogs.push("有些东西，不是点出来的。");
             dialogs.push("你可以试试同时按下几个你平时不会一起按的键。");
             dialogs.push("键盘上的组合... 也许能打开什么？");
+            dialogs.push("Ctrl、Alt... 再加上一个字母... 我主人姓什么来着？");
         }
         
         const randomDialog = dialogs[Math.floor(Math.random() * dialogs.length)];
@@ -224,37 +230,32 @@ class DesktopPet {
         if (!this.minesweeperCleared) {
             this.minesweeperCleared = true;
             
+            // 立即显示第一条对话
+            this.showDialog("哇！你真厉害！扫雷都通关了！", 4000);
+            
             // 庆祝动画（让宠物跳跃）
             this.celebrate();
             
-            // 显示提示对话序列 - 暗示性的，不直接给答案
-            setTimeout(() => {
-                this.showDialog("哇！你真厉害！扫雷都通关了！", 4000);
-            }, 1000);
-            
+            // 显示后续提示对话序列 - 暗示性的，不直接给答案
             setTimeout(() => {
                 this.showDialog("看来你确实有耐心... 也有足够的好奇心。", 4000);
-            }, 6000);
+            }, 5000);
             
             setTimeout(() => {
                 this.showDialog("那我就告诉你一个秘密吧~", 4000);
-            }, 11000);
+            }, 10000);
             
             setTimeout(() => {
                 this.showDialog("我主人说... 高手都用键盘，菜鸟才点鼠标。", 5000);
-            }, 16000);
+            }, 15000);
             
             setTimeout(() => {
                 this.showDialog("有些东西，不是点出来的。", 5000);
-            }, 22000);
+            }, 21000);
             
             setTimeout(() => {
                 this.showDialog("试试看... 同时按下几个你平时不会一起按的键？", 6000);
-            }, 28000);
-            
-            setTimeout(() => {
-                this.showDialog("Ctrl、Alt... 再加上一个字母... 说不定能打开什么呢？", 7000);
-            }, 35000);
+            }, 27000);
         }
     }
 
