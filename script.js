@@ -78,6 +78,45 @@ document.addEventListener('mousemove', (e) => {
 document.addEventListener('mouseup', () => {
     isDragging = false;
     currentWindow = null;
+    isResizing = false;
+    resizingWindow = null;
+});
+
+// Resizing Logic
+let isResizing = false;
+let resizingWindow = null;
+let resizeStartX = 0;
+let resizeStartY = 0;
+let resizeStartWidth = 0;
+let resizeStartHeight = 0;
+
+document.querySelectorAll('.resize-handle').forEach(handle => {
+    handle.addEventListener('mousedown', (e) => {
+        e.stopPropagation(); // Prevent window dragging
+        isResizing = true;
+        resizingWindow = handle.closest('.window');
+        bringToFront(resizingWindow);
+        
+        resizeStartX = e.clientX;
+        resizeStartY = e.clientY;
+        resizeStartWidth = resizingWindow.offsetWidth;
+        resizeStartHeight = resizingWindow.offsetHeight;
+    });
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (isResizing && resizingWindow) {
+        e.preventDefault();
+        
+        const deltaX = e.clientX - resizeStartX;
+        const deltaY = e.clientY - resizeStartY;
+        
+        const newWidth = Math.max(300, resizeStartWidth + deltaX);
+        const newHeight = Math.max(200, resizeStartHeight + deltaY);
+        
+        resizingWindow.style.width = newWidth + 'px';
+        resizingWindow.style.height = newHeight + 'px';
+    }
 });
 
 // Gitalk Initialization

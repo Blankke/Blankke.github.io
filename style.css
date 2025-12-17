@@ -3,7 +3,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden; /* Prevent body scroll, windows move inside */
-  font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
   height: 100vh;
   width: 100vw;
   user-select: none;
@@ -52,12 +52,48 @@ body {
 .window {
   position: absolute;
   min-width: 300px;
+  min-height: 200px;
   display: none; /* Hidden by default */
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+.window:not([style*="display: none"]) {
+  display: flex;
 }
 
 .window-body {
   margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Resize Handle */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, #808080 50%);
+  z-index: 10;
+}
+
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #000;
+  border-bottom: 2px solid #000;
+  border-left: 2px solid #fff;
+  border-top: 2px solid #fff;
 }
 
 /* Taskbar */
@@ -163,6 +199,28 @@ body {
   /* Custom scrollbar for webkit to match retro feel slightly better */
   scrollbar-width: thin;
   scrollbar-color: #c0c0c0 #dfdfdf;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  padding: 10px;
+  border: 2px inset #dfdfdf;
+  overflow-y: auto;
+}
+
+.guestbook-container #gitalk-container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Computer Window Content */
+.computer-content {
+  background: white;
+  padding: 15px;
+  border: 2px inset #dfdfdf;
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* Overriding some Gitalk styles to fit better (Optional) */
@@ -176,7 +234,7 @@ body {
   border: 2px outset #dfdfdf;
   background-color: #c0c0c0;
   color: black;
-  font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
 }
 
 #gitalk-container .gt-container .gt-btn:hover {
