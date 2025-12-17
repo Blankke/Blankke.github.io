@@ -322,6 +322,10 @@
                 const totalNonMines = this.rows * this.cols - this.totalMines;
                 if (revealedCount === totalNonMines) {
                     this.endGame(true);
+                    // 通知父窗口（桌宠）游戏胜利
+                    if (window.parent && window.parent.desktopPet) {
+                        window.parent.desktopPet.onMinesweeperWin();
+                    }
                 }
             }
 
