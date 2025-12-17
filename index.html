@@ -27,7 +27,7 @@
             <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_installer-2.png" alt="Internet">
             <div class="icon-text">GitHub</div>
         </div>
-        <div class="icon" onclick="window.open('resume.html', '_blank')">
+        <div class="icon" ondblclick="openWindow('window-resume')">
             <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png" alt="Resume">
             <div class="icon-text">我的简历</div>
         </div>
@@ -89,6 +89,30 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
             <div class="guestbook-container">
                 <!-- Gitalk Container -->
                 <div id="gitalk-container"></div>
+            </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
+    <!-- Window: Resume -->
+    <div id="window-resume" class="window" style="width: 700px; height: 600px;">
+        <div class="title-bar">
+            <div class="title-bar-text">我的简历.doc - Microsoft Word</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close" onclick="closeWindow('window-resume')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <ul role="menu-bar">
+                <li role="menu-item">文件</li>
+                <li role="menu-item">编辑</li>
+                <li role="menu-item">查看</li>
+                <li role="menu-item">帮助</li>
+            </ul>
+            <div class="resume-container">
+                <iframe src="resume.html" frameborder="0" style="width: 100%; height: 100%; border: 2px inset #dfdfdf;"></iframe>
             </div>
         </div>
         <div class="resize-handle"></div>

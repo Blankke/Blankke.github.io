@@ -223,6 +223,18 @@ body {
   overflow-y: auto;
 }
 
+/* Resume Window */
+.resume-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: white;
+}
+
+.resume-container iframe {
+  flex: 1;
+}
+
 /* Overriding some Gitalk styles to fit better (Optional) */
 #gitalk-container .gt-container .gt-header-textarea {
   border-radius: 0;
