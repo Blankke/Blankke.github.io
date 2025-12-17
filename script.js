@@ -513,10 +513,27 @@ loadMusicManifest();
 // 右键菜单功能
 // ---------------------------------------------------
 const contextMenu = document.getElementById('context-menu');
+const iconContextMenu = document.getElementById('icon-context-menu');
+let copiedIcon = null; // 存储被复制的图标数据
+let contextMenuTargetIcon = null; // 右键点击的图标
 
-// 显示右键菜单
+// 更新粘贴按钮状态
+function updatePasteButton() {
+    const pasteBtn = document.getElementById('ctx-paste');
+    if (pasteBtn) {
+        if (copiedIcon) {
+            pasteBtn.classList.remove('disabled');
+        } else {
+            pasteBtn.classList.add('disabled');
+        }
+    }
+}
+
+// 显示桌面右键菜单
 function showContextMenu(x, y) {
     if (!contextMenu) return;
+    hideIconContextMenu(); // 隐藏图标菜单
+    updatePasteButton(); // 更新粘贴按钮状态
     contextMenu.style.display = 'block';
     contextMenu.style.left = `${x}px`;
     contextMenu.style.top = `${y}px`;
@@ -531,15 +548,51 @@ function showContextMenu(x, y) {
     }
 }
 
-// 隐藏右键菜单
+// 显示图标右键菜单
+function showIconContextMenu(x, y, icon) {
+    if (!iconContextMenu) return;
+    hideContextMenu(); // 隐藏桌面菜单
+    contextMenuTargetIcon = icon;
+    iconContextMenu.style.display = 'block';
+    iconContextMenu.style.left = `${x}px`;
+    iconContextMenu.style.top = `${y}px`;
+    
+    // 确保菜单不会超出屏幕
+    const rect = iconContextMenu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+        iconContextMenu.style.left = `${window.innerWidth - rect.width}px`;
+    }
+    if (rect.bottom > window.innerHeight) {
+        iconContextMenu.style.top = `${window.innerHeight - rect.height}px`;
+    }
+}
+
+// 隐藏桌面右键菜单
 function hideContextMenu() {
     if (contextMenu) {
         contextMenu.style.display = 'none';
     }
 }
 
+// 隐藏图标右键菜单
+function hideIconContextMenu() {
+    if (iconContextMenu) {
+        iconContextMenu.style.display = 'none';
+    }
+    contextMenuTargetIcon = null;
+}
+
 // 桌面右键菜单
 document.addEventListener('contextmenu', (e) => {
+    // 检查是否点击在图标上
+    const icon = e.target.closest('.icon[data-icon-id]');
+    if (icon) {
+        e.preventDefault();
+        selectIcon(icon);
+        showIconContextMenu(e.clientX, e.clientY, icon);
+        return;
+    }
+    
     // 只在桌面区域显示右键菜单
     if (e.target === document.body || e.target.id === 'desktop' || e.target.closest('.desktop-icons')) {
         e.preventDefault();
@@ -549,8 +602,9 @@ document.addEventListener('contextmenu', (e) => {
 
 // 点击其他地方关闭菜单
 document.addEventListener('click', (e) => {
-    if (!contextMenu.contains(e.target)) {
+    if (!contextMenu.contains(e.target) && !iconContextMenu.contains(e.target)) {
         hideContextMenu();
+        hideIconContextMenu();
     }
 });
 
@@ -584,11 +638,138 @@ document.getElementById('ctx-refresh')?.addEventListener('click', () => {
     hideContextMenu();
 });
 
+document.getElementById('ctx-paste')?.addEventListener('click', () => {
+    if (!copiedIcon) return;
+    
+    // 创建新图标
+    const newIcon = document.createElement('div');
+    newIcon.className = 'icon';
+    
+    // 生成唯一 ID
+    const timestamp = Date.now();
+    const newId = `icon-copy-${timestamp}`;
+    const newDataId = `copy-${timestamp}`;
+    
+    newIcon.id = newId;
+    newIcon.dataset.iconId = newDataId;
+    
+    // 设置位置（在原图标附近偏移一点）
+    const offsetX = 80;
+    const offsetY = 80;
+    newIcon.dataset.defaultLeft = String(copiedIcon.left + offsetX);
+    newIcon.dataset.defaultTop = String(copiedIcon.top + offsetY);
+    newIcon.style.left = `${copiedIcon.left + offsetX}px`;
+    newIcon.style.top = `${copiedIcon.top + offsetY}px`;
+    
+    // 复制内容
+    newIcon.innerHTML = copiedIcon.content;
+    
+    // 如果有双击事件，也复制过来
+    if (copiedIcon.ondblclick) {
+        newIcon.ondblclick = copiedIcon.ondblclick;
+    }
+    
+    // 添加到桌面
+    document.getElementById('desktop').appendChild(newIcon);
+    
+    // 添加事件监听器
+    setupIconEvents(newIcon);
+    
+    // 保存位置
+    saveIconPosition(newIcon);
+    
+    hideContextMenu();
+});
+
 document.getElementById('ctx-properties')?.addEventListener('click', () => {
     // 显示属性对话框
     alert('桌面属性\\n\\n分辨率: ' + window.innerWidth + ' x ' + window.innerHeight + '\\n颜色: 32 位\\n适配器: GitHub Pages Accelerator');
     hideContextMenu();
 });
+
+// 图标右键菜单项功能
+document.getElementById('icon-ctx-open')?.addEventListener('click', () => {
+    if (contextMenuTargetIcon) {
+        // 触发双击事件
+        const dblclickEvent = new MouseEvent('dblclick', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+        });
+        contextMenuTargetIcon.dispatchEvent(dblclickEvent);
+    }
+    hideIconContextMenu();
+});
+
+document.getElementById('icon-ctx-copy')?.addEventListener('click', () => {
+    if (contextMenuTargetIcon) {
+        // 保存图标数据
+        copiedIcon = {
+            content: contextMenuTargetIcon.innerHTML,
+            left: contextMenuTargetIcon.offsetLeft,
+            top: contextMenuTargetIcon.offsetTop,
+            ondblclick: contextMenuTargetIcon.ondblclick
+        };
+        updatePasteButton();
+    }
+    hideIconContextMenu();
+});
+
+document.getElementById('icon-ctx-delete')?.addEventListener('click', () => {
+    if (contextMenuTargetIcon && contextMenuTargetIcon.dataset.iconId) {
+        const iconId = contextMenuTargetIcon.dataset.iconId;
+        
+        // 不允许删除原始图标
+        const originalIcons = ['computer', 'guestbook', 'github', 'resume', 'music', 'radio', 'minesweeper'];
+        if (originalIcons.includes(iconId)) {
+            alert('无法删除系统图标！');
+            hideIconContextMenu();
+            return;
+        }
+        
+        // 删除复制的图标
+        if (confirm('确定要删除这个图标吗？')) {
+            // 从 localStorage 中删除位置信息
+            const saved = JSON.parse(localStorage.getItem('win98_desktop_icons') || '{}');
+            delete saved[iconId];
+            localStorage.setItem('win98_desktop_icons', JSON.stringify(saved));
+            
+            // 从 DOM 中删除
+            contextMenuTargetIcon.remove();
+        }
+    }
+    hideIconContextMenu();
+});
+
+document.getElementById('icon-ctx-properties')?.addEventListener('click', () => {
+    if (contextMenuTargetIcon) {
+        const iconText = contextMenuTargetIcon.querySelector('.icon-text')?.textContent || '未知';
+        const iconId = contextMenuTargetIcon.dataset.iconId || 'unknown';
+        alert(`图标属性\\n\\n名称: ${iconText}\\nID: ${iconId}\\n位置: (${contextMenuTargetIcon.offsetLeft}, ${contextMenuTargetIcon.offsetTop})`);
+    }
+    hideIconContextMenu();
+});
+
+// 为新图标设置事件监听器的辅助函数
+function setupIconEvents(icon) {
+    // 单击选中图标
+    icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectIcon(icon);
+    });
+
+    icon.addEventListener('mousedown', (e) => {
+        // only left button
+        if (e.button !== 0) return;
+        isDraggingIcon = true;
+        draggingIcon = icon;
+        iconDownX = e.clientX;
+        iconDownY = e.clientY;
+        iconDragOffsetX = e.clientX - icon.offsetLeft;
+        iconDragOffsetY = e.clientY - icon.offsetTop;
+        selectIcon(icon); // 拖动时也选中
+    });
+}
 
 // Gitalk Initialization
 // ---------------------------------------------------
