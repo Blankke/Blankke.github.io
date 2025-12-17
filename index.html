@@ -23,9 +23,9 @@
             <img src="icon/notepad-5.png" alt="Guestbook">
             <div class="icon-text">留言板.txt</div>
         </div>
-        <div class="icon" id="icon-github" data-icon-id="github" data-default-left="20" data-default-top="200" onclick="window.open('https://github.com/Blankke', '_blank')">
+        <div class="icon" id="icon-github" data-icon-id="github" data-default-left="20" data-default-top="200" ondblclick="window.open('https://github.com/Blankke', '_blank')">
             <img src="icon/network_internet_pcs_installer-2.png" alt="Internet">
-            <div class="icon-text">GitHub</div>
+            <div class="icon-text">网上邻居</div>
         </div>
         <div class="icon" id="icon-resume" data-icon-id="resume" data-default-left="20" data-default-top="290" ondblclick="openWindow('window-resume')">
             <img src="icon/directory_open_file_mydocs-4.png" alt="Resume">
@@ -37,12 +37,12 @@
             <div class="icon-text">音乐播放器</div>
         </div>
 
-        <div class="icon" id="icon-radio" data-icon-id="radio" data-default-left="20" data-default-top="470" onclick="window.open('https://radio.garden/visit/glasgow/CtpxHQ6P', '_blank')">
+        <div class="icon" id="icon-radio" data-icon-id="radio" data-default-left="20" data-default-top="470" ondblclick="window.open('https://radio.garden/visit/glasgow/CtpxHQ6P', '_blank')">
             <img src="icon/media_player-0.png" alt="Radio">
             <div class="icon-text">收音机</div>
         </div>
 
-        <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560" onclick="window.open('https://minesweeper.online/', '_blank')">
+        <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560" ondblclick="window.open('https://minesweeper.online/', '_blank')">
             <img src="icon/minesweeper-0.png" alt="Minesweeper">
             <div class="icon-text">扫雷</div>
         </div>
@@ -218,6 +218,24 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
         <div class="taskbar-windows" id="taskbar-windows" aria-label="Running windows"></div>
         <div class="taskbar-divider"></div>
         <div class="taskbar-time" id="taskbar-time">12:00 PM</div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div id="context-menu" class="context-menu">
+        <div class="context-menu-item" id="ctx-arrange">
+            <span>排列图标</span>
+        </div>
+        <div class="context-menu-item" id="ctx-refresh">
+            <span>刷新</span>
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="ctx-paste" class="disabled">
+            <span>粘贴</span>
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="ctx-properties">
+            <span>属性</span>
+        </div>
     </div>
 
     <script src="script.js"></script>

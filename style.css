@@ -46,6 +46,27 @@ body {
   border: 1px dotted white;
 }
 
+/* 图标选中状态 */
+.icon.selected .icon-text {
+  background-color: #000080;
+  border: 1px dotted white;
+}
+
+.icon.selected {
+  /* 可选：给整个图标添加视觉反馈 */
+}
+
+/* 拖拽中的图标 */
+.icon.dragging {
+  opacity: 0.7;
+  cursor: move !important;
+}
+
+/* 窗口标题栏悬停效果 */
+.title-bar:hover {
+  background: linear-gradient(to right, #000080, #1084d0);
+}
+
 /* Windows */
 .window {
   position: absolute;
@@ -287,6 +308,20 @@ body {
   border: 2px inset #dfdfdf;
   flex: 1;
   overflow-y: auto;
+  font-size: 15px; /* 增大字体 */
+  line-height: 1.6; /* 增加行高提升可读性 */
+}
+
+.computer-content h3 {
+  font-size: 20px; /* 标题更大 */
+}
+
+.computer-content p {
+  font-size: 15px;
+}
+
+.computer-content fieldset {
+  font-size: 14px;
 }
 
 /* Resume Window */
@@ -397,4 +432,55 @@ body {
   background-color: #000080;
   color: white;
   border-color: white;
+}
+/* 右键菜单 */
+.context-menu {
+  position: fixed;
+  background: silver;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow: 2px 2px 0px black;
+  padding: 2px;
+  z-index: 3000;
+  display: none;
+  min-width: 150px;
+}
+
+.context-menu-item {
+  padding: 5px 25px 5px 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  position: relative;
+}
+
+.context-menu-item:hover {
+  background-color: #000080;
+  color: white;
+}
+
+.context-menu-item.disabled {
+  color: #808080;
+  cursor: default;
+}
+
+.context-menu-item.disabled:hover {
+  background-color: silver;
+  color: #808080;
+}
+
+.context-menu-separator {
+  height: 0;
+  border-top: 1px solid #808080;
+  border-bottom: 1px solid #ffffff;
+  margin: 2px 0;
+}
+
+.context-menu-item img {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  left: 5px;
 }

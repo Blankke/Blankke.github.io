@@ -267,8 +267,57 @@ let iconDragOffsetX = 0;
 let iconDragOffsetY = 0;
 let iconDownX = 0;
 let iconDownY = 0;
+let selectedIcon = null; // 当前选中的图标
+
+// 图标选中功能
+function selectIcon(icon) {
+    if (selectedIcon) {
+        selectedIcon.classList.remove('selected');
+    }
+    selectedIcon = icon;
+    if (icon) {
+        icon.classList.add('selected');
+    }
+}
+
+// 点击桌面取消选中
+document.getElementById('desktop').addEventListener('click', (e) => {
+    if (e.target.id === 'desktop' || e.target === document.body) {
+        selectIcon(null);
+    }
+});
+
+// 双击桌面空白区域自动排列图标（类似 Windows 98）
+document.getElementById('desktop').addEventListener('dblclick', (e) => {
+    if (e.target.id === 'desktop' || e.target === document.body) {
+        // 自动排列图标
+        const icons = Array.from(document.querySelectorAll('.icon[data-icon-id]'));
+        let top = 20;
+        let left = 20;
+        const spacing = 90;
+        const maxHeight = window.innerHeight - 100;
+        
+        icons.forEach((icon) => {
+            icon.style.left = `${left}px`;
+            icon.style.top = `${top}px`;
+            saveIconPosition(icon);
+            
+            top += spacing;
+            if (top > maxHeight) {
+                top = 20;
+                left += 90;
+            }
+        });
+    }
+});
 
 document.querySelectorAll('.icon[data-icon-id]').forEach(icon => {
+    // 单击选中图标
+    icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectIcon(icon);
+    });
+
     icon.addEventListener('mousedown', (e) => {
         // only left button
         if (e.button !== 0) return;
@@ -278,6 +327,7 @@ document.querySelectorAll('.icon[data-icon-id]').forEach(icon => {
         iconDownY = e.clientY;
         iconDragOffsetX = e.clientX - icon.offsetLeft;
         iconDragOffsetY = e.clientY - icon.offsetTop;
+        selectIcon(icon); // 拖动时也选中
     });
 });
 
@@ -286,6 +336,12 @@ document.addEventListener('mousemove', (e) => {
     const moved = Math.abs(e.clientX - iconDownX) + Math.abs(e.clientY - iconDownY);
     if (moved < 3) return; // tiny threshold to avoid interfering with dblclick
     e.preventDefault();
+    
+    // 添加拖拽样式
+    if (!draggingIcon.classList.contains('dragging')) {
+        draggingIcon.classList.add('dragging');
+    }
+    
     const maxLeft = window.innerWidth - draggingIcon.offsetWidth;
     const maxTop = window.innerHeight - 28 - draggingIcon.offsetHeight; // keep above taskbar
     const left = clamp(e.clientX - iconDragOffsetX, 0, maxLeft);
@@ -296,6 +352,7 @@ document.addEventListener('mousemove', (e) => {
 
 document.addEventListener('mouseup', () => {
     if (isDraggingIcon && draggingIcon) {
+        draggingIcon.classList.remove('dragging'); // 移除拖拽样式
         saveIconPosition(draggingIcon);
     }
     isDraggingIcon = false;
@@ -452,6 +509,86 @@ window.addEventListener('resize', () => {
 });
 
 loadMusicManifest();
+
+// 右键菜单功能
+// ---------------------------------------------------
+const contextMenu = document.getElementById('context-menu');
+
+// 显示右键菜单
+function showContextMenu(x, y) {
+    if (!contextMenu) return;
+    contextMenu.style.display = 'block';
+    contextMenu.style.left = `${x}px`;
+    contextMenu.style.top = `${y}px`;
+    
+    // 确保菜单不会超出屏幕
+    const rect = contextMenu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+        contextMenu.style.left = `${window.innerWidth - rect.width}px`;
+    }
+    if (rect.bottom > window.innerHeight) {
+        contextMenu.style.top = `${window.innerHeight - rect.height}px`;
+    }
+}
+
+// 隐藏右键菜单
+function hideContextMenu() {
+    if (contextMenu) {
+        contextMenu.style.display = 'none';
+    }
+}
+
+// 桌面右键菜单
+document.addEventListener('contextmenu', (e) => {
+    // 只在桌面区域显示右键菜单
+    if (e.target === document.body || e.target.id === 'desktop' || e.target.closest('.desktop-icons')) {
+        e.preventDefault();
+        showContextMenu(e.clientX, e.clientY);
+    }
+});
+
+// 点击其他地方关闭菜单
+document.addEventListener('click', (e) => {
+    if (!contextMenu.contains(e.target)) {
+        hideContextMenu();
+    }
+});
+
+// 右键菜单项功能
+document.getElementById('ctx-arrange')?.addEventListener('click', () => {
+    // 自动排列图标
+    const icons = Array.from(document.querySelectorAll('.icon[data-icon-id]'));
+    let top = 20;
+    let left = 20;
+    const spacing = 90;
+    const maxHeight = window.innerHeight - 100;
+    
+    icons.forEach((icon, index) => {
+        icon.style.left = `${left}px`;
+        icon.style.top = `${top}px`;
+        saveIconPosition(icon);
+        
+        top += spacing;
+        if (top > maxHeight) {
+            top = 20;
+            left += 90;
+        }
+    });
+    
+    hideContextMenu();
+});
+
+document.getElementById('ctx-refresh')?.addEventListener('click', () => {
+    // 刷新页面
+    location.reload();
+    hideContextMenu();
+});
+
+document.getElementById('ctx-properties')?.addEventListener('click', () => {
+    // 显示属性对话框
+    alert('桌面属性\\n\\n分辨率: ' + window.innerWidth + ' x ' + window.innerHeight + '\\n颜色: 32 位\\n适配器: GitHub Pages Accelerator');
+    hideContextMenu();
+});
 
 // Gitalk Initialization
 // ---------------------------------------------------
