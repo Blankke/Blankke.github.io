@@ -30,12 +30,11 @@ document.addEventListener('click', (e) => {
 // Window Management
 function openWindow(id) {
     const win = document.getElementById(id);
-    win.style.display = 'block';
+    win.classList.add('window-open');
     bringToFront(win);
     
     // Center window if it's the first open (simple check)
     if (!win.dataset.positioned) {
-        const rect = win.getBoundingClientRect();
         win.style.top = '20%';
         win.style.left = '20%';
         win.dataset.positioned = 'true';
@@ -43,7 +42,8 @@ function openWindow(id) {
 }
 
 function closeWindow(id) {
-    document.getElementById(id).style.display = 'none';
+    const win = document.getElementById(id);
+    win.classList.remove('window-open');
 }
 
 function bringToFront(element) {
@@ -118,6 +118,145 @@ document.addEventListener('mousemove', (e) => {
         resizingWindow.style.height = newHeight + 'px';
     }
 });
+
+// Desktop Icon Dragging (with persistence)
+// ---------------------------------------------------
+const desktop = document.getElementById('desktop');
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+function loadIconPositions() {
+    const saved = JSON.parse(localStorage.getItem('win98_desktop_icons') || '{}');
+    document.querySelectorAll('.icon[data-icon-id]').forEach(icon => {
+        const id = icon.dataset.iconId;
+        const fallbackLeft = parseInt(icon.dataset.defaultLeft || '20', 10);
+        const fallbackTop = parseInt(icon.dataset.defaultTop || '20', 10);
+        const pos = saved[id] || { left: fallbackLeft, top: fallbackTop };
+        icon.style.left = `${pos.left}px`;
+        icon.style.top = `${pos.top}px`;
+    });
+}
+
+function saveIconPosition(icon) {
+    const id = icon.dataset.iconId;
+    if (!id) return;
+    const saved = JSON.parse(localStorage.getItem('win98_desktop_icons') || '{}');
+    saved[id] = { left: icon.offsetLeft, top: icon.offsetTop };
+    localStorage.setItem('win98_desktop_icons', JSON.stringify(saved));
+}
+
+let isDraggingIcon = false;
+let draggingIcon = null;
+let iconDragOffsetX = 0;
+let iconDragOffsetY = 0;
+let iconDownX = 0;
+let iconDownY = 0;
+
+document.querySelectorAll('.icon[data-icon-id]').forEach(icon => {
+    icon.addEventListener('mousedown', (e) => {
+        // only left button
+        if (e.button !== 0) return;
+        isDraggingIcon = true;
+        draggingIcon = icon;
+        iconDownX = e.clientX;
+        iconDownY = e.clientY;
+        iconDragOffsetX = e.clientX - icon.offsetLeft;
+        iconDragOffsetY = e.clientY - icon.offsetTop;
+    });
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDraggingIcon || !draggingIcon) return;
+    const moved = Math.abs(e.clientX - iconDownX) + Math.abs(e.clientY - iconDownY);
+    if (moved < 3) return; // tiny threshold to avoid interfering with dblclick
+    e.preventDefault();
+    const maxLeft = window.innerWidth - draggingIcon.offsetWidth;
+    const maxTop = window.innerHeight - 28 - draggingIcon.offsetHeight; // keep above taskbar
+    const left = clamp(e.clientX - iconDragOffsetX, 0, maxLeft);
+    const top = clamp(e.clientY - iconDragOffsetY, 0, maxTop);
+    draggingIcon.style.left = `${left}px`;
+    draggingIcon.style.top = `${top}px`;
+});
+
+document.addEventListener('mouseup', () => {
+    if (isDraggingIcon && draggingIcon) {
+        saveIconPosition(draggingIcon);
+    }
+    isDraggingIcon = false;
+    draggingIcon = null;
+});
+
+loadIconPositions();
+
+// Music Player
+// ---------------------------------------------------
+const musicListEl = document.getElementById('music-list');
+const musicAudioEl = document.getElementById('music-audio');
+const musicNowTitleEl = document.getElementById('music-now-title');
+const musicStatusEl = document.getElementById('music-status');
+
+async function loadMusicManifest() {
+    try {
+        const res = await fetch('music/manifest.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const tracks = Array.isArray(data.tracks) ? data.tracks : [];
+        renderTrackList(tracks);
+    } catch (err) {
+        if (musicListEl) {
+            musicListEl.innerHTML = `<div style="padding: 6px;">无法读取 music/manifest.json。<br>请确认已部署并且文件存在。<br><br>错误：${String(err)}</div>`;
+        }
+    }
+}
+
+function renderTrackList(tracks) {
+    if (!musicListEl) return;
+    if (!tracks.length) {
+        musicListEl.innerHTML = `<div style="padding: 6px;">music/manifest.json 里没有歌曲。</div>`;
+        return;
+    }
+
+    musicListEl.innerHTML = '';
+    tracks.forEach((track, idx) => {
+        const title = track.title || track.file || `Track ${idx + 1}`;
+        const file = track.file;
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = title;
+        btn.addEventListener('click', () => playTrack({ title, file }));
+        musicListEl.appendChild(btn);
+    });
+}
+
+function playTrack(track) {
+    if (!musicAudioEl) return;
+    if (!track?.file) return;
+    const src = `music/${encodeURIComponent(track.file)}`;
+    musicAudioEl.src = src;
+    musicNowTitleEl.textContent = track.title || track.file;
+    musicStatusEl.textContent = '播放中...';
+    musicAudioEl.play().catch(() => {
+        musicStatusEl.textContent = '已加载（点击播放）';
+    });
+}
+
+if (musicAudioEl) {
+    musicAudioEl.addEventListener('ended', () => {
+        musicStatusEl.textContent = '播放结束';
+    });
+    musicAudioEl.addEventListener('pause', () => {
+        if (musicAudioEl.currentTime > 0 && !musicAudioEl.ended) {
+            musicStatusEl.textContent = '已暂停';
+        }
+    });
+    musicAudioEl.addEventListener('play', () => {
+        musicStatusEl.textContent = '播放中...';
+    });
+}
+
+loadMusicManifest();
 
 // Gitalk Initialization
 // ---------------------------------------------------

@@ -11,17 +11,14 @@ body {
 
 /* Desktop Icons */
 .desktop-icons {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 20px;
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   z-index: 0;
+  pointer-events: none; /* icons opt-in */
 }
 
 .icon {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30,6 +27,7 @@ body {
   text-align: center;
   color: white;
   text-shadow: 1px 1px 0px black; /* Better readability on teal */
+  pointer-events: auto;
 }
 
 .icon img {
@@ -55,12 +53,12 @@ body {
   min-height: 200px;
   display: none; /* Hidden by default */
   z-index: 10;
-  display: flex;
-  flex-direction: column;
+  box-sizing: border-box;
 }
 
-.window:not([style*="display: none"]) {
+.window.window-open {
   display: flex;
+  flex-direction: column;
 }
 
 .window-body {
@@ -69,6 +67,11 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
+}
+
+.window-body > ul[role="menu-bar"] {
+  flex: 0 0 auto;
 }
 
 /* Resize Handle */
@@ -128,6 +131,69 @@ body {
 
 .taskbar-divider {
   flex-grow: 1;
+}
+
+.taskbar-windows {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.taskbar-window-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  min-width: 120px;
+  height: 24px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskbar-window-btn img {
+  width: 16px;
+  height: 16px;
+}
+
+.taskbar-window-btn.is-active {
+  box-shadow: inset -1px -1px #dfdfdf, inset 1px 1px #0a0a0a;
+}
+
+.taskbar-separator {
+  width: 2px;
+  height: 22px;
+  margin: 0 4px;
+  background: #808080;
+  box-shadow: 1px 0 #fff;
+}
+
+.quick-launch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.quick-launch-btn {
+  width: 26px;
+  height: 26px;
+  padding: 1px;
+  background: transparent;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.quick-launch-btn img {
+  width: 22px;
+  height: 22px;
+}
+
+.quick-launch-btn:hover {
+  border-color: #ffffff #808080 #808080 #ffffff;
 }
 
 .taskbar-time {
@@ -229,10 +295,88 @@ body {
   display: flex;
   overflow: hidden;
   background: white;
+  min-height: 0;
 }
 
 .resume-container iframe {
   flex: 1;
+  width: 100%;
+  height: 100%;
+  border: 2px inset #dfdfdf;
+  box-sizing: border-box;
+}
+
+/* Music player */
+.music-container {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 10px;
+  padding: 10px;
+  background: silver;
+}
+
+.music-list {
+  background: white;
+  border: 2px inset #dfdfdf;
+  overflow-y: auto;
+  padding: 6px;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+
+.music-list button {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.music-now {
+  background: white;
+  border: 2px inset #dfdfdf;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.music-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.music-controls .btn {
+  min-width: 44px;
+}
+
+.music-loop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+}
+
+.music-track-btn.is-current {
+  background: #000080;
+  color: #fff;
+}
+
+.music-now-title {
+  font-weight: bold;
+  color: #000080;
+}
+
+.music-audio {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .music-container {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Overriding some Gitalk styles to fit better (Optional) */

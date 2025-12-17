@@ -14,37 +14,52 @@
 <body>
 
     <!-- Desktop Icons -->
-    <div class="desktop-icons">
-        <div class="icon" ondblclick="openWindow('window-computer')">
+    <div class="desktop-icons" id="desktop">
+        <div class="icon" id="icon-computer" data-icon-id="computer" data-default-left="20" data-default-top="20" ondblclick="openWindow('window-computer')">
             <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-4.png" alt="My Computer">
             <div class="icon-text">我的电脑</div>
         </div>
-        <div class="icon" ondblclick="openWindow('window-guestbook')">
+        <div class="icon" id="icon-guestbook" data-icon-id="guestbook" data-default-left="20" data-default-top="110" ondblclick="openWindow('window-guestbook')">
             <img src="https://win98icons.alexmeub.com/icons/png/notepad-5.png" alt="Guestbook">
             <div class="icon-text">留言板.txt</div>
         </div>
-        <div class="icon" onclick="window.open('https://github.com/Blankke', '_blank')">
+        <div class="icon" id="icon-github" data-icon-id="github" data-default-left="20" data-default-top="200" onclick="window.open('https://github.com/Blankke', '_blank')">
             <img src="https://win98icons.alexmeub.com/icons/png/network_internet_pcs_installer-2.png" alt="Internet">
             <div class="icon-text">GitHub</div>
         </div>
-        <div class="icon" ondblclick="openWindow('window-resume')">
+        <div class="icon" id="icon-resume" data-icon-id="resume" data-default-left="20" data-default-top="290" ondblclick="openWindow('window-resume')">
             <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png" alt="Resume">
             <div class="icon-text">我的简历</div>
+        </div>
+
+        <div class="icon" id="icon-music" data-icon-id="music" data-default-left="20" data-default-top="380" ondblclick="openWindow('window-music')">
+            <img src="https://win98icons.alexmeub.com/icons/png/media_player_file-0.png" alt="Music">
+            <div class="icon-text">音乐播放器</div>
+        </div>
+
+        <div class="icon" id="icon-radio" data-icon-id="radio" data-default-left="20" data-default-top="470" onclick="window.open('https://radio.garden/visit/glasgow/CtpxHQ6P', '_blank')">
+            <img src="https://win98icons.alexmeub.com/icons/png/radio-0.png" alt="Radio">
+            <div class="icon-text">收音机</div>
+        </div>
+
+        <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560" onclick="window.open('https://minesweeper.online/', '_blank')">
+            <img src="https://win98icons.alexmeub.com/icons/png/mine_sweeper-0.png" alt="Minesweeper">
+            <div class="icon-text">扫雷</div>
         </div>
     </div>
 
     <!-- Window: My Computer (Personal Info) -->
-    <div id="window-computer" class="window" style="width: 400px;">
+    <div id="window-computer" class="window" data-window-title="我的电脑" data-window-icon="https://win98icons.alexmeub.com/icons/png/computer_explorer-4.png" style="width: 400px;">
         <div class="title-bar">
             <div class="title-bar-text">我的电脑 - 个人介绍</div>
             <div class="title-bar-controls">
-                <button aria-label="Minimize"></button>
-                <button aria-label="Maximize"></button>
+                <button aria-label="Minimize" onclick="minimizeWindow('window-computer')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-computer')"></button>
                 <button aria-label="Close" onclick="closeWindow('window-computer')"></button>
             </div>
         </div>
         <div class="window-body">
-            <div style="background: white; padding: 15px; border: 2px inset #dfdfdf; height: 250px; overflow-y: auto;">
+            <div class="computer-content">
                 <h3>👋 Hi!</h3>
                 <p>Welcome to the personal page for Blankke.
 Blankke is short for Blank Kernel Explorer. It began as a simple alias, but gradually became a reminder of why I enjoy systems programming: starting from almost nothing, and making complexity emerge through structure.
@@ -72,10 +87,12 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
     </div>
 
     <!-- Window: Guestbook -->
-    <div id="window-guestbook" class="window" style="width: 350px;">
+    <div id="window-guestbook" class="window" data-window-title="留言板" data-window-icon="https://win98icons.alexmeub.com/icons/png/notepad-5.png" style="width: 350px;">
         <div class="title-bar">
             <div class="title-bar-text">留言板.txt - 记事本</div>
             <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-guestbook')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-guestbook')"></button>
                 <button aria-label="Close" onclick="closeWindow('window-guestbook')"></button>
             </div>
         </div>
@@ -95,12 +112,12 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
     </div>
 
     <!-- Window: Resume -->
-    <div id="window-resume" class="window" style="width: 700px; height: 600px;">
+    <div id="window-resume" class="window" data-window-title="我的简历" data-window-icon="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png" style="width: 700px; height: 600px;">
         <div class="title-bar">
             <div class="title-bar-text">我的简历.doc - Microsoft Word</div>
             <div class="title-bar-controls">
-                <button aria-label="Minimize"></button>
-                <button aria-label="Maximize"></button>
+                <button aria-label="Minimize" onclick="minimizeWindow('window-resume')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-resume')"></button>
                 <button aria-label="Close" onclick="closeWindow('window-resume')"></button>
             </div>
         </div>
@@ -112,7 +129,48 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
                 <li role="menu-item">帮助</li>
             </ul>
             <div class="resume-container">
-                <iframe src="resume.html" frameborder="0" style="width: 100%; height: 100%; border: 2px inset #dfdfdf;"></iframe>
+                <iframe src="resume.html" frameborder="0"></iframe>
+            </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
+    <!-- Window: Music Player -->
+    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="https://win98icons.alexmeub.com/icons/png/media_player_file-0.png" style="width: 760px; height: 520px;">
+        <div class="title-bar">
+            <div class="title-bar-text">音乐播放器 - Windows Media Player (Lite)</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-music')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-music')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-music')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <ul role="menu-bar">
+                <li role="menu-item">文件</li>
+                <li role="menu-item">播放</li>
+                <li role="menu-item">视图</li>
+                <li role="menu-item">帮助</li>
+            </ul>
+            <div class="music-container">
+                <div class="music-list" id="music-list">
+                    <div style="padding: 4px;">正在加载 music/manifest.json ...</div>
+                </div>
+                <div class="music-now">
+                    <div class="music-now-title" id="music-now-title">未选择歌曲</div>
+                    <div class="music-controls">
+                        <button class="btn" id="music-prev" type="button">⏮</button>
+                        <button class="btn" id="music-play" type="button">▶</button>
+                        <button class="btn" id="music-pause" type="button">⏸</button>
+                        <button class="btn" id="music-next" type="button">⏭</button>
+                        <label class="music-loop"><input id="music-loop" type="checkbox"> 循环</label>
+                    </div>
+                    <audio class="music-audio" id="music-audio" controls preload="metadata"></audio>
+                    <div class="status-bar">
+                        <p class="status-bar-field" id="music-status">就绪</p>
+                        <p class="status-bar-field">44.1 kHz</p>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="resize-handle"></div>
@@ -150,6 +208,14 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
             <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" alt="win">
             Start
         </button>
+        <div class="taskbar-separator"></div>
+        <div class="quick-launch">
+            <button class="quick-launch-btn" title="Internet Explorer (Bing)" onclick="window.open('https://www.bing.com', '_blank')">
+                <img src="https://win98icons.alexmeub.com/icons/png/iexplore-2.png" alt="IE">
+            </button>
+        </div>
+        <div class="taskbar-separator"></div>
+        <div class="taskbar-windows" id="taskbar-windows" aria-label="Running windows"></div>
         <div class="taskbar-divider"></div>
         <div class="taskbar-time" id="taskbar-time">12:00 PM</div>
     </div>
