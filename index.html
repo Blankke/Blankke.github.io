@@ -42,7 +42,7 @@
             <div class="icon-text">收音机</div>
         </div>
 
-        <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560" ondblclick="window.open('https://minesweeper.online/', '_blank')">
+        <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560" ondblclick="openWindow('window-minesweeper')">
             <img src="icon/minesweeper-0.png" alt="Minesweeper">
             <div class="icon-text">扫雷</div>
         </div>
@@ -131,6 +131,22 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
             <div class="resume-container">
                 <iframe src="resume.html" frameborder="0"></iframe>
             </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
+    <!-- Window: Minesweeper -->
+    <div id="window-minesweeper" class="window" data-window-title="扫雷" data-window-icon="icon/minesweeper-0.png" style="width: 380px; height: 480px;">
+        <div class="title-bar">
+            <div class="title-bar-text">扫雷</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-minesweeper')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-minesweeper')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-minesweeper')"></button>
+            </div>
+        </div>
+        <div class="window-body" style="padding: 0; overflow: hidden;">
+            <iframe src="minesweeper.html" frameborder="0" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
         <div class="resize-handle"></div>
     </div>
