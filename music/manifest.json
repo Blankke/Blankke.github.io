@@ -1,8 +1,28 @@
 {
   "tracks": [
     {
-      "title": "Josemi Carmona - Puccini Tosca",
-      "file": "Josemi Carmona - Puccini Tosca.mp3"
+      "title": "Don McLean - American Pie",
+      "file": "Don McLean - American Pie.mp3"
+    },
+    {
+      "title": "I Am Arrows - Nice try",
+      "file": "I Am Arrows - Nice try.mp3"
+    },
+    {
+      "title": "I Am Arrows - Green grass",
+      "file": "I Am Arrows - Green grass.mp3"
+    },
+    {
+      "title": "I Am Arrows - Nun",
+      "file": "I Am Arrows - Nun.mp3"
+    },
+    {
+      "title": "Jason Mraz - Life Is Wonderful (Live in Amsterdam)",
+      "file": "Jason Mraz - Life Is Wonderful (Live in Amsterdam).mp3"
+    },
+    {
+      "title": "Maroon 5 - Lucky Strike",
+      "file": "Maroon 5 - Lucky Strike.mp3"
     }
   ]
 }
