@@ -13,7 +13,7 @@ class TerminalSystem {
             'dir',
             'type resume.txt',
             'cd documents',
-            'copy notes.raw diary.bin',
+            'copy notes.raw ..\\diary.bin',
             'dir /w',
             'mem'
         ];
@@ -158,8 +158,8 @@ Microsoft(R) Windows 98
             case 'cat': // 兼容
                 this.cmdType(args);
                 break;
-            case 'history': // 保留作为调试工具
-                this.cmdHistory();
+            case 'doskey':
+                this.cmdDoskey(args);
                 break;
             case 'unlock':
                 this.cmdUnlock(args);
@@ -325,7 +325,7 @@ Microsoft(R) Windows 98
         
         // 特殊处理 diary.bin
         if (filename === 'DIARY.BIN') {
-            this.catDiaryBin();
+            this.typeDiaryBin();
             return;
         }
         
@@ -346,7 +346,7 @@ Microsoft(R) Windows 98
         }
     }
     
-    catDiaryBin() {
+    typeDiaryBin() {
         if (!this.radioTokenFound) {
             // 完全未解锁
             this.print('');
@@ -404,18 +404,51 @@ Microsoft(R) Windows 98
         this.print('');
         this.print('Keep exploring. Keep being curious.', 'success');
         this.print('');
+        
+        this.print('Entry 004 - [SECRET REPO]', 'output');
+        this.print('');
+        this.print('I have set up a private repository access.', 'output');
+        this.print('Use this link to view my private projects:', 'output');
+        this.print('');
+        
+        const token = this.acceptedKey || 'YOUR_KEY';
+        const url = `https://blankke.caozc1108.workers.dev/?token=${token}`;
+        
+        // Manually create link element
+        const line = document.createElement('div');
+        line.className = 'terminal-line terminal-output';
+        const link = document.createElement('a');
+        link.href = url;
+        link.textContent = url;
+        link.target = '_blank';
+        link.style.color = '#fff';
+        link.style.textDecoration = 'underline';
+        line.appendChild(link);
+        this.terminalOutput.appendChild(line);
+        this.scrollToBottom();
+
+        this.print('');
+        this.print('NOTE: If the link shows "Access Denied",', 'hint');
+        this.print('the token you used might be the wrong one.', 'hint');
+        this.print('The correct token is 8 characters long.', 'hint');
+        this.print('');
         this.print('===========================================', 'system');
         this.print('');
     }
     
-    cmdHistory() {
-        this.print('');
-        // 显示预设历史 + 用户历史
-        const allHistory = [...this.presetHistory, ...this.commandHistory];
-        allHistory.forEach((cmd, index) => {
-            this.print(`  ${cmd}`, 'output');
-        });
-        this.print('');
+    cmdDoskey(args) {
+        if (args.length > 0 && args[0].toLowerCase() === '/history') {
+            this.print('');
+            // 显示预设历史 + 用户历史
+            const allHistory = [...this.presetHistory, ...this.commandHistory];
+            allHistory.forEach((cmd) => {
+                this.print(`${cmd}`, 'output');
+            });
+            this.print('');
+        } else {
+            // 简化版 doskey，只支持 /history
+            this.print('DOSKey installed.');
+        }
     }
     
     cmdUnlock(args) {
@@ -450,6 +483,7 @@ Microsoft(R) Windows 98
             const hash = await this.sha256(key);
             
             if (validHashes.includes(hash)) {
+                this.acceptedKey = key;
                 if (!this.radioTokenFound) {
                     this.radioTokenFound = true;
                     this.print('');
