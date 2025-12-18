@@ -850,3 +850,19 @@ function openCMD() {
         }
     }, 100);
 }
+
+// 打开内置浏览器
+window.openBrowser = function(url) {
+    const browserWindow = document.getElementById('window-browser');
+    const browserIframe = document.getElementById('browser-iframe');
+    const browserAddress = document.getElementById('browser-address');
+    
+    if (!browserWindow || !browserIframe) return;
+    
+    // 更新地址栏和 iframe
+    if (browserAddress) browserAddress.value = url;
+    browserIframe.src = url;
+    
+    // 打开窗口
+    openWindow('window-browser');
+};

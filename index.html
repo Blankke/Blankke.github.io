@@ -245,6 +245,37 @@
         <div class="resize-handle"></div>
     </div>
 
+    <!-- Window: Browser -->
+    <div id="window-browser" class="window" data-window-title="Internet Explorer" data-window-icon="icon/msie1-0.png" style="width: 800px; height: 600px;">
+        <div class="title-bar">
+            <div class="title-bar-text">Internet Explorer</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-browser')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-browser')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-browser')"></button>
+            </div>
+        </div>
+        <div class="window-body" style="display: flex; flex-direction: column; height: 100%; padding: 0;">
+            <div style="padding: 2px; border-bottom: 1px solid #808080;">
+                <ul role="menu-bar">
+                    <li role="menu-item">文件(F)</li>
+                    <li role="menu-item">编辑(E)</li>
+                    <li role="menu-item">查看(V)</li>
+                    <li role="menu-item">收藏(A)</li>
+                    <li role="menu-item">帮助(H)</li>
+                </ul>
+            </div>
+            <div style="padding: 4px; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #808080;">
+                <span>地址(D):</span>
+                <input type="text" id="browser-address" style="flex: 1;" readonly>
+            </div>
+            <div style="flex: 1; position: relative;">
+                <iframe id="browser-iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
     <!-- Start Menu -->
     <div id="start-menu" class="start-menu">
         <div class="start-menu-sidebar">
@@ -264,7 +295,7 @@
                 <span>设置</span>
             </div>
             <hr style="width: 100%; border-top: 1px solid #808080; border-bottom: 1px solid #fff;">
-            <div class="menu-item" onclick="alert('关机功能暂未实现 :)')">
+            <div class="menu-item" onclick="window.close()">
                 <img src="icon/shut_down_normal-4.png">
                 <span>关闭系统...</span>
             </div>
@@ -279,7 +310,7 @@
         </button>
         <div class="taskbar-separator"></div>
         <div class="quick-launch">
-            <button class="quick-launch-btn" title="Internet Explorer (Bing)" onclick="window.open('https://www.bing.com', '_blank')">
+            <button class="quick-launch-btn" title="Internet Explorer" onclick="openBrowser('ie_start.html')">
                 <img src="icon/msie1-0.png" alt="IE">
             </button>
         </div>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to Internet Explorer</title>
+    <style>
+        body {
+            background-color: #fff;
+            font-family: "MS Sans Serif", Tahoma, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 12px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #003399;
+            margin-right: 10px;
+            font-style: italic;
+        }
+        .search-box {
+            background: #ececec;
+            padding: 15px;
+            border: 1px solid #808080;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 16px;
+            margin-top: 0;
+        }
+        input[type="text"] {
+            width: 200px;
+            padding: 2px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .link-group h3 {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            color: #003399;
+        }
+        ul {
+            list-style-type: square;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        a {
+            color: #0000ff;
+            text-decoration: underline;
+        }
+        .footer {
+            margin-top: 30px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">Microsoft Internet Explorer</div>
+        <div>Home Page</div>
+    </div>
+
+    <div class="search-box">
+        <h1>Search the Internet</h1>
+        <form action="https://www.bing.com/search" method="GET" target="_blank">
+            <label>Find:</label>
+            <input type="text" name="q" placeholder="Type here...">
+            <button type="submit">Search</button>
+            <br>
+            <small style="color: #666; margin-top: 5px; display: block;">(Opens in a new window)</small>
+        </form>
+    </div>
+
+    <div class="links">
+        <div class="link-group">
+            <h3>Local Resources</h3>
+            <ul>
+                <li><a href="resume.html">My Resume</a></li>
+                <li><a href="#" onclick="window.parent.openWindow('window-minesweeper'); return false;">Play Minesweeper</a></li>
+                <li><a href="#" onclick="window.parent.openWindow('window-music'); return false;">Music Player</a></li>
+            </ul>
+        </div>
+        <div class="link-group">
+            <h3>Cool Links</h3>
+            <ul>
+                <li><a href="https://www.google.com" target="_blank">Google</a></li>
+                <li><a href="https://github.com" target="_blank">GitHub</a></li>
+                <li><a href="https://news.ycombinator.com" target="_blank">Hacker News</a></li>
+                <li><a href="https://archive.org" target="_blank">Internet Archive</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; 1998 Microsoft Corporation. All rights reserved.
+    </div>
+
+</body>
+</html>

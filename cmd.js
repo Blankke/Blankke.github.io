@@ -507,12 +507,20 @@ Microsoft(R) Windows 98
         // Manually create link element
         const line = document.createElement('div');
         line.className = 'terminal-line terminal-output';
-        const link = document.createElement('a');
-        link.href = url;
+        const link = document.createElement('span');
         link.textContent = url;
-        link.target = '_blank';
         link.style.color = '#fff';
         link.style.textDecoration = 'underline';
+        link.style.cursor = 'pointer';
+        
+        link.onclick = () => {
+            if (window.openBrowser) {
+                window.openBrowser(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        };
+        
         line.appendChild(link);
         this.terminalOutput.appendChild(line);
         this.scrollToBottom();
