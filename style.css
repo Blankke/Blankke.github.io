@@ -508,15 +508,12 @@ body::after {
   font-family: 'Courier New', Courier, monospace;
   font-size: 14px;
   padding: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto; /* Scroll the container */
+  display: block;   /* Normal block flow */
 }
 
 #terminal-output {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  /* Remove flex: 1 and overflow */
   margin-bottom: 5px;
   white-space: pre-wrap;
   word-wrap: break-word;

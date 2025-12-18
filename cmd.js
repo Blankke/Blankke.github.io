@@ -7,6 +7,14 @@ class TerminalSystem {
         this.unlocked = false; // 是否已经解锁（获得快捷键 token）
         this.radioTokenFound = false; // 是否找到收音机 token
         
+        // Tab 补全状态
+        this.tabState = {
+            isActive: false,
+            matches: [],
+            index: 0,
+            basePath: ''
+        };
+
         // 预设的命令历史（看起来像真实使用过的）
         this.presetHistory = [
             'ver',
@@ -41,6 +49,14 @@ class TerminalSystem {
         this.terminalContainer = document.getElementById('terminal-container');
         
         if (!this.terminalInput) return;
+
+        // 获取光标元素
+        this.terminalCursor = this.terminalContainer.querySelector('.terminal-cursor');
+        // 创建光标右侧文本显示元素
+        if (this.terminalCursor) {
+            this.terminalInputRight = document.createElement('span');
+            this.terminalCursor.parentNode.insertBefore(this.terminalInputRight, this.terminalCursor.nextSibling);
+        }
         
         // 聚焦输入框
         this.terminalContainer.addEventListener('click', () => {
@@ -51,9 +67,25 @@ class TerminalSystem {
         this.terminalInput.addEventListener('input', () => {
             this.updateInputDisplay();
         });
+
+        // 监听光标移动 (按键、点击)
+        this.terminalInput.addEventListener('keyup', () => this.updateInputDisplay());
+        this.terminalInput.addEventListener('click', () => this.updateInputDisplay());
+        this.terminalInput.addEventListener('select', () => this.updateInputDisplay());
         
         // 绑定按键事件
         this.terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                this.handleTabCompletion();
+                return;
+            }
+
+            // 重置 Tab 状态
+            if (e.key !== 'Shift' && e.key !== 'Control' && e.key !== 'Alt') {
+                this.tabState.isActive = false;
+            }
+
             if (e.key === 'Enter') {
                 this.executeCommand(this.terminalInput.value);
                 this.terminalInput.value = '';
@@ -72,8 +104,17 @@ class TerminalSystem {
     }
 
     updateInputDisplay() {
-        if (this.terminalInputDisplay) {
-            this.terminalInputDisplay.textContent = this.terminalInput.value;
+        if (!this.terminalInputDisplay || !this.terminalInput) return;
+        
+        const value = this.terminalInput.value;
+        const cursorPos = this.terminalInput.selectionStart;
+        
+        const left = value.slice(0, cursorPos);
+        const right = value.slice(cursorPos);
+        
+        this.terminalInputDisplay.textContent = left;
+        if (this.terminalInputRight) {
+            this.terminalInputRight.textContent = right;
         }
     }
     
@@ -81,9 +122,9 @@ class TerminalSystem {
         const welcome = `
 Microsoft(R) Windows 98
    (C)Copyright Microsoft Corp 1981-1998.
-
 `;
         this.print(welcome, 'system');
+        this.print('Type "HELP" for a list of commands.', 'hint');
         this.printPrompt();
     }
     
@@ -107,7 +148,10 @@ Microsoft(R) Windows 98
     }
     
     scrollToBottom() {
-        this.terminalOutput.scrollTop = this.terminalOutput.scrollHeight;
+        // Scroll the container instead of the output div
+        if (this.terminalContainer) {
+            this.terminalContainer.scrollTop = this.terminalContainer.scrollHeight;
+        }
     }
     
     executeCommand(input) {
@@ -173,6 +217,44 @@ Microsoft(R) Windows 98
         
         this.printPrompt();
     }
+
+    handleTabCompletion() {
+        const input = this.terminalInput.value;
+        
+        if (!this.tabState.isActive) {
+            // 简单的参数解析：取最后一个空格后的内容作为前缀
+            const lastSpaceIndex = input.lastIndexOf(' ');
+            const prefix = lastSpaceIndex === -1 ? input : input.slice(lastSpaceIndex + 1);
+            const basePath = lastSpaceIndex === -1 ? '' : input.slice(0, lastSpaceIndex + 1);
+            
+            // 获取当前目录文件
+            const dir = this.fileSystem[this.currentPath];
+            if (!dir) return;
+            
+            // 查找匹配项 (不区分大小写)
+            const candidates = Object.keys(dir).filter(name => 
+                name.toLowerCase().startsWith(prefix.toLowerCase())
+            );
+            
+            if (candidates.length === 0) return;
+            
+            this.tabState.matches = candidates;
+            this.tabState.index = 0;
+            this.tabState.isActive = true;
+            this.tabState.basePath = basePath;
+        } else {
+            // 循环切换下一个匹配项
+            this.tabState.index = (this.tabState.index + 1) % this.tabState.matches.length;
+        }
+        
+        // 应用匹配项
+        const match = this.tabState.matches[this.tabState.index];
+        this.terminalInput.value = this.tabState.basePath + match;
+        
+        // 移动光标到末尾并更新显示
+        this.terminalInput.selectionStart = this.terminalInput.selectionEnd = this.terminalInput.value.length;
+        this.updateInputDisplay();
+    }
     
     navigateHistory(direction) {
         this.historyIndex += direction;
@@ -183,7 +265,14 @@ Microsoft(R) Windows 98
         } else {
             this.terminalInput.value = '';
         }
-        this.updateInputDisplay();
+        
+        // 移动光标到末尾
+        setTimeout(() => {
+             if (this.terminalInput) {
+                 this.terminalInput.selectionStart = this.terminalInput.selectionEnd = this.terminalInput.value.length;
+                 this.updateInputDisplay();
+             }
+        }, 0);
     }
     
     // 命令实现
@@ -408,7 +497,8 @@ Microsoft(R) Windows 98
         this.print('Entry 004 - [SECRET REPO]', 'output');
         this.print('');
         this.print('I have set up a private repository access.', 'output');
-        this.print('Use this link to view my private projects:', 'output');
+        this.print('Use this link to view my private thoughts:', 'output');
+        this.print('this is your own discovery, handle it with care, don\'t share it.', 'output');
         this.print('');
         
         const token = this.acceptedKey || 'YOUR_KEY';
