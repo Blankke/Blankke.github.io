@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Retro Desktop</title>
+    <title>A deep World</title>
     <!-- 98.css for the core look and feel -->
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <link rel="stylesheet" href="style.css">
@@ -33,18 +33,23 @@
         </div>
 
         <div class="icon" id="icon-music" data-icon-id="music" data-default-left="20" data-default-top="380" ondblclick="openWindow('window-music')">
-            <img src="icon/media_player_file-0.png" alt="Music">
+            <img src="icon/cd_player.png" alt="Music">
             <div class="icon-text">音乐播放器</div>
         </div>
 
         <div class="icon" id="icon-radio" data-icon-id="radio" data-default-left="20" data-default-top="470" ondblclick="window.open('https://radio.garden/visit/glasgow/CtpxHQ6P', '_blank')">
-            <img src="icon/media_player-0.png" alt="Radio">
+            <img src="icon/radio.png" alt="Radio">
             <div class="icon-text">收音机</div>
         </div>
 
         <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560" ondblclick="openWindow('window-minesweeper')">
             <img src="icon/minesweeper-0.png" alt="Minesweeper">
             <div class="icon-text">扫雷</div>
+        </div>
+
+        <div class="icon" id="icon-recyclebin" data-icon-id="recyclebin" data-default-left="120" data-default-top="20" ondblclick="openWindow('window-recyclebin')">
+            <img src="icon/recycle_bin_empty.png" alt="Recycle Bin">
+            <div class="icon-text">回收站</div>
         </div>
     </div>
 
@@ -60,21 +65,26 @@
         </div>
         <div class="window-body">
             <div class="computer-content">
-                <h3>👋 Hi!</h3>
-                <p>Welcome to the personal page for Blankke.
-Blankke is short for Blank Kernel Explorer. It began as a simple alias, but gradually became a reminder of why I enjoy systems programming: starting from almost nothing, and making complexity emerge through structure.
+                <h3>👋 你好！欢迎来到我的个人网站</h3>
+                <p>这是我的一个小角落，用来放一些关于我自己的介绍和想法。
 
-I study computer science, with a focus on operating systems and low-level software. When I’m not working on kernels or debugging build systems, I write, read, and keep notes — often trying to make sense of ideas that don’t yet have clear answers.
+我叫 Blankke，这个名字是 Blank Kernel Explorer 的缩写。最初只是一个简单的别名，但渐渐地它成为了我为什么喜欢系统编程的提醒：从几乎空白的地方开始，通过结构让复杂性浮现。
 
-This site is a quiet place to collect what I’m building, learning, and thinking. </p>
-                <p></p>
+
+我学习计算机科学，专注于操作系统和底层软件。当我不在写内核或调试构建系统时，我会写作、阅读和做笔记 —— 经常试图理解那些还没有明确答案的想法。
+
+我其实还有挺多爱好的，有时骑骑车，有时玩玩游戏，有时听听广播，最喜欢以前在放学路上的车里听城市之声的音乐频道。不过到了大学也渐渐有些嘈杂，所以我开始寻找网络上的广播电台，发现了很多有趣的东西。
+
+这个网站是一个安静的地方，用来收集我正在构建、学习和思考的东西。</p>
+                
+                <p style="margin-top: 15px;">对了，这里还有一个小伙伴 —— 我的宠物 <strong>MewMew</strong>（一只粉色的猫咪）。她有点害羞，但如果你耐心等待一会儿，她会主动跟你说话的~ 😺</p>
                 <br>
                 <fieldset>
-                    <legend>About Me</legend>
+                    <legend>关于我</legend>
                     <ul>
-                        <li>Occupation: Developer</li>
-                        <li>Hobbies: Programming, Gaming, Blogging</li>
-                        <li>Location: I am in the INTERNET</li>
+                        <li>职业：开发者 / Developer</li>
+                        <li>爱好：编程、游戏、写博客、听广播</li>
+                        <li>位置：I am in the INTERNET</li>
                     </ul>
                 </fieldset>
             </div>
@@ -107,6 +117,26 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
                 <!-- Gitalk Container -->
                 <div id="gitalk-container"></div>
             </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
+    <!-- Window: Recycle Bin -->
+    <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="icon/recycle_bin_empty.png" style="width: 360px; height: 260px;">
+        <div class="title-bar">
+            <div class="title-bar-text">回收站</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-recyclebin')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-recyclebin')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-recyclebin')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <p style="margin-top: 0;">回收站是空的。</p>
+            <fieldset>
+                <legend>操作</legend>
+                <button type="button" disabled>清空回收站</button>
+            </fieldset>
         </div>
         <div class="resize-handle"></div>
     </div>
@@ -151,8 +181,31 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
         <div class="resize-handle"></div>
     </div>
 
+    <!-- Window: MS-DOS Prompt (CMD) -->
+    <div id="window-cmd" class="window" data-window-title="MS-DOS Prompt" data-window-icon="icon/command_prompt-0.png" style="width: 650px; height: 450px;">
+        <div class="title-bar">
+            <div class="title-bar-text">MS-DOS Prompt</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-cmd')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-cmd')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-cmd')"></button>
+            </div>
+        </div>
+        <div class="window-body" style="padding: 0; background: #000;">
+            <div id="terminal-container">
+                <div id="terminal-output"></div>
+                <div class="terminal-input-line">
+                    <span id="terminal-prompt-text" class="terminal-prompt"></span>
+                    <span id="terminal-input-display"></span><span class="terminal-cursor">_</span>
+                    <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
     <!-- Window: Music Player -->
-    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="icon/media_player_file-0.png" style="width: 760px; height: 520px;">
+    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="icon/cd_playerpng" style="width: 760px; height: 520px;">
         <div class="title-bar">
             <div class="title-bar-text">音乐播放器 - Windows Media Player (Lite)</div>
             <div class="title-bar-controls">
@@ -272,7 +325,8 @@ This site is a quiet place to collect what I’m building, learning, and thinkin
         </div>
     </div>
 
-    <script src="script.js"></script>
     <script src="pet.js"></script>
+    <script src="cmd.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

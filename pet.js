@@ -10,6 +10,11 @@ class DesktopPet {
         this.currentState = 'idle';
         this.minesweeperCleared = false;
         this.dialogShown = {};
+        this.radioHintGiven = false; // 是否已经给出广播暗示
+        
+        // 扫雷相关状态
+        this.lastMinesweeperInteraction = Date.now();
+        this.minesweeperIdleCheckInterval = null;
         
         this.init();
     }
@@ -45,30 +50,29 @@ class DesktopPet {
         this.dialogElement.id = 'pet-dialog';
         this.dialogElement.style.cssText = `
             position: fixed;
-            background: #ffffcc;
-            border: 2px solid #333;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-family: "Microsoft YaHei", "MS Sans Serif", Arial, sans-serif;
-            font-size: 13px;
-            line-height: 1.5;
+            background: #ffffff;
+            color: #000;
+            border: 2px solid #000;
+            padding: 8px 10px;
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
             max-width: 280px;
             display: none;
             z-index: 10000;
-            box-shadow: 3px 3px 8px rgba(0,0,0,0.25);
-            animation: fadeIn 0.3s ease;
+            animation: petDialogFadeIn 0.12s ease;
         `;
         this.dialogElement.innerHTML = `
-            <div id="pet-dialog-text" style="color: #333;"></div>
-            <div style="position: absolute; bottom: -12px; left: 30px; width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 12px solid #333;"></div>
-            <div style="position: absolute; bottom: -9px; left: 31px; width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-top: 11px solid #ffffcc;"></div>
+            <div id="pet-dialog-text" style="margin: 0;"></div>
+            <div style="position: absolute; bottom: -10px; left: 26px; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid #000;"></div>
+            <div style="position: absolute; bottom: -8px; left: 27px; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-top: 9px solid #fff;"></div>
         `;
         
-        // 添加淡入动画
+        // 添加宠物悬停效果（轻微放大即可）
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
+            @keyframes petDialogFadeIn {
+                from { opacity: 0; transform: translateY(4px); }
                 to { opacity: 1; transform: translateY(0); }
             }
             #desktop-pet:hover {
@@ -91,6 +95,9 @@ class DesktopPet {
         
         // 随机移动
         this.startRandomMovement();
+
+        // 启动扫雷闲置检查
+        this.startMinesweeperIdleCheck();
     }
 
     setPosition(x, y) {
@@ -178,10 +185,10 @@ class DesktopPet {
         const initialDialogs = [
             { text: "喵~ 你好呀！欢迎来到这里！", delay: 800, id: 'welcome' },
             { text: "我是这里的小向导，有什么需要帮助的吗？", delay: 6000, id: 'intro0' },
-            { text: "这里看起来很简单... 对吧？", delay: 15000, id: 'intro1' },
-            { text: "试试那些图标吧，都能用的~", delay: 30000, id: 'intro2' },
-            { text: "我主人说，真正重要的东西往往藏在表面之下。", delay: 50000, id: 'hint1' },
-            { text: "就像冰山... 你只能看到露出水面的那一小部分。", delay: 75000, id: 'hint2' }
+            { text: "这里看起来很简单... 对吧？", delay: 10000, id: 'intro1' },
+            { text: "试试那些图标吧，都能用的~", delay: 15000, id: 'intro2' },
+            { text: "我主人说，真正重要的东西往往藏在表面之下。", delay: 30000, id: 'hint1' },
+            { text: "就像冰山... 你只能看到露出水面的那一小部分。", delay: 40000, id: 'hint2' }
         ];
         
         initialDialogs.forEach(dialog => {
@@ -207,7 +214,7 @@ class DesktopPet {
 
     showRandomDialog() {
         const dialogs = [
-            "咩？",
+            "喵？",
             "找我有什么事吗？",
             "我在这里呢~",
             "别总是戳我啦！",
@@ -226,37 +233,114 @@ class DesktopPet {
         this.showDialog(randomDialog, 3000);
     }
 
-    onMinesweeperWin() {
-        if (!this.minesweeperCleared) {
-            this.minesweeperCleared = true;
-            
-            // 立即显示第一条对话
-            this.showDialog("哇！你真厉害！扫雷都通关了！", 4000);
-            
-            // 庆祝动画（让宠物跳跃）
-            this.celebrate();
-            
-            // 显示后续提示对话序列 - 暗示性的，不直接给答案
+    onMinesweeperWin(time) {
+        // 移动到扫雷窗口旁边
+        this.moveToElement('window-minesweeper');
+
+        if (time > 50) {
+            // 超过50秒
+            this.showDialog(`通关啦！不过用了 ${time} 秒... 有点慢哦~`, 4000);
             setTimeout(() => {
-                this.showDialog("看来你确实有耐心... 也有足够的好奇心。", 4000);
-            }, 5000);
-            
-            setTimeout(() => {
-                this.showDialog("那我就告诉你一个秘密吧~", 4000);
-            }, 10000);
-            
-            setTimeout(() => {
-                this.showDialog("我主人说... 高手都用键盘，菜鸟才点鼠标。", 5000);
-            }, 15000);
-            
-            setTimeout(() => {
-                this.showDialog("有些东西，不是点出来的。", 5000);
-            }, 21000);
-            
-            setTimeout(() => {
-                this.showDialog("试试看... 同时按下几个你平时不会一起按的键？", 6000);
-            }, 27000);
+                this.showDialog("下次试试能不能在 50 秒内完成？", 4000);
+            }, 4500);
+        } else {
+            // 50秒内通关
+            if (!this.minesweeperCleared) {
+                this.minesweeperCleared = true;
+                
+                // 立即显示第一条对话
+                this.showDialog(`哇！${time} 秒！太快了！`, 4000);
+                
+                // 庆祝动画（让宠物跳跃）
+                this.celebrate();
+                
+                // 显示后续提示对话序列 - 暗示性的，不直接给答案
+                setTimeout(() => {
+                    this.showDialog("看来你确实有耐心... 也有足够的好奇心。", 4000);
+                }, 5000);
+                
+                setTimeout(() => {
+                    this.showDialog("那我就告诉你一个秘密吧~", 4000);
+                }, 10000);
+                
+                setTimeout(() => {
+                    this.showDialog("我主人说... 高手都用键盘，菜鸟才点鼠标。", 5000);
+                }, 15000);
+                
+                setTimeout(() => {
+                    this.showDialog("有些东西，不是点出来的。", 5000);
+                }, 21000);
+                
+                setTimeout(() => {
+                    this.showDialog("试试看... 同时按下几个你平时不会一起按的键？", 6000);
+                }, 27000);
+            } else {
+                this.showDialog(`又是 ${time} 秒！保持这个速度！`, 3000);
+                this.celebrate();
+            }
         }
+    }
+
+    onMinesweeperLoss() {
+        // 移动到扫雷窗口旁边
+        this.moveToElement('window-minesweeper');
+        
+        const lossDialogs = [
+            "哎呀，炸了...",
+            "没关系，再试一次！",
+            "小心一点哦~",
+            "那个位置看起来就很危险...",
+            "不要灰心，下次一定行！"
+        ];
+        const randomDialog = lossDialogs[Math.floor(Math.random() * lossDialogs.length)];
+        this.showDialog(randomDialog, 3000);
+    }
+
+    resetMinesweeperIdleTimer() {
+        this.lastMinesweeperInteraction = Date.now();
+    }
+
+    startMinesweeperIdleCheck() {
+        // 每分钟检查一次
+        this.minesweeperIdleCheckInterval = setInterval(() => {
+            const now = Date.now();
+            // 如果超过 5 分钟 (300000ms) 没有玩扫雷
+            if (now - this.lastMinesweeperInteraction > 300000) {
+                // 只有当没有其他对话显示时才显示
+                if (this.dialogElement.style.display === 'none') {
+                    this.showDialog("好久没玩扫雷了，手不痒吗？", 4000);
+                    // 重置计时器，避免一直提醒
+                    this.lastMinesweeperInteraction = Date.now(); 
+                }
+            }
+        }, 60000);
+    }
+
+    moveToElement(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        
+        // 如果窗口是最小化的，就不移动过去
+        if (!el.classList.contains('window-open') || el.classList.contains('window-minimized')) {
+            return;
+        }
+
+        const rect = el.getBoundingClientRect();
+        
+        // 尝试放在右边
+        let targetX = rect.right + 10;
+        let targetY = rect.top + 50;
+        
+        // 如果右边放不下，放左边
+        if (targetX + 60 > window.innerWidth) {
+            targetX = rect.left - 60;
+        }
+        
+        // 确保不超出屏幕
+        targetX = Math.max(10, Math.min(window.innerWidth - 60, targetX));
+        targetY = Math.max(10, Math.min(window.innerHeight - 60, targetY));
+        
+        this.setPosition(targetX, targetY);
     }
 
     celebrate() {
@@ -286,11 +370,31 @@ class DesktopPet {
         if (dialogs[dialogId]) {
             this.showDialog(dialogs[dialogId], 5000);
         }
-    }
-}
+    }    
+    // 给出广播暗示（被 CMD 调用）
+    giveRadioHint() {
+        if (this.radioHintGiven) return;
+        this.radioHintGiven = true;
+        
+        // 含蓄的暗示序列
+        setTimeout(() => {
+            this.showDialog("你之前看过我主人的个人介绍吗？", 5000);
+        }, 1000);
+        
+        setTimeout(() => {
+            this.showDialog("他说过... 他喜欢听广播。", 5000);
+        }, 7000);
+        
+        setTimeout(() => {
+            this.showDialog("有些编号，不在文件里。", 6000);
+        }, 13000);
+        
+        setTimeout(() => {
+            this.showDialog("它们在... 你意想不到的地方。", 6000);
+        }, 20000);
+    }}
 
 // 初始化桌面宠物
-let desktopPet;
 window.addEventListener('load', () => {
-    desktopPet = new DesktopPet();
+    window.desktopPet = new DesktopPet();
 });

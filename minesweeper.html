@@ -237,6 +237,11 @@
             }
 
             handleClick(row, col) {
+                // Notify parent of activity
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'minesweeper-active' }, '*');
+                }
+
                 if (this.gameOver || this.gameWon) return;
                 if (this.flagged[row][col]) return;
                 if (this.revealed[row][col]) return;
@@ -295,6 +300,10 @@
                 
                 if (won) {
                     this.resetButton.textContent = '😎';
+                    // Notify parent of win with time
+                    if (window.parent !== window) {
+                        window.parent.postMessage({ type: 'minesweeper-win', time: this.timer }, '*');
+                    }
                 } else {
                     this.resetButton.textContent = '😵';
                     for (let row = 0; row < this.rows; row++) {
@@ -303,6 +312,10 @@
                                 this.revealed[row][col] = true;
                             }
                         }
+                    }
+                    // Notify parent of loss
+                    if (window.parent !== window) {
+                        window.parent.postMessage({ type: 'minesweeper-loss' }, '*');
                     }
                 }
                 
@@ -322,10 +335,6 @@
                 const totalNonMines = this.rows * this.cols - this.totalMines;
                 if (revealedCount === totalNonMines) {
                     this.endGame(true);
-                    // 通知父窗口（桌宠）游戏胜利
-                    if (window.parent && window.parent.desktopPet) {
-                        window.parent.desktopPet.onMinesweeperWin();
-                    }
                 }
             }
 

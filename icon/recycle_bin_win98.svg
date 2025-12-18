@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Lid -->
+  <rect x="10" y="5" width="12" height="3" fill="#c0c0c0" stroke="#000" stroke-width="1"/>
+  <rect x="12" y="3" width="8" height="2" fill="#dfdfdf" stroke="#000" stroke-width="1"/>
+
+  <!-- Bin body -->
+  <rect x="8" y="8" width="16" height="20" fill="#ffffff" stroke="#000" stroke-width="1"/>
+
+  <!-- Win98-ish bevel -->
+  <path d="M9 9h14" stroke="#dfdfdf"/>
+  <path d="M9 9v18" stroke="#dfdfdf"/>
+  <path d="M24 9v19" stroke="#808080"/>
+  <path d="M9 28h16" stroke="#808080"/>
+
+  <!-- Slats -->
+  <path d="M11 12h10" stroke="#00a2ff" stroke-width="1"/>
+  <path d="M11 15h10" stroke="#00a2ff" stroke-width="1"/>
+  <path d="M11 18h10" stroke="#00a2ff" stroke-width="1"/>
+  <path d="M11 21h10" stroke="#00a2ff" stroke-width="1"/>
+
+  <!-- Paper hint -->
+  <rect x="13" y="10" width="6" height="3" fill="#f6f6f6" stroke="#808080" stroke-width="1"/>
+</svg>

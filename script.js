@@ -801,3 +801,52 @@ try {
 } catch (e) {
     console.error("Gitalk render failed:", e);
 }
+
+// 快捷键监听 - Ctrl+Alt+C 打开 CMD
+// ---------------------------------------------------
+document.addEventListener('keydown', (e) => {
+    // Ctrl+Alt+C
+    if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        openCMD();
+    }
+});
+
+// 监听来自 iframe 的消息（扫雷通关）
+window.addEventListener('message', (event) => {
+    // console.log('[Main] Received message:', event.data);
+    if (!window.desktopPet) return;
+
+    if (event.data.type === 'minesweeper-win') {
+        window.desktopPet.onMinesweeperWin(event.data.time);
+    } else if (event.data.type === 'minesweeper-loss') {
+        window.desktopPet.onMinesweeperLoss();
+    } else if (event.data.type === 'minesweeper-active') {
+        window.desktopPet.resetMinesweeperIdleTimer();
+    }
+});
+
+function openCMD() {
+    const cmdWindow = document.getElementById('window-cmd');
+    if (!cmdWindow) return;
+    
+    // 打开窗口
+    openWindow('window-cmd');
+    
+    // 初始化终端（如果还没初始化）
+    if (!window.terminal) {
+        window.terminal = new TerminalSystem();
+        // 解锁第一层（快捷键本身就是第一个 token）
+        window.terminal.unlockFirstLayer();
+    }
+    
+    // 聚焦输入框
+    setTimeout(() => {
+        const input = document.getElementById('terminal-input');
+        if (input) {
+            input.focus();
+            // 再次尝试，防止动画未完成
+            setTimeout(() => input.focus(), 300);
+        }
+    }, 100);
+}
