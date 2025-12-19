@@ -15,7 +15,7 @@ const recycleBinCatalog = {
         restoreData: { 
             type: 'desktop-icon',
             content: '<img src="icon/notepad-5.png" alt="readme"><div class="icon-text">readme.txt</div>',
-            ondblclick: function() { openWindow('window-recycle-readme'); },
+            ondblclick: function() { openRecycleReadme(); },
             left: 20,
             top: 320
         }
@@ -131,8 +131,9 @@ function renderRecycleBin() {
 
 function openRecycleReadme() {
     const textarea = document.getElementById('recycle-readme-text');
-    if (textarea) {
+    if (textarea && !textarea.dataset.initialized) {
         textarea.value = recycleBinCatalog.readme.preview;
+        textarea.dataset.initialized = 'true';
     }
     openWindow('window-recycle-readme');
 }

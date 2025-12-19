@@ -205,6 +205,9 @@ Microsoft(R) Windows 98
             case 'doskey':
                 this.cmdDoskey(args);
                 break;
+            case 'history':
+                this.cmdDoskey(['/history']);
+                break;
             case 'unlock':
                 this.cmdUnlock(args);
                 break;
@@ -284,6 +287,7 @@ Microsoft(R) Windows 98
         this.print('DIR            Displays a list of files and subdirectories in a directory.');
         this.print('EXIT           Quits the CMD.EXE program (closes window).');
         this.print('HELP           Provides Help information for Windows commands.');
+        this.print('HISTORY        Displays the command history.');
         this.print('TYPE           Displays the contents of a text file.');
         this.print('UNLOCK         [Custom] Unlock protected content.');
         this.print('VER            Displays the Windows version.');
@@ -325,6 +329,9 @@ Microsoft(R) Windows 98
         dirCount += 2;
 
         Object.keys(dir).forEach(name => {
+            // 隐藏 diary.bin，必须通过 history 发现
+            if (name === 'DIARY.BIN') return;
+
             const entry = dir[name];
             // 修复：null 也是 object，但在这里代表特殊文件
             const isDir = entry !== null && typeof entry === 'object' && !Array.isArray(entry);
