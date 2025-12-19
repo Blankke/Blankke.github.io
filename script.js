@@ -10,6 +10,24 @@ function updateTime() {
 setInterval(updateTime, 1000);
 updateTime();
 
+// Boot toast (bottom-right)
+function showBootToast() {
+    // Use navigation timing as a pseudo "boot time"
+    const seconds = Math.max(0.6, Math.round((performance.now() / 1000) * 10) / 10);
+    const percent = Math.max(1, Math.min(99, Math.round(99 - seconds * 6)));
+
+    const toast = document.createElement('div');
+    toast.className = 'boot-toast';
+    toast.textContent = `欢迎回来！本次开机用时 ${seconds} 秒，超越全球 ${percent}% 用户 :)`;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 6500);
+}
+
+showBootToast();
+
 // Start Menu
 const startButton = document.getElementById('start-button');
 const startMenu = document.getElementById('start-menu');
@@ -361,6 +379,283 @@ document.addEventListener('mouseup', () => {
 
 loadIconPositions();
 
+// Recycle Bin + PVZ Wisdom Tree hint system
+// ---------------------------------------------------
+const RECYCLE_KEY = 'recycle_bin_items_v1';
+const PVZ_RESTORED_KEY = 'pvz_restored_v1';
+const TREE_HINT_IDX_KEY = 'wisdom_tree_hint_idx_v1';
+
+const recycleBinDefaults = ['readme', 'pvz'];
+const recycleBinCatalog = {
+    readme: {
+        id: 'readme',
+        name: 'readme.txt',
+        icon: 'icon/notepad-5.png',
+        preview: 'readme.txt\n\n我本来想写一个提示系统……\n写到一半又觉得太直白。\n\n最后我决定：把它删掉。\n\n（但是它为什么还在回收站里？）\n',
+    },
+    pvz: {
+        id: 'pvz',
+        name: 'PlantsVsZombies.lnk',
+        icon: 'icon/pvz_icon.png',
+        preview: '一个奇怪的快捷方式。\n右键它，也许会有“还原”。',
+    }
+};
+
+function getRecycleItems() {
+    try {
+        const raw = localStorage.getItem(RECYCLE_KEY);
+        if (!raw) return [...recycleBinDefaults];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [...recycleBinDefaults];
+        return parsed.filter(id => typeof id === 'string');
+    } catch {
+        return [...recycleBinDefaults];
+    }
+}
+
+function setRecycleItems(items) {
+    localStorage.setItem(RECYCLE_KEY, JSON.stringify(items));
+    updateRecycleBinDesktopIcon();
+}
+
+function updateRecycleBinDesktopIcon() {
+    const img = document.getElementById('recyclebin-desktop-icon');
+    if (!img) return;
+    const items = getRecycleItems();
+    img.src = items.length ? 'icon/recycle_bin_full.png' : 'icon/recycle_bin_empty.png';
+}
+
+function renderRecycleBin() {
+    updateRecycleBinDesktopIcon();
+
+    const listEl = document.getElementById('recyclebin-list');
+    const previewEl = document.getElementById('recyclebin-preview-text');
+    if (!listEl) return;
+
+    const items = getRecycleItems();
+    listEl.innerHTML = '';
+    let selectedId = null;
+
+    const selectItem = (id) => {
+        selectedId = id;
+        listEl.querySelectorAll('.recyclebin-item').forEach(el => {
+            el.classList.toggle('is-selected', el.dataset.itemId === id);
+        });
+        const meta = recycleBinCatalog[id];
+        if (previewEl) previewEl.textContent = meta?.preview || '…';
+    };
+
+    items.forEach((id) => {
+        const meta = recycleBinCatalog[id];
+        if (!meta) return;
+
+        const row = document.createElement('div');
+        row.className = 'recyclebin-item';
+        row.dataset.itemId = id;
+        row.innerHTML = `<img src="${meta.icon}" alt=""><span>${meta.name}</span>`;
+
+        row.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectItem(id);
+        });
+
+        row.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            if (id === 'readme') {
+                openRecycleReadme();
+            }
+        });
+
+        row.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            selectItem(id);
+            if (id === 'pvz') {
+                showRecycleContextMenu(e.clientX, e.clientY);
+            }
+        });
+
+        listEl.appendChild(row);
+    });
+
+    if (items.length) selectItem(items[0]);
+    else if (previewEl) previewEl.textContent = '回收站是空的。';
+}
+
+function openRecycleReadme() {
+    const textarea = document.getElementById('recycle-readme-text');
+    if (textarea) {
+        textarea.value = recycleBinCatalog.readme.preview;
+    }
+    openWindow('window-recycle-readme');
+}
+
+// Recycle item context menu (restore)
+let recycleMenuEl = null;
+function ensureRecycleContextMenu() {
+    if (recycleMenuEl) return recycleMenuEl;
+    recycleMenuEl = document.createElement('div');
+    recycleMenuEl.id = 'recycle-item-context-menu';
+    recycleMenuEl.className = 'context-menu';
+    recycleMenuEl.style.display = 'none';
+    recycleMenuEl.innerHTML = `
+        <div class="context-menu-item" id="recycle-ctx-restore"><span>还原</span></div>
+    `;
+    document.body.appendChild(recycleMenuEl);
+
+    document.addEventListener('click', () => {
+        recycleMenuEl.style.display = 'none';
+    });
+
+    const restoreBtn = recycleMenuEl.querySelector('#recycle-ctx-restore');
+    if (restoreBtn) {
+        restoreBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            recycleMenuEl.style.display = 'none';
+            restorePvz();
+        });
+    }
+    return recycleMenuEl;
+}
+
+function showRecycleContextMenu(x, y) {
+    const menu = ensureRecycleContextMenu();
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+    menu.style.display = 'block';
+}
+
+function bindIconInteractions(icon) {
+    if (!icon) return;
+    if (!icon.dataset.iconId) return;
+
+    icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectIcon(icon);
+    });
+
+    icon.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        isDraggingIcon = true;
+        draggingIcon = icon;
+        iconDownX = e.clientX;
+        iconDownY = e.clientY;
+        iconDragOffsetX = e.clientX - icon.offsetLeft;
+        iconDragOffsetY = e.clientY - icon.offsetTop;
+        selectIcon(icon);
+    });
+}
+
+function restorePvz() {
+    // Remove pvz from recycle items
+    const items = getRecycleItems().filter(id => id !== 'pvz');
+    setRecycleItems(items);
+    localStorage.setItem(PVZ_RESTORED_KEY, '1');
+
+    // Add desktop icon if missing
+    if (!document.getElementById('icon-pvz')) {
+        const desktopEl = document.getElementById('desktop');
+        if (!desktopEl) return;
+
+        const icon = document.createElement('div');
+        icon.className = 'icon';
+        icon.id = 'icon-pvz';
+        icon.dataset.iconId = 'pvz';
+        icon.dataset.defaultLeft = '120';
+        icon.dataset.defaultTop = '120';
+        icon.setAttribute('ondblclick', "openWindow('window-wisdomtree')");
+        icon.innerHTML = `
+            <img src="icon/pvz_icon.png" alt="PVZ">
+            <div class="icon-text">植物大战僵尸</div>
+        `;
+        desktopEl.appendChild(icon);
+        bindIconInteractions(icon);
+        loadIconPositions();
+    }
+
+    renderRecycleBin();
+}
+
+function ensurePvzDesktopIconFromState() {
+    const restored = localStorage.getItem(PVZ_RESTORED_KEY) === '1';
+    if (!restored) return;
+    if (document.getElementById('icon-pvz')) return;
+
+    const items = getRecycleItems();
+    // Ensure pvz isn't still in recycle
+    if (items.includes('pvz')) {
+        setRecycleItems(items.filter(id => id !== 'pvz'));
+    }
+    restorePvz();
+}
+
+// Wisdom tree hints
+const wisdomTreeHints = [
+    '……',
+    '提示 1：这里的提示以后再写。',
+    '提示 2：有些东西不是“点出来”的。',
+    '提示 3：也许你该回到“回收站”看看。',
+    '提示 4：先到这里，剩下的你来补充。'
+];
+
+let pvzFood = 10;
+
+function resetWisdomTreeUI() {
+    pvzFood = 10;
+    const countEl = document.getElementById('pvz-food-count');
+    if (countEl) countEl.textContent = `x ${pvzFood}`;
+    const speechEl = document.getElementById('pvz-tree-speech');
+    if (speechEl) speechEl.textContent = '……';
+}
+
+function initWisdomTreeOnce() {
+    const btn = document.getElementById('pvz-fertilize');
+    if (!btn || btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+        if (pvzFood <= 0) return;
+        pvzFood -= 1;
+        const countEl = document.getElementById('pvz-food-count');
+        if (countEl) countEl.textContent = `x ${pvzFood}`;
+
+        let idx = 0;
+        try {
+            idx = parseInt(localStorage.getItem(TREE_HINT_IDX_KEY) || '0', 10);
+            if (Number.isNaN(idx) || idx < 0) idx = 0;
+        } catch {
+            idx = 0;
+        }
+        const next = Math.min(idx + 1, wisdomTreeHints.length - 1);
+        localStorage.setItem(TREE_HINT_IDX_KEY, String(next));
+
+        const speechEl = document.getElementById('pvz-tree-speech');
+        if (speechEl) speechEl.textContent = wisdomTreeHints[next] || '……';
+    });
+}
+
+function onOpenWisdomTree() {
+    initWisdomTreeOnce();
+    resetWisdomTreeUI();
+    const tree = document.getElementById('pvz-tree');
+    if (tree) tree.style.display = 'flex';
+}
+
+// Hook into openWindow for recyclebin + wisdom tree
+const _openWindow = openWindow;
+openWindow = function(id) {
+    _openWindow(id);
+    if (id === 'window-recyclebin') {
+        renderRecycleBin();
+    }
+    if (id === 'window-wisdomtree') {
+        onOpenWisdomTree();
+    }
+};
+
+// Initialize on load
+renderRecycleBin();
+ensurePvzDesktopIconFromState();
+
 // Music Player
 // ---------------------------------------------------
 const musicListEl = document.getElementById('music-list');
@@ -372,6 +667,28 @@ const musicNextEl = document.getElementById('music-next');
 const musicPlayEl = document.getElementById('music-play');
 const musicPauseEl = document.getElementById('music-pause');
 const musicLoopEl = document.getElementById('music-loop');
+const mewmewTalkToggleEl = document.getElementById('mewmew-talk-toggle');
+
+window.mewmewTalkEnabled = false;
+
+if (mewmewTalkToggleEl) {
+    try {
+        const saved = localStorage.getItem('mewmew_talk_enabled_v1') === '1';
+        mewmewTalkToggleEl.checked = saved;
+        window.mewmewTalkEnabled = saved;
+    } catch {
+        // ignore
+    }
+
+    mewmewTalkToggleEl.addEventListener('change', () => {
+        window.mewmewTalkEnabled = !!mewmewTalkToggleEl.checked;
+        try {
+            localStorage.setItem('mewmew_talk_enabled_v1', window.mewmewTalkEnabled ? '1' : '0');
+        } catch {
+            // ignore
+        }
+    });
+}
 
 let musicTracks = [];
 let musicCurrentIndex = -1;

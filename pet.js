@@ -19,6 +19,16 @@ class DesktopPet {
         this.init();
     }
 
+    isTalkEnabled() {
+        // Prefer runtime flag from script.js; fall back to persisted value.
+        if (typeof window.mewmewTalkEnabled === 'boolean') return window.mewmewTalkEnabled;
+        try {
+            return localStorage.getItem('mewmew_talk_enabled_v1') === '1';
+        } catch {
+            return false;
+        }
+    }
+
     init() {
         // 创建宠物元素
         this.element = document.createElement('div');
@@ -57,6 +67,7 @@ class DesktopPet {
             font-family: "MS Sans Serif", Arial, sans-serif;
             font-size: 12px;
             line-height: 1.4;
+            min-width: 80px;
             max-width: 280px;
             display: none;
             z-index: 10000;
@@ -166,7 +177,8 @@ class DesktopPet {
 
     showDialog(text, duration = 5000) {
         const dialogText = document.getElementById('pet-dialog-text');
-        dialogText.textContent = text;
+        const finalText = this.isTalkEnabled() ? text : '喵';
+        dialogText.textContent = finalText;
         this.dialogElement.style.display = 'block';
         this.updateDialogPosition();
         
@@ -183,10 +195,8 @@ class DesktopPet {
     startDialogSequence() {
         // 初始对话序列 - 刚进入就开始说话吸引注意
         const initialDialogs = [
-            { text: "喵~ 你好呀！欢迎来到这里！", delay: 800, id: 'welcome' },
             { text: "我是这里的小向导，有什么需要帮助的吗？", delay: 6000, id: 'intro0' },
             { text: "这里看起来很简单... 对吧？", delay: 10000, id: 'intro1' },
-            { text: "试试那些图标吧，都能用的~", delay: 15000, id: 'intro2' },
             { text: "我主人说，真正重要的东西往往藏在表面之下。", delay: 30000, id: 'hint1' },
             { text: "就像冰山... 你只能看到露出水面的那一小部分。", delay: 40000, id: 'hint2' }
         ];

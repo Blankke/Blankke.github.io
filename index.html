@@ -48,7 +48,7 @@
         </div>
 
         <div class="icon" id="icon-recyclebin" data-icon-id="recyclebin" data-default-left="120" data-default-top="20" ondblclick="openWindow('window-recyclebin')">
-            <img src="icon/recycle_bin_empty.png" alt="Recycle Bin">
+            <img id="recyclebin-desktop-icon" src="icon/recycle_bin_full.png" alt="Recycle Bin">
             <div class="icon-text">回收站</div>
         </div>
     </div>
@@ -122,7 +122,7 @@
     </div>
 
     <!-- Window: Recycle Bin -->
-    <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="icon/recycle_bin_empty.png" style="width: 360px; height: 260px;">
+    <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="icon/recycle_bin_full.png" style="width: 420px; height: 320px;">
         <div class="title-bar">
             <div class="title-bar-text">回收站</div>
             <div class="title-bar-controls">
@@ -132,11 +132,69 @@
             </div>
         </div>
         <div class="window-body">
-            <p style="margin-top: 0;">回收站是空的。</p>
-            <fieldset>
-                <legend>操作</legend>
-                <button type="button" disabled>清空回收站</button>
-            </fieldset>
+            <div class="recyclebin-layout">
+                <div class="recyclebin-list" id="recyclebin-list" aria-label="Recycle Bin Items"></div>
+                <div class="recyclebin-preview">
+                    <fieldset>
+                        <legend>说明</legend>
+                        <div id="recyclebin-preview-text" style="white-space: pre-wrap; font-size: 12px;">右键文件试试。</div>
+                    </fieldset>
+                    <fieldset style="margin-top: 10px;">
+                        <legend>操作</legend>
+                        <button type="button" disabled>清空回收站</button>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
+    <!-- Window: readme.txt (from Recycle Bin) -->
+    <div id="window-recycle-readme" class="window" data-window-title="readme.txt" data-window-icon="icon/notepad-5.png" style="width: 520px; height: 420px;">
+        <div class="title-bar">
+            <div class="title-bar-text">readme.txt - 记事本</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-recycle-readme')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-recycle-readme')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-recycle-readme')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <ul role="menu-bar">
+                <li role="menu-item">文件</li>
+                <li role="menu-item">编辑</li>
+                <li role="menu-item">帮助</li>
+            </ul>
+            <textarea id="recycle-readme-text" style="flex: 1; width: 100%; resize: none;"></textarea>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
+    <!-- Window: Wisdom Tree (PVZ-like) -->
+    <div id="window-wisdomtree" class="window" data-window-title="植物大战僵尸" data-window-icon="icon/pvz_icon.png" style="width: 640px; height: 460px;">
+        <div class="title-bar">
+            <div class="title-bar-text">Plants vs Zombies (Lite)</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-wisdomtree')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-wisdomtree')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-wisdomtree')"></button>
+            </div>
+        </div>
+        <div class="window-body" style="padding: 0;">
+            <div id="pvz-tree" class="pvz-tree">
+                <div class="pvz-tree-topbar">
+                    <button id="pvz-fertilize" type="button" class="btn pvz-fertilize" title="施肥">
+                        <img src="icon/TreeFood.png" alt="Fertilizer">
+                        <span id="pvz-food-count">x 10</span>
+                    </button>
+                </div>
+                <div class="pvz-tree-body">
+                    <div class="pvz-tree-stage">
+                        <img src="icon/Store_TreeOfWisdomIcon.png" alt="Wisdom Tree" class="pvz-tree-img">
+                    </div>
+                    <div class="pvz-tree-speech" id="pvz-tree-speech">……</div>
+                </div>
+            </div>
         </div>
         <div class="resize-handle"></div>
     </div>
@@ -233,6 +291,7 @@
                         <button class="btn" id="music-pause" type="button">⏸</button>
                         <button class="btn" id="music-next" type="button">⏭</button>
                         <label class="music-loop"><input id="music-loop" type="checkbox"> 循环</label>
+                        <label class="music-loop"><input id="mewmew-talk-toggle" type="checkbox"> MewMew</label>
                     </div>
                     <audio class="music-audio" id="music-audio" controls preload="metadata"></audio>
                     <div class="status-bar">
