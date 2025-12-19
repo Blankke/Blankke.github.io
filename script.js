@@ -400,9 +400,9 @@ const recycleBinCatalog = {
         name: 'PlantsVsZombies.lnk',
         icon: 'icon/pvz_icon.png',
         preview: '一个奇怪的快捷方式。\n右键它，也许会有“还原”。',
-    },
         canRestore: true,
         restoreData: { type: 'desktop-icon' }
+    }
 };
 
 // Add deleted icon to recycle catalog
@@ -424,43 +424,7 @@ function addIconToRecycleBin(iconId, iconData) {
     };
 }
 
-// Add deleted icon to recycle catalog
-function addIconToRecycleBin(iconId, iconData) {
-    recycleBinCatalog[iconId] = {
-        id: iconId,
-        name: iconData.name || iconId,
-        icon: iconData.icon || 'settings_gear-4.png',
-        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
-        canRestore: true,
-        restoreData: {
-            type: 'desktop-icon',
-            iconId: iconId,
-            content: iconData.content,
-            left: iconData.left,
-            top: iconData.top,
-            ondblclick: iconData.ondblclick
-        }
-    };
-}
 
-// Add deleted icon to recycle catalog
-function addIconToRecycleBin(iconId, iconData) {
-    recycleBinCatalog[iconId] = {
-        id: iconId,
-        name: iconData.name || iconId,
-        icon: iconData.icon || 'settings_gear-4.png',
-        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
-        canRestore: true,
-        restoreData: {
-            type: 'desktop-icon',
-            iconId: iconId,
-            content: iconData.content,
-            left: iconData.left,
-            top: iconData.top,
-            ondblclick: iconData.ondblclick
-        }
-    };
-}
 
 function getRecycleItems() {
     try {
@@ -626,10 +590,15 @@ function restoreRecycleItem(itemId) {
     if (restoreData.type === 'desktop-icon') {
         // Restore desktop icon
         const desktopEl = document.getElementById('desktop');
-        if (!desktopEl) return;
+        if (!desktopEl) {
+            console.error('[RecycleBin] Desktop element not found!');
+            return;
+        }
 
         const existingId = itemId === 'pvz' ? 'icon-pvz' : `icon-${itemId}`;
-        if (document.getElementById(existingId)) return; // Already exists
+        if (document.getElementById(existingId)) {
+            return; // Already exists
+        }
 
         const icon = document.createElement('div');
         icon.className = 'icon';
@@ -666,17 +635,48 @@ function restoreRecycleItem(itemId) {
     renderRecycleBin();
 }
 
-function ensurePvzDesktopIconFromState() {
-    const restored = localStorage.getItem(PVZ_RESTORED_KEY) === '1';
-    if (!restored) return;
-    if (document.getElementById('icon-pvz')) return;
+function initRecycleBinState() {
+    // 1. Check PVZ
+    const pvzRestored = localStorage.getItem(PVZ_RESTORED_KEY) === '1';
+    let items = getRecycleItems();
+    let changed = false;
 
-    const items = getRecycleItems();
-    // Ensure pvz isn't still in recycle
-    if (items.includes('pvz')) {
-        setRecycleItems(items.filter(id => id !== 'pvz'));
+    if (pvzRestored) {
+        // If it's marked as restored, ensure it's on the desktop
+        if (!document.getElementById('icon-pvz')) {
+            // Use restoreRecycleItem to create the DOM element
+            // It will also ensure it's removed from the bin list
+            restoreRecycleItem('pvz');
+        }
+        
+        // Double check it's not in the bin (restoreRecycleItem handles this, but just in case)
+        const currentItems = getRecycleItems();
+        if (currentItems.includes('pvz')) {
+            items = currentItems.filter(id => id !== 'pvz');
+            changed = true;
+        } else {
+            items = currentItems;
+        }
+    } else {
+        // If NOT restored, it MUST be in the recycle bin
+        if (!items.includes('pvz')) {
+            items.push('pvz');
+            changed = true;
+        }
     }
-    restoreRecycleItem('pvz');
+
+    // 2. Check Readme (Always ensure it's in bin for "initial state" behavior)
+    if (!items.includes('readme')) {
+        items.push('readme');
+        changed = true;
+    }
+
+    if (changed) {
+        setRecycleItems(items);
+    }
+    
+    // Force render to update UI
+    renderRecycleBin();
 }
 
 // Wisdom tree hints
@@ -742,43 +742,7 @@ openWindow = function(id) {
     }
 };
 
-// Add deleted icon to recycle catalog
-function addIconToRecycleBin(iconId, iconData) {
-    recycleBinCatalog[iconId] = {
-        id: iconId,
-        name: iconData.name || iconId,
-        icon: iconData.icon || 'settings_gear-4.png',
-        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
-        canRestore: true,
-        restoreData: {
-            type: 'desktop-icon',
-            iconId: iconId,
-            content: iconData.content,
-            left: iconData.left,
-            top: iconData.top,
-            ondblclick: iconData.ondblclick
-        }
-    };
-}
 
-// Add deleted icon to recycle catalog
-function addIconToRecycleBin(iconId, iconData) {
-    recycleBinCatalog[iconId] = {
-        id: iconId,
-        name: iconData.name || iconId,
-        icon: iconData.icon || 'settings_gear-4.png',
-        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
-        canRestore: true,
-        restoreData: {
-            type: 'desktop-icon',
-            iconId: iconId,
-            content: iconData.content,
-            left: iconData.left,
-            top: iconData.top,
-            ondblclick: iconData.ondblclick
-        }
-    };
-}
 
 // Initialize on load
 // Ensure PVZ starts in recycle bin (remove any desktop remnants from previous state)
@@ -1221,7 +1185,7 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', () => {
         const iconId = contextMenuTargetIcon.dataset.iconId;
         const iconName = contextMenuTargetIcon.querySelector('.icon-text')?.textContent || iconId;
         const iconImg = contextMenuTargetIcon.querySelector('img');
-        const iconSrc = iconImg ? iconImg.src : '';
+        const iconSrc = iconImg ? iconImg.getAttribute('src') : 'icon/settings_gear-4.png';
         
         if (confirm(`确定要删除 "${iconName}" 吗?
 
@@ -1229,7 +1193,7 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', () => {
             // Save icon data to recycle bin
             const iconData = {
                 name: iconName,
-                icon: iconSrc.includes('/') ? iconSrc.split('/').pop() : 'settings_gear-4.png',
+                icon: iconSrc,
                 content: contextMenuTargetIcon.innerHTML,
                 left: contextMenuTargetIcon.offsetLeft,
                 top: contextMenuTargetIcon.offsetTop,
@@ -1390,40 +1354,7 @@ window.openBrowser = function(url) {
     openWindow('window-browser');
 };
 
-// Add deleted icon to recycle catalog
-function addIconToRecycleBin(iconId, iconData) {
-    recycleBinCatalog[iconId] = {
-        id: iconId,
-        name: iconData.name || iconId,
-        icon: iconData.icon || 'settings_gear-4.png',
-        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
-        canRestore: true,
-        restoreData: {
-            type: 'desktop-icon',
-            iconId: iconId,
-            content: iconData.content,
-            left: iconData.left,
-            top: iconData.top,
-            ondblclick: iconData.ondblclick
-        }
-    };
-}
+// Initialize Recycle Bin State (Restore missing icons)
+initRecycleBinState();
 
-// Add deleted icon to recycle catalog
-function addIconToRecycleBin(iconId, iconData) {
-    recycleBinCatalog[iconId] = {
-        id: iconId,
-        name: iconData.name || iconId,
-        icon: iconData.icon || 'settings_gear-4.png',
-        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
-        canRestore: true,
-        restoreData: {
-            type: 'desktop-icon',
-            iconId: iconId,
-            content: iconData.content,
-            left: iconData.left,
-            top: iconData.top,
-            ondblclick: iconData.ondblclick
-        }
-    };
-}
+
