@@ -74,7 +74,8 @@ const musicLoopEl = document.getElementById('music-loop');
 
 window.mewmewTalkEnabled = false;
 try {
-    window.mewmewTalkEnabled = localStorage.getItem('mewmew_talk_enabled_v1') === '1';
+    // 默认为关闭，使用 v2 键值以重置旧的设置
+    window.mewmewTalkEnabled = localStorage.getItem('mewmew_talk_enabled_v2') === '1';
 } catch {
     // ignore
 }
@@ -104,7 +105,7 @@ function ensureTrackContextMenu() {
         toggleEl.addEventListener('change', () => {
             window.mewmewTalkEnabled = !!toggleEl.checked;
             try {
-                localStorage.setItem('mewmew_talk_enabled_v1', window.mewmewTalkEnabled ? '1' : '0');
+                localStorage.setItem('mewmew_talk_enabled_v2', window.mewmewTalkEnabled ? '1' : '0');
             } catch {
                 // ignore
             }

@@ -23,7 +23,7 @@ class DesktopPet {
         // Prefer runtime flag from script.js; fall back to persisted value.
         if (typeof window.mewmewTalkEnabled === 'boolean') return window.mewmewTalkEnabled;
         try {
-            return localStorage.getItem('mewmew_talk_enabled_v1') === '1';
+            return localStorage.getItem('mewmew_talk_enabled_v2') === '1';
         } catch {
             return false;
         }
@@ -67,16 +67,17 @@ class DesktopPet {
             font-family: "MS Sans Serif", Arial, sans-serif;
             font-size: 12px;
             line-height: 1.4;
-            min-width: 80px;
+            min-width: 100px;
             max-width: 280px;
+            text-align: center;
             display: none;
             z-index: 10000;
             animation: petDialogFadeIn 0.12s ease;
         `;
         this.dialogElement.innerHTML = `
             <div id="pet-dialog-text" style="margin: 0;"></div>
-            <div style="position: absolute; bottom: -10px; left: 26px; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid #000;"></div>
-            <div style="position: absolute; bottom: -8px; left: 27px; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-top: 9px solid #fff;"></div>
+            <div style="position: absolute; bottom: -10px; left: 50%; margin-left: -10px; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid #000;"></div>
+            <div style="position: absolute; bottom: -8px; left: 50%; margin-left: -9px; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-top: 9px solid #fff;"></div>
         `;
         
         // 添加宠物悬停效果（轻微放大即可）
@@ -127,8 +128,11 @@ class DesktopPet {
         const dialogWidth = this.dialogElement.offsetWidth;
         const dialogHeight = this.dialogElement.offsetHeight;
         
-        // 对话框显示在宠物上方
-        let dialogX = this.x - dialogWidth / 2 + 16;
+        // 对话框显示在宠物上方，水平居中
+        // 宠物宽度48px，中心点为 x + 24
+        // 对话框中心点为 dialogX + dialogWidth / 2
+        // 所以 dialogX = x + 24 - dialogWidth / 2
+        let dialogX = this.x + 24 - dialogWidth / 2;
         let dialogY = this.y - dialogHeight - 20;
         
         // 确保对话框在屏幕内
