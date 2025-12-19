@@ -20,13 +20,8 @@ class DesktopPet {
     }
 
     isTalkEnabled() {
-        // Prefer runtime flag from script.js; fall back to persisted value.
-        if (typeof window.mewmewTalkEnabled === 'boolean') return window.mewmewTalkEnabled;
-        try {
-            return localStorage.getItem('mewmew_talk_enabled_v2') === '1';
-        } catch {
-            return false;
-        }
+        // Only use runtime flag, no persistence
+        return typeof window.mewmewTalkEnabled === 'boolean' ? window.mewmewTalkEnabled : false;
     }
 
     init() {

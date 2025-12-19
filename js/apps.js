@@ -73,12 +73,7 @@ const musicPauseEl = document.getElementById('music-pause');
 const musicLoopEl = document.getElementById('music-loop');
 
 window.mewmewTalkEnabled = false;
-try {
-    // 默认为关闭，使用 v2 键值以重置旧的设置
-    window.mewmewTalkEnabled = localStorage.getItem('mewmew_talk_enabled_v2') === '1';
-} catch {
-    // ignore
-}
+// No persistence for MewMew talk state - resets on reload
 
 let trackContextMenu = null;
 let trackContextMenuTarget = null;
@@ -104,11 +99,6 @@ function ensureTrackContextMenu() {
         toggleEl.checked = window.mewmewTalkEnabled;
         toggleEl.addEventListener('change', () => {
             window.mewmewTalkEnabled = !!toggleEl.checked;
-            try {
-                localStorage.setItem('mewmew_talk_enabled_v2', window.mewmewTalkEnabled ? '1' : '0');
-            } catch {
-                // ignore
-            }
         });
     }
 

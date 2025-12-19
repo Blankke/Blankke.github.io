@@ -208,7 +208,7 @@ function restoreRecycleItem(itemId) {
         
         if (itemId === 'pvz') {
             // Special handling for PVZ
-            localStorage.setItem(PVZ_RESTORED_KEY, '1');
+            // localStorage.setItem(PVZ_RESTORED_KEY, '1'); // No persistence for puzzle items
             icon.dataset.defaultLeft = '120';
             icon.dataset.defaultTop = '120';
             icon.setAttribute('ondblclick', "openWindow('window-wisdomtree')");
@@ -218,7 +218,7 @@ function restoreRecycleItem(itemId) {
             `;
         } else {
             if (itemId === 'readme') {
-                localStorage.setItem(README_RESTORED_KEY, '1');
+                // localStorage.setItem(README_RESTORED_KEY, '1'); // No persistence for puzzle items
             }
             // Restore from saved data
             icon.dataset.defaultLeft = String(restoreData.left || 120);
@@ -245,7 +245,8 @@ function restoreRecycleItem(itemId) {
 
 function initRecycleBinState() {
     // 1. Check PVZ
-    const pvzRestored = localStorage.getItem(PVZ_RESTORED_KEY) === '1';
+    // const pvzRestored = localStorage.getItem(PVZ_RESTORED_KEY) === '1';
+    const pvzRestored = false; // Always reset to recycle bin on reload
     let items = getRecycleItems();
     let changed = false;
 
@@ -268,7 +269,8 @@ function initRecycleBinState() {
     }
 
     // 2. Check Readme
-    const readmeRestored = localStorage.getItem(README_RESTORED_KEY) === '1';
+    // const readmeRestored = localStorage.getItem(README_RESTORED_KEY) === '1';
+    const readmeRestored = false; // Always reset to recycle bin on reload
 
     if (readmeRestored) {
         if (!document.getElementById('icon-readme')) {
