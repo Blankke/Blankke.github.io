@@ -392,14 +392,75 @@ const recycleBinCatalog = {
         name: 'readme.txt',
         icon: 'icon/notepad-5.png',
         preview: 'readme.txt\n\n我本来想写一个提示系统……\n写到一半又觉得太直白。\n\n最后我决定：把它删掉。\n\n（但是它为什么还在回收站里？）\n',
+        canRestore: true,
+        restoreData: { type: 'window', windowId: 'window-recycle-readme' }
     },
     pvz: {
         id: 'pvz',
         name: 'PlantsVsZombies.lnk',
         icon: 'icon/pvz_icon.png',
         preview: '一个奇怪的快捷方式。\n右键它，也许会有“还原”。',
-    }
+    },
+        canRestore: true,
+        restoreData: { type: 'desktop-icon' }
 };
+
+// Add deleted icon to recycle catalog
+function addIconToRecycleBin(iconId, iconData) {
+    recycleBinCatalog[iconId] = {
+        id: iconId,
+        name: iconData.name || iconId,
+        icon: iconData.icon || 'settings_gear-4.png',
+        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
+        canRestore: true,
+        restoreData: {
+            type: 'desktop-icon',
+            iconId: iconId,
+            content: iconData.content,
+            left: iconData.left,
+            top: iconData.top,
+            ondblclick: iconData.ondblclick
+        }
+    };
+}
+
+// Add deleted icon to recycle catalog
+function addIconToRecycleBin(iconId, iconData) {
+    recycleBinCatalog[iconId] = {
+        id: iconId,
+        name: iconData.name || iconId,
+        icon: iconData.icon || 'settings_gear-4.png',
+        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
+        canRestore: true,
+        restoreData: {
+            type: 'desktop-icon',
+            iconId: iconId,
+            content: iconData.content,
+            left: iconData.left,
+            top: iconData.top,
+            ondblclick: iconData.ondblclick
+        }
+    };
+}
+
+// Add deleted icon to recycle catalog
+function addIconToRecycleBin(iconId, iconData) {
+    recycleBinCatalog[iconId] = {
+        id: iconId,
+        name: iconData.name || iconId,
+        icon: iconData.icon || 'settings_gear-4.png',
+        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
+        canRestore: true,
+        restoreData: {
+            type: 'desktop-icon',
+            iconId: iconId,
+            content: iconData.content,
+            left: iconData.left,
+            top: iconData.top,
+            ondblclick: iconData.ondblclick
+        }
+    };
+}
 
 function getRecycleItems() {
     try {
@@ -470,8 +531,8 @@ function renderRecycleBin() {
             e.preventDefault();
             e.stopPropagation();
             selectItem(id);
-            if (id === 'pvz') {
-                showRecycleContextMenu(e.clientX, e.clientY);
+            if (meta.canRestore) {
+                showRecycleContextMenu(e.clientX, e.clientY, id);
             }
         });
 
@@ -492,6 +553,8 @@ function openRecycleReadme() {
 
 // Recycle item context menu (restore)
 let recycleMenuEl = null;
+let currentRecycleItemId = null;
+
 function ensureRecycleContextMenu() {
     if (recycleMenuEl) return recycleMenuEl;
     recycleMenuEl = document.createElement('div');
@@ -512,14 +575,17 @@ function ensureRecycleContextMenu() {
         restoreBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             recycleMenuEl.style.display = 'none';
-            restorePvz();
+            if (currentRecycleItemId) {
+                restoreRecycleItem(currentRecycleItemId);
+            }
         });
     }
     return recycleMenuEl;
 }
 
-function showRecycleContextMenu(x, y) {
+function showRecycleContextMenu(x, y, itemId) {
     const menu = ensureRecycleContextMenu();
+    currentRecycleItemId = itemId;
     menu.style.left = `${x}px`;
     menu.style.top = `${y}px`;
     menu.style.display = 'block';
@@ -546,28 +612,52 @@ function bindIconInteractions(icon) {
     });
 }
 
-function restorePvz() {
-    // Remove pvz from recycle items
-    const items = getRecycleItems().filter(id => id !== 'pvz');
-    setRecycleItems(items);
-    localStorage.setItem(PVZ_RESTORED_KEY, '1');
+function restoreRecycleItem(itemId) {
+    const meta = recycleBinCatalog[itemId];
+    if (!meta || !meta.canRestore) return;
 
-    // Add desktop icon if missing
-    if (!document.getElementById('icon-pvz')) {
+    // Remove from recycle items
+    const items = getRecycleItems().filter(id => id !== itemId);
+    setRecycleItems(items);
+
+    const restoreData = meta.restoreData;
+    if (!restoreData) return;
+
+    if (restoreData.type === 'desktop-icon') {
+        // Restore desktop icon
         const desktopEl = document.getElementById('desktop');
         if (!desktopEl) return;
 
+        const existingId = itemId === 'pvz' ? 'icon-pvz' : `icon-${itemId}`;
+        if (document.getElementById(existingId)) return; // Already exists
+
         const icon = document.createElement('div');
         icon.className = 'icon';
-        icon.id = 'icon-pvz';
-        icon.dataset.iconId = 'pvz';
-        icon.dataset.defaultLeft = '120';
-        icon.dataset.defaultTop = '120';
-        icon.setAttribute('ondblclick', "openWindow('window-wisdomtree')");
-        icon.innerHTML = `
-            <img src="icon/pvz_icon.png" alt="PVZ">
-            <div class="icon-text">植物大战僵尸</div>
-        `;
+        icon.id = existingId;
+        icon.dataset.iconId = itemId;
+        
+        if (itemId === 'pvz') {
+            // Special handling for PVZ
+            localStorage.setItem(PVZ_RESTORED_KEY, '1');
+            icon.dataset.defaultLeft = '120';
+            icon.dataset.defaultTop = '120';
+            icon.setAttribute('ondblclick', "openWindow('window-wisdomtree')");
+            icon.innerHTML = `
+                <img src="icon/pvz_icon.png" alt="PVZ">
+                <div class="icon-text">植物大战僵尸</div>
+            `;
+        } else {
+            // Restore from saved data
+            icon.dataset.defaultLeft = String(restoreData.left || 120);
+            icon.dataset.defaultTop = String(restoreData.top || 120);
+            icon.style.left = `${restoreData.left || 120}px`;
+            icon.style.top = `${restoreData.top || 120}px`;
+            icon.innerHTML = restoreData.content || '';
+            if (restoreData.ondblclick) {
+                icon.ondblclick = restoreData.ondblclick;
+            }
+        }
+        
         desktopEl.appendChild(icon);
         bindIconInteractions(icon);
         loadIconPositions();
@@ -586,7 +676,7 @@ function ensurePvzDesktopIconFromState() {
     if (items.includes('pvz')) {
         setRecycleItems(items.filter(id => id !== 'pvz'));
     }
-    restorePvz();
+    restoreRecycleItem('pvz');
 }
 
 // Wisdom tree hints
@@ -652,9 +742,53 @@ openWindow = function(id) {
     }
 };
 
+// Add deleted icon to recycle catalog
+function addIconToRecycleBin(iconId, iconData) {
+    recycleBinCatalog[iconId] = {
+        id: iconId,
+        name: iconData.name || iconId,
+        icon: iconData.icon || 'settings_gear-4.png',
+        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
+        canRestore: true,
+        restoreData: {
+            type: 'desktop-icon',
+            iconId: iconId,
+            content: iconData.content,
+            left: iconData.left,
+            top: iconData.top,
+            ondblclick: iconData.ondblclick
+        }
+    };
+}
+
+// Add deleted icon to recycle catalog
+function addIconToRecycleBin(iconId, iconData) {
+    recycleBinCatalog[iconId] = {
+        id: iconId,
+        name: iconData.name || iconId,
+        icon: iconData.icon || 'settings_gear-4.png',
+        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
+        canRestore: true,
+        restoreData: {
+            type: 'desktop-icon',
+            iconId: iconId,
+            content: iconData.content,
+            left: iconData.left,
+            top: iconData.top,
+            ondblclick: iconData.ondblclick
+        }
+    };
+}
+
 // Initialize on load
+// Ensure PVZ starts in recycle bin (remove any desktop remnants from previous state)
+const existingPvzIcon = document.getElementById('icon-pvz');
+if (existingPvzIcon) {
+    existingPvzIcon.remove();
+    // Clear the restored flag to ensure it stays in recycle bin
+    localStorage.removeItem(PVZ_RESTORED_KEY);
+}
 renderRecycleBin();
-ensurePvzDesktopIconFromState();
 
 // Music Player
 // ---------------------------------------------------
@@ -667,27 +801,67 @@ const musicNextEl = document.getElementById('music-next');
 const musicPlayEl = document.getElementById('music-play');
 const musicPauseEl = document.getElementById('music-pause');
 const musicLoopEl = document.getElementById('music-loop');
-const mewmewTalkToggleEl = document.getElementById('mewmew-talk-toggle');
 
+// MewMew talk toggle state
 window.mewmewTalkEnabled = false;
+try {
+    window.mewmewTalkEnabled = localStorage.getItem('mewmew_talk_enabled_v1') === '1';
+} catch {
+    // ignore
+}
 
-if (mewmewTalkToggleEl) {
-    try {
-        const saved = localStorage.getItem('mewmew_talk_enabled_v1') === '1';
-        mewmewTalkToggleEl.checked = saved;
-        window.mewmewTalkEnabled = saved;
-    } catch {
-        // ignore
+// Track context menu for American Pie secret
+let trackContextMenu = null;
+let trackContextMenuTarget = null;
+
+function ensureTrackContextMenu() {
+    if (trackContextMenu) return trackContextMenu;
+    trackContextMenu = document.createElement('div');
+    trackContextMenu.id = 'track-context-menu';
+    trackContextMenu.className = 'context-menu';
+    trackContextMenu.style.display = 'none';
+    trackContextMenu.innerHTML = `
+        <div class="context-menu-item" id="track-ctx-mewmew">
+            <label style="cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px;">
+                <input type="checkbox" id="track-mewmew-toggle" style="margin: 0;">
+                <span>MewMew 对话</span>
+            </label>
+        </div>
+    `;
+    document.body.appendChild(trackContextMenu);
+
+    const toggleEl = trackContextMenu.querySelector('#track-mewmew-toggle');
+    if (toggleEl) {
+        toggleEl.checked = window.mewmewTalkEnabled;
+        toggleEl.addEventListener('change', () => {
+            window.mewmewTalkEnabled = !!toggleEl.checked;
+            try {
+                localStorage.setItem('mewmew_talk_enabled_v1', window.mewmewTalkEnabled ? '1' : '0');
+            } catch {
+                // ignore
+            }
+        });
     }
 
-    mewmewTalkToggleEl.addEventListener('change', () => {
-        window.mewmewTalkEnabled = !!mewmewTalkToggleEl.checked;
-        try {
-            localStorage.setItem('mewmew_talk_enabled_v1', window.mewmewTalkEnabled ? '1' : '0');
-        } catch {
-            // ignore
+    document.addEventListener('click', (e) => {
+        if (!trackContextMenu.contains(e.target)) {
+            trackContextMenu.style.display = 'none';
         }
     });
+
+    return trackContextMenu;
+}
+
+function showTrackContextMenu(x, y, trackIndex) {
+    const menu = ensureTrackContextMenu();
+    trackContextMenuTarget = trackIndex;
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+    menu.style.display = 'block';
+
+    // Sync checkbox state
+    const toggleEl = menu.querySelector('#track-mewmew-toggle');
+    if (toggleEl) toggleEl.checked = window.mewmewTalkEnabled;
 }
 
 let musicTracks = [];
@@ -724,6 +898,16 @@ function renderTrackList(tracks) {
         btn.textContent = title;
         btn.dataset.trackIndex = String(idx);
         btn.addEventListener('click', () => playTrackByIndex(idx));
+
+        // Right-click menu only for American Pie (index 0)
+        if (idx === 0) {
+            btn.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showTrackContextMenu(e.clientX, e.clientY, idx);
+            });
+        }
+
         musicListEl.appendChild(btn);
     });
 
@@ -1035,24 +1219,46 @@ document.getElementById('icon-ctx-copy')?.addEventListener('click', () => {
 document.getElementById('icon-ctx-delete')?.addEventListener('click', () => {
     if (contextMenuTargetIcon && contextMenuTargetIcon.dataset.iconId) {
         const iconId = contextMenuTargetIcon.dataset.iconId;
+        const iconName = contextMenuTargetIcon.querySelector('.icon-text')?.textContent || iconId;
+        const iconImg = contextMenuTargetIcon.querySelector('img');
+        const iconSrc = iconImg ? iconImg.src : '';
         
-        // 不允许删除原始图标
-        const originalIcons = ['computer', 'guestbook', 'github', 'resume', 'music', 'radio', 'minesweeper'];
-        if (originalIcons.includes(iconId)) {
-            alert('无法删除系统图标！');
-            hideIconContextMenu();
-            return;
-        }
-        
-        // 删除复制的图标
-        if (confirm('确定要删除这个图标吗？')) {
-            // 从 localStorage 中删除位置信息
+        if (confirm(`确定要删除 "${iconName}" 吗?
+
+删除的图标将移至回收站。`)) {
+            // Save icon data to recycle bin
+            const iconData = {
+                name: iconName,
+                icon: iconSrc.includes('/') ? iconSrc.split('/').pop() : 'settings_gear-4.png',
+                content: contextMenuTargetIcon.innerHTML,
+                left: contextMenuTargetIcon.offsetLeft,
+                top: contextMenuTargetIcon.offsetTop,
+                ondblclick: contextMenuTargetIcon.ondblclick
+            };
+            
+            // Add to recycle catalog and items list
+            addIconToRecycleBin(iconId, iconData);
+            const items = getRecycleItems();
+            if (!items.includes(iconId)) {
+                items.push(iconId);
+                setRecycleItems(items);
+            }
+            
+            // Clear PVZ restored flag if deleting PVZ
+            if (iconId === 'pvz') {
+                localStorage.removeItem(PVZ_RESTORED_KEY);
+            }
+            
+            // Remove from localStorage position data
             const saved = JSON.parse(localStorage.getItem('win98_desktop_icons') || '{}');
             delete saved[iconId];
             localStorage.setItem('win98_desktop_icons', JSON.stringify(saved));
             
-            // 从 DOM 中删除
+            // Remove from DOM
             contextMenuTargetIcon.remove();
+            
+            // Update recycle bin icon
+            updateRecycleBinDesktopIcon();
         }
     }
     hideIconContextMenu();
@@ -1183,3 +1389,41 @@ window.openBrowser = function(url) {
     // 打开窗口
     openWindow('window-browser');
 };
+
+// Add deleted icon to recycle catalog
+function addIconToRecycleBin(iconId, iconData) {
+    recycleBinCatalog[iconId] = {
+        id: iconId,
+        name: iconData.name || iconId,
+        icon: iconData.icon || 'settings_gear-4.png',
+        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
+        canRestore: true,
+        restoreData: {
+            type: 'desktop-icon',
+            iconId: iconId,
+            content: iconData.content,
+            left: iconData.left,
+            top: iconData.top,
+            ondblclick: iconData.ondblclick
+        }
+    };
+}
+
+// Add deleted icon to recycle catalog
+function addIconToRecycleBin(iconId, iconData) {
+    recycleBinCatalog[iconId] = {
+        id: iconId,
+        name: iconData.name || iconId,
+        icon: iconData.icon || 'settings_gear-4.png',
+        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
+        canRestore: true,
+        restoreData: {
+            type: 'desktop-icon',
+            iconId: iconId,
+            content: iconData.content,
+            left: iconData.left,
+            top: iconData.top,
+            ondblclick: iconData.ondblclick
+        }
+    };
+}
