@@ -1,10 +1,6 @@
 {
   "tracks": [
     {
-      "title": "Don McLean - American Pie",
-      "file": "Don McLean - American Pie.mp3"
-    },
-    {
       "title": "I Am Arrows - Nice try",
       "file": "I Am Arrows - Nice try.mp3"
     },
@@ -15,6 +11,10 @@
     {
       "title": "I Am Arrows - Nun",
       "file": "I Am Arrows - Nun.mp3"
+    },
+    {
+      "title": "Don McLean - American Pie",
+      "file": "Don McLean - American Pie.mp3"
     },
     {
       "title": "Jason Mraz - Life Is Wonderful (Live in Amsterdam)",

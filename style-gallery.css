@@ -1,0 +1,50 @@
+/* Gallery Styles */
+.gallery-content {
+  padding: 10px;
+  column-count: 3; /* 默认 3 列 */
+  column-gap: 10px;
+}
+
+.gallery-item {
+  break-inside: avoid; /* 防止图片被分割到两列 */
+  margin-bottom: 10px;
+  background: #fff;
+  border: 2px solid #808080; /* 简单的边框 */
+  padding: 4px;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.gallery-item:hover {
+  transform: scale(1.02);
+  z-index: 1;
+  border-color: #000080;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: pointer;
+}
+
+.gallery-caption {
+  margin-top: 4px;
+  font-size: 12px;
+  text-align: center;
+  color: #333;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+}
+
+/* 响应式列数 */
+@media (max-width: 800px) {
+  .gallery-content {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 500px) {
+  .gallery-content {
+    column-count: 1;
+  }
+}

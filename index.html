@@ -7,6 +7,7 @@
     <!-- 98.css for the core look and feel -->
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-gallery.css">
     <!-- Gitalk -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
     <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
@@ -28,7 +29,7 @@
             <div class="icon-text">网上邻居</div>
         </div>
         <div class="icon" id="icon-resume" data-icon-id="resume" data-default-left="20" data-default-top="290" ondblclick="openWindow('window-resume')">
-            <img src="icon/directory_open_file_mydocs-4.png" alt="Resume">
+            <img src="icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" alt="Resume">
             <div class="icon-text">我的简历</div>
         </div>
 
@@ -50,6 +51,11 @@
         <div class="icon" id="icon-recyclebin" data-icon-id="recyclebin" data-default-left="120" data-default-top="20" ondblclick="openWindow('window-recyclebin')">
             <img id="recyclebin-desktop-icon" src="icon/recycle_bin_full.png" alt="Recycle Bin">
             <div class="icon-text">回收站</div>
+        </div>
+
+        <div class="icon" id="icon-gallery" data-icon-id="gallery" data-default-left="120" data-default-top="110" ondblclick="openWindow('window-gallery'); initGallery();">
+            <img src="icon/camera.png" alt="Gallery" onerror="this.src='icon/directory_open_file_mydocs-4.png'">
+            <div class="icon-text">我的相册</div>
         </div>
     </div>
 
@@ -149,6 +155,24 @@
         <div class="resize-handle"></div>
     </div>
 
+    <!-- Window: Gallery -->
+    <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="icon/camera.png" style="width: 800px; height: 600px;">
+        <div class="title-bar">
+            <div class="title-bar-text">我的相册 - 图片查看器</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-gallery')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-gallery')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-gallery')"></button>
+            </div>
+        </div>
+        <div class="window-body" style="padding: 0; background: #fff; overflow-y: auto;">
+            <div id="gallery-content" class="gallery-content">
+                <!-- 瀑布流内容将由 JS 动态生成 -->
+            </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
     <!-- Window: readme.txt (from Recycle Bin) -->
     <div id="window-recycle-readme" class="window" data-window-title="readme.txt" data-window-icon="icon/notepad-5.png" style="width: 520px; height: 420px;">
         <div class="title-bar">
@@ -200,7 +224,7 @@
     </div>
 
     <!-- Window: Resume -->
-    <div id="window-resume" class="window" data-window-title="我的简历" data-window-icon="icon/directory_open_file_mydocs-4.png" style="width: 700px; height: 600px;">
+    <div id="window-resume" class="window" data-window-title="我的简历" data-window-icon="icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" style="width: 700px; height: 600px;">
         <div class="title-bar">
             <div class="title-bar-text">我的简历.doc - Microsoft Word</div>
             <div class="title-bar-controls">
@@ -423,6 +447,8 @@
     <script src="js/desktop.js"></script>
     <script src="js/recycle-bin.js"></script>
     <script src="js/apps.js"></script>
+    <script src="js/gallery-data.js"></script>
+    <script src="js/gallery.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
