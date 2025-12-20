@@ -152,15 +152,29 @@ let isDragging = false;
 let currentWindow = null;
 let offset = { x: 0, y: 0 };
 
-document.querySelectorAll('.title-bar').forEach(titleBar => {
-    titleBar.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        currentWindow = titleBar.closest('.window');
-        bringToFront(currentWindow);
+// Use event delegation for dragging to support dynamic windows
+document.addEventListener('mousedown', (e) => {
+    // 1. Window Focus (bring to front)
+    const clickedWindow = e.target.closest('.window');
+    if (clickedWindow) {
+        bringToFront(clickedWindow);
+    }
+
+    // 2. Dragging (Title Bar)
+    const titleBar = e.target.closest('.title-bar');
+    if (titleBar) {
+        const win = titleBar.closest('.window');
+        // Ignore if clicking buttons in title bar
+        if (e.target.tagName === 'BUTTON') return;
         
-        offset.x = e.clientX - currentWindow.offsetLeft;
-        offset.y = e.clientY - currentWindow.offsetTop;
-    });
+        if (win && !win.classList.contains('window-maximized')) {
+            isDragging = true;
+            currentWindow = win;
+            offset.x = e.clientX - win.offsetLeft;
+            offset.y = e.clientY - win.offsetTop;
+            e.preventDefault(); // Prevent text selection
+        }
+    }
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -186,18 +200,19 @@ let resizeStartY = 0;
 let resizeStartWidth = 0;
 let resizeStartHeight = 0;
 
-document.querySelectorAll('.resize-handle').forEach(handle => {
-    handle.addEventListener('mousedown', (e) => {
+// Use event delegation for resizing
+document.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('resize-handle')) {
         e.stopPropagation(); // Prevent window dragging
         isResizing = true;
-        resizingWindow = handle.closest('.window');
+        resizingWindow = e.target.closest('.window');
         bringToFront(resizingWindow);
         
         resizeStartX = e.clientX;
         resizeStartY = e.clientY;
         resizeStartWidth = resizingWindow.offsetWidth;
         resizeStartHeight = resizingWindow.offsetHeight;
-    });
+    }
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -222,6 +237,48 @@ window.addEventListener('resize', () => {
         win.style.height = `${window.innerHeight - 32}px`;
     });
 });
+
+// Dynamic Window Creation Helper
+window.createWindow = function({ id, title, icon, content, width = 300, height = 'auto', x, y }) {
+    // If window exists, just open it
+    let win = document.getElementById(id);
+    if (win) {
+        openWindow(id);
+        return win;
+    }
+
+    win = document.createElement('div');
+    win.id = id;
+    win.className = 'window';
+    win.style.width = typeof width === 'number' ? `${width}px` : width;
+    if (height !== 'auto') win.style.height = typeof height === 'number' ? `${height}px` : height;
+    
+    // Default position (center-ish)
+    const top = y !== undefined ? y : (window.innerHeight / 2 - 150);
+    const left = x !== undefined ? x : (window.innerWidth / 2 - 150);
+    win.style.top = `${Math.max(0, top)}px`;
+    win.style.left = `${Math.max(0, left)}px`;
+
+    win.dataset.windowTitle = title;
+    if (icon) win.dataset.windowIcon = icon;
+
+    win.innerHTML = `
+        <div class="title-bar">
+            <div class="title-bar-text">${title}</div>
+            <div class="title-bar-controls">
+                <button aria-label="Close" onclick="closeWindow('${id}')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            ${content}
+        </div>
+    `;
+
+    document.body.appendChild(win);
+    openWindow(id);
+    return win;
+};
+
 
 // Common Window Openers
 function openCMD() {

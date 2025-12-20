@@ -130,46 +130,34 @@ function showTrackContextMenu(x, y, track, index) {
 
 function showTrackProperties(track) {
     const title = track.title || track.file || 'Unknown Track';
+    const isAmericanPie = title.toLowerCase().includes('american pie');
     
-    // Check if it's American Pie (case-insensitive check)
-    if (title.toLowerCase().includes('american pie')) {
-        // Show special properties dialog with MewMew toggle
-        showMewMewPropertiesDialog(title);
-    } else {
-        // Show generic properties
-        alert(`属性:\n\n标题: ${title}\n文件: ${track.file}\n类型: MP3 Audio`);
+    // Close existing properties window if any (to allow switching or refreshing)
+    if (typeof closeWindow === 'function') {
+        closeWindow('window-track-properties');
     }
-}
 
-function showMewMewPropertiesDialog(title) {
-    // Create a custom modal for properties
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.zIndex = '9999';
-    overlay.style.display = 'flex';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    
-    // Window structure
-    const win = document.createElement('div');
-    win.className = 'window';
-    win.style.width = '300px';
-    win.style.boxShadow = '2px 2px 10px rgba(0,0,0,0.5)';
-    
-    win.innerHTML = `
-        <div class="title-bar">
-            <div class="title-bar-text">属性 - ${title}</div>
-            <div class="title-bar-controls">
-                <button aria-label="Close" class="close-btn"></button>
+    let content = `
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="icon/cd_player.png" style="width: 32px; height: 32px;">
+                <div>
+                    <p><strong>${title}</strong></p>
+                    <p>类型: MP3 Audio</p>
+                    <p>位置: music/</p>
+                </div>
             </div>
-        </div>
-        <div class="window-body">
-            <p>文件: ${title}</p>
-            <p>类型: MP3 Audio</p>
+            <div style="border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 5px 0;"></div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 5px; font-size: 12px;">
+                <div>文件名:</div>
+                <div>${track.file}</div>
+                <div>大小:</div>
+                <div>未知</div>
+            </div>
+    `;
+
+    if (isAmericanPie) {
+        content += `
             <br>
             <fieldset>
                 <legend>高级设置</legend>
@@ -178,30 +166,53 @@ function showMewMewPropertiesDialog(title) {
                     <label for="prop-mewmew-toggle">启用 MewMew 对话</label>
                 </div>
             </fieldset>
+        `;
+    }
+
+    content += `
             <br>
             <div style="text-align: right;">
-                <button id="prop-ok-btn">确定</button>
+                <button id="prop-ok-btn" style="min-width: 60px;">确定</button>
             </div>
         </div>
     `;
-    
-    overlay.appendChild(win);
-    document.body.appendChild(overlay);
-    
-    const closeBtn = win.querySelector('.close-btn');
-    const okBtn = win.querySelector('#prop-ok-btn');
-    const toggle = win.querySelector('#prop-mewmew-toggle');
-    
-    toggle.checked = window.mewmewTalkEnabled;
-    
-    const close = () => {
-        window.mewmewTalkEnabled = toggle.checked;
-        document.body.removeChild(overlay);
-    };
-    
-    closeBtn.addEventListener('click', close);
-    okBtn.addEventListener('click', close);
+
+    if (typeof createWindow === 'function') {
+        createWindow({
+            id: 'window-track-properties',
+            title: '属性',
+            icon: 'icon/settings_gear-4.png',
+            width: 350,
+            content: content
+        });
+
+        // Bind events after creation
+        setTimeout(() => {
+            const win = document.getElementById('window-track-properties');
+            if (!win) return;
+
+            const okBtn = win.querySelector('#prop-ok-btn');
+            if (okBtn) {
+                okBtn.addEventListener('click', () => closeWindow('window-track-properties'));
+            }
+
+            if (isAmericanPie) {
+                const toggle = win.querySelector('#prop-mewmew-toggle');
+                if (toggle) {
+                    toggle.checked = window.mewmewTalkEnabled;
+                    toggle.addEventListener('change', () => {
+                        window.mewmewTalkEnabled = toggle.checked;
+                    });
+                }
+            }
+        }, 0);
+    } else {
+        // Fallback if window manager not ready
+        alert(`属性:\n\n标题: ${title}\n文件: ${track.file}`);
+    }
 }
+
+// Removed showMewMewPropertiesDialog as it is now integrated into showTrackProperties
 
 let musicTracks = [];
 let musicCurrentIndex = -1;

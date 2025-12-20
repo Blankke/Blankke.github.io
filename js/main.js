@@ -47,14 +47,61 @@ document.addEventListener('DOMContentLoaded', () => {
     const trayEthernet = document.getElementById('tray-ethernet');
     if (trayEthernet) {
         trayEthernet.addEventListener('click', () => {
-            alert('已连接: Ethernet\n速度: 100.0 Mbps\n状态: 已连接');
+            if (typeof createWindow === 'function') {
+                createWindow({
+                    id: 'window-ethernet-status',
+                    title: '本地连接 状态',
+                    icon: 'icon/Pictogrammers-Material-Ethernet-cable.512.png',
+                    width: 300,
+                    content: `
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <img src="icon/Pictogrammers-Material-Ethernet-cable.512.png" style="width: 32px; height: 32px;">
+                            <div>
+                                <p><strong>连接状态</strong></p>
+                                <p>状态: 已连接</p>
+                                <p>持续时间: 00:00:00</p>
+                                <p>速度: 100.0 Mbps</p>
+                            </div>
+                        </div>
+                        <br>
+                        <div style="text-align: right;">
+                            <button onclick="closeWindow('window-ethernet-status')">关闭</button>
+                        </div>
+                    `
+                });
+            } else {
+                alert('已连接: Ethernet\n速度: 100.0 Mbps\n状态: 已连接');
+            }
         });
     }
 
     const trayQQ = document.getElementById('tray-qq');
     if (trayQQ) {
         trayQQ.addEventListener('click', () => {
-            alert('来自 群星 的消息:\n\n“把文件夹里的 American Pie 看看属性。”');
+            if (typeof createWindow === 'function') {
+                createWindow({
+                    id: 'window-qq-msg',
+                    title: '消息 - 群星',
+                    icon: 'icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png',
+                    width: 320,
+                    content: `
+                        <div style="display: flex; gap: 10px;">
+                            <img src="icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png" style="width: 32px; height: 32px;">
+                            <div>
+                                <p><strong>群星</strong></p>
+                                <p style="margin-top: 8px;">“把文件夹里的 American Pie 看看属性。”</p>
+                            </div>
+                        </div>
+                        <br>
+                        <div style="text-align: right;">
+                            <button onclick="closeWindow('window-qq-msg')">回复</button>
+                            <button onclick="closeWindow('window-qq-msg')">关闭</button>
+                        </div>
+                    `
+                });
+            } else {
+                alert('来自 群星 的消息:\n\n“把文件夹里的 American Pie 看看属性。”');
+            }
         });
     }
 });
