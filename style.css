@@ -754,3 +754,23 @@ body::after {
 #terminal-output::-webkit-scrollbar-thumb:hover {
   background: #fff;
 }
+
+/* Visitor Counter */
+#visitor-counter {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2; /* Above desktop icons, below windows */
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  color: white;
+  text-shadow: 1px 1px 0px black;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: auto; /* Allow clicking the link */
+}
+
+#visitor-counter img {
+  vertical-align: middle;
+}
