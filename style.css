@@ -757,10 +757,11 @@ body::after {
 
 /* Visitor Counter */
 #visitor-counter {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 2; /* Above desktop icons, below windows */
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  left: auto !important;
+  z-index: 2000 !important; /* Ensure it's on top */
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   color: white;
   text-shadow: 1px 1px 0px black;
@@ -768,7 +769,7 @@ body::after {
   display: flex;
   align-items: center;
   gap: 5px;
-  pointer-events: auto; /* Allow clicking the link */
+  pointer-events: auto;
 }
 
 #visitor-counter img {
