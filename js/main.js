@@ -42,4 +42,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof renderRecycleBin === 'function') {
         renderRecycleBin();
     }
+
+    // 5. System Tray Interactions
+    const trayEthernet = document.getElementById('tray-ethernet');
+    if (trayEthernet) {
+        trayEthernet.addEventListener('click', () => {
+            alert('已连接: Ethernet\n速度: 100.0 Mbps\n状态: 已连接');
+        });
+    }
+
+    const trayQQ = document.getElementById('tray-qq');
+    if (trayQQ) {
+        trayQQ.addEventListener('click', () => {
+            alert('来自 群星 的消息:\n\n“把文件夹里的 American Pie 看看属性。”');
+        });
+    }
 });

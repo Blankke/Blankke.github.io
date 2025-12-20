@@ -365,12 +365,36 @@ body::after {
 }
 
 .taskbar-time {
+  padding: 2px 5px;
+  margin-right: 2px;
+  font-size: 12px;
+  /* Border moved to system-tray */
+}
+
+.system-tray {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
-  padding: 2px 10px;
+  padding: 2px;
   margin-right: 2px;
   background: silver;
-  font-size: 12px;
+  height: 22px; /* Match taskbar height roughly */
+}
+
+.tray-icon {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tray-icon img {
+  width: 16px;
+  height: 16px;
 }
 
 /* Start Menu */

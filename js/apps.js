@@ -76,7 +76,6 @@ window.mewmewTalkEnabled = false;
 // No persistence for MewMew talk state - resets on reload
 
 let trackContextMenu = null;
-let trackContextMenuTarget = null;
 
 function ensureTrackContextMenu() {
     if (trackContextMenu) return trackContextMenu;
@@ -84,23 +83,7 @@ function ensureTrackContextMenu() {
     trackContextMenu.id = 'track-context-menu';
     trackContextMenu.className = 'context-menu';
     trackContextMenu.style.display = 'none';
-    trackContextMenu.innerHTML = `
-        <div class="context-menu-item" id="track-ctx-mewmew">
-            <label style="cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px;">
-                <input type="checkbox" id="track-mewmew-toggle" style="margin: 0;">
-                <span>MewMew 对话</span>
-            </label>
-        </div>
-    `;
     document.body.appendChild(trackContextMenu);
-
-    const toggleEl = trackContextMenu.querySelector('#track-mewmew-toggle');
-    if (toggleEl) {
-        toggleEl.checked = window.mewmewTalkEnabled;
-        toggleEl.addEventListener('change', () => {
-            window.mewmewTalkEnabled = !!toggleEl.checked;
-        });
-    }
 
     document.addEventListener('click', (e) => {
         if (!trackContextMenu.contains(e.target)) {
@@ -111,15 +94,113 @@ function ensureTrackContextMenu() {
     return trackContextMenu;
 }
 
-function showTrackContextMenu(x, y, trackIndex) {
+function showTrackContextMenu(x, y, track, index) {
     const menu = ensureTrackContextMenu();
-    trackContextMenuTarget = trackIndex;
+    menu.innerHTML = ''; // Clear previous items
+
+    // Play Item
+    const playItem = document.createElement('div');
+    playItem.className = 'context-menu-item';
+    playItem.textContent = '播放(P)';
+    playItem.addEventListener('click', () => {
+        playTrackByIndex(index);
+        menu.style.display = 'none';
+    });
+    menu.appendChild(playItem);
+
+    // Separator
+    const sep = document.createElement('div');
+    sep.className = 'context-menu-separator';
+    menu.appendChild(sep);
+
+    // Properties Item
+    const propItem = document.createElement('div');
+    propItem.className = 'context-menu-item';
+    propItem.textContent = '属性(R)';
+    propItem.addEventListener('click', () => {
+        showTrackProperties(track);
+        menu.style.display = 'none';
+    });
+    menu.appendChild(propItem);
+
     menu.style.left = `${x}px`;
     menu.style.top = `${y}px`;
     menu.style.display = 'block';
+}
 
-    const toggleEl = menu.querySelector('#track-mewmew-toggle');
-    if (toggleEl) toggleEl.checked = window.mewmewTalkEnabled;
+function showTrackProperties(track) {
+    const title = track.title || track.file || 'Unknown Track';
+    
+    // Check if it's American Pie (case-insensitive check)
+    if (title.toLowerCase().includes('american pie')) {
+        // Show special properties dialog with MewMew toggle
+        showMewMewPropertiesDialog(title);
+    } else {
+        // Show generic properties
+        alert(`属性:\n\n标题: ${title}\n文件: ${track.file}\n类型: MP3 Audio`);
+    }
+}
+
+function showMewMewPropertiesDialog(title) {
+    // Create a custom modal for properties
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.zIndex = '9999';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    
+    // Window structure
+    const win = document.createElement('div');
+    win.className = 'window';
+    win.style.width = '300px';
+    win.style.boxShadow = '2px 2px 10px rgba(0,0,0,0.5)';
+    
+    win.innerHTML = `
+        <div class="title-bar">
+            <div class="title-bar-text">属性 - ${title}</div>
+            <div class="title-bar-controls">
+                <button aria-label="Close" class="close-btn"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <p>文件: ${title}</p>
+            <p>类型: MP3 Audio</p>
+            <br>
+            <fieldset>
+                <legend>高级设置</legend>
+                <div class="field-row">
+                    <input type="checkbox" id="prop-mewmew-toggle">
+                    <label for="prop-mewmew-toggle">启用 MewMew 对话</label>
+                </div>
+            </fieldset>
+            <br>
+            <div style="text-align: right;">
+                <button id="prop-ok-btn">确定</button>
+            </div>
+        </div>
+    `;
+    
+    overlay.appendChild(win);
+    document.body.appendChild(overlay);
+    
+    const closeBtn = win.querySelector('.close-btn');
+    const okBtn = win.querySelector('#prop-ok-btn');
+    const toggle = win.querySelector('#prop-mewmew-toggle');
+    
+    toggle.checked = window.mewmewTalkEnabled;
+    
+    const close = () => {
+        window.mewmewTalkEnabled = toggle.checked;
+        document.body.removeChild(overlay);
+    };
+    
+    closeBtn.addEventListener('click', close);
+    okBtn.addEventListener('click', close);
 }
 
 let musicTracks = [];
@@ -156,13 +237,12 @@ function renderTrackList(tracks) {
         btn.dataset.trackIndex = String(idx);
         btn.addEventListener('click', () => playTrackByIndex(idx));
 
-        if (idx === 0) {
-            btn.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showTrackContextMenu(e.clientX, e.clientY, idx);
-            });
-        }
+        // Add context menu to ALL tracks
+        btn.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showTrackContextMenu(e.clientX, e.clientY, track, idx);
+        });
 
         musicListEl.appendChild(btn);
     });
