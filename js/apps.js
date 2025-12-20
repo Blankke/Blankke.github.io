@@ -129,8 +129,14 @@ function showTrackContextMenu(x, y, track, index) {
 }
 
 function showTrackProperties(track) {
+    // Ensure track is an object
+    if (!track || typeof track !== 'object') {
+        track = { title: 'Error', file: 'Error' };
+    }
+
     const title = track.title || track.file || 'Unknown Track';
-    const isAmericanPie = title.toLowerCase().includes('american pie');
+    // Loose matching for "American Pie"
+    const isAmericanPie = title.toLowerCase().replace(/[^a-z0-9]/g, '').includes('americanpie');
     
     // Close existing properties window if any (to allow switching or refreshing)
     if (typeof closeWindow === 'function') {
@@ -165,6 +171,7 @@ function showTrackProperties(track) {
                     <input type="checkbox" id="prop-mewmew-toggle">
                     <label for="prop-mewmew-toggle">启用 MewMew 对话</label>
                 </div>
+                <p style="margin-top: 6px; color: gray; font-size: 11px;">* 勾选后点击猫咪即可对话</p>
             </fieldset>
         `;
     }
@@ -205,7 +212,7 @@ function showTrackProperties(track) {
                     });
                 }
             }
-        }, 0);
+        }, 50); // Increased timeout slightly to ensure DOM is ready
     } else {
         // Fallback if window manager not ready
         alert(`属性:\n\n标题: ${title}\n文件: ${track.file}`);
