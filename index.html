@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,48 +13,58 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
     <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
 </head>
+
 <body>
 
     <!-- Desktop Icons -->
     <div class="desktop-icons" id="desktop">
-        <div class="icon" id="icon-computer" data-icon-id="computer" data-default-left="20" data-default-top="20" ondblclick="openWindow('window-computer')">
+        <div class="icon" id="icon-computer" data-icon-id="computer" data-default-left="20" data-default-top="20"
+            ondblclick="openWindow('window-computer')">
             <img src="icon/computer_explorer-4.png" alt="My Computer">
             <div class="icon-text">我的电脑</div>
         </div>
-        <div class="icon" id="icon-guestbook" data-icon-id="guestbook" data-default-left="20" data-default-top="110" ondblclick="openWindow('window-guestbook')">
+        <div class="icon" id="icon-guestbook" data-icon-id="guestbook" data-default-left="20" data-default-top="110"
+            ondblclick="openWindow('window-guestbook')">
             <img src="icon/notepad-5.png" alt="Guestbook">
             <div class="icon-text">留言板.txt</div>
         </div>
-        <div class="icon" id="icon-github" data-icon-id="github" data-default-left="20" data-default-top="200" ondblclick="window.open('https://github.com', '_blank')">
+        <div class="icon" id="icon-github" data-icon-id="github" data-default-left="20" data-default-top="200"
+            ondblclick="window.open('https://github.com', '_blank')">
             <img src="icon/network_internet_pcs_installer-2.png" alt="Internet">
             <div class="icon-text">网上邻居</div>
         </div>
-        <div class="icon" id="icon-resume" data-icon-id="resume" data-default-left="20" data-default-top="290" ondblclick="openWindow('window-resume')">
+        <div class="icon" id="icon-resume" data-icon-id="resume" data-default-left="20" data-default-top="290"
+            ondblclick="openWindow('window-resume')">
             <img src="icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" alt="Resume">
             <div class="icon-text">我的简历</div>
         </div>
 
-        <div class="icon" id="icon-music" data-icon-id="music" data-default-left="20" data-default-top="380" ondblclick="openWindow('window-music')">
+        <div class="icon" id="icon-music" data-icon-id="music" data-default-left="20" data-default-top="380"
+            ondblclick="openWindow('window-music')">
             <img src="icon/cd_player.png" alt="Music">
             <div class="icon-text">音乐播放器</div>
         </div>
 
-        <div class="icon" id="icon-radio" data-icon-id="radio" data-default-left="20" data-default-top="470" ondblclick="window.open('https://radio.garden/visit/glasgow/CtpxHQ6P', '_blank')">
+        <div class="icon" id="icon-radio" data-icon-id="radio" data-default-left="20" data-default-top="470"
+            ondblclick="window.open('https://radio.garden/visit/glasgow/CtpxHQ6P', '_blank')">
             <img src="icon/radio.svg" alt="Radio">
             <div class="icon-text">收音机</div>
         </div>
 
-        <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560" ondblclick="openWindow('window-minesweeper')">
+        <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560"
+            ondblclick="openWindow('window-minesweeper')">
             <img src="icon/minesweeper-0.png" alt="Minesweeper">
             <div class="icon-text">扫雷</div>
         </div>
 
-        <div class="icon" id="icon-recyclebin" data-icon-id="recyclebin" data-default-left="120" data-default-top="20" ondblclick="openWindow('window-recyclebin')">
+        <div class="icon" id="icon-recyclebin" data-icon-id="recyclebin" data-default-left="120" data-default-top="20"
+            ondblclick="openWindow('window-recyclebin')">
             <img id="recyclebin-desktop-icon" src="icon/recycle_bin_full.png" alt="Recycle Bin">
             <div class="icon-text">回收站</div>
         </div>
 
-        <div class="icon" id="icon-gallery" data-icon-id="gallery" data-default-left="120" data-default-top="110" ondblclick="openWindow('window-gallery'); initGallery();">
+        <div class="icon" id="icon-gallery" data-icon-id="gallery" data-default-left="120" data-default-top="110"
+            ondblclick="openWindow('window-gallery'); initGallery();">
             <img src="icon/camera.png" alt="Gallery" onerror="this.src='icon/directory_open_file_mydocs-4.png'">
             <div class="icon-text">我的相册</div>
         </div>
@@ -62,7 +73,8 @@
     <!-- Top Right Info -->
     <div id="top-right-info">
         <div id="visitor-counter">
-            You are the <a href="https://www.easycounter.com/"><img src="https://www.easycounter.com/counter.php?blankke" border="0" alt="page counter"></a> th visitor.
+            You are the <a href="https://www.easycounter.com/"><img
+                    src="https://www.easycounter.com/counter.php?blankke" border="0" alt="page counter"></a> th visitor.
         </div>
         <div id="last-updated">
             Last updated: <span id="last-updated-time"></span>
@@ -70,7 +82,8 @@
     </div>
 
     <!-- Window: My Computer (Personal Info) -->
-    <div id="window-computer" class="window" data-window-title="我的电脑" data-window-icon="icon/computer_explorer-4.png" style="width: 400px;">
+    <div id="window-computer" class="window" data-window-title="我的电脑" data-window-icon="icon/computer_explorer-4.png"
+        style="width: 400px;">
         <div class="title-bar">
             <div class="title-bar-text">我的电脑 - 个人介绍</div>
             <div class="title-bar-controls">
@@ -84,36 +97,39 @@
                 <h3>👋 你好！欢迎来到我的个人网站</h3>
                 <p>这是我的一个小角落，用来放一些关于我自己的介绍和想法。
 
-我叫 Blankke，这个名字是 Blank Kernel Explorer 的缩写。最初只是一个简单的别名，但渐渐地它成为了我为什么喜欢系统编程的提醒：从几乎空白的地方开始，通过结构让复杂性浮现。
+                    我的网名是<strong>Dandelion Blanc</strong>. 你们知道吗？“Dent du Lion”在法语中意为“狮子的牙齿”，其实就是蒲公英的意思。
+                    我觉得这个名字很有趣，因为蒲公英虽然看起来柔弱，但它们却能在各种环境中生存和传播，植物学家觉得蒲公英的叶子是锯齿状的，就像狮子的牙齿一样。
+                    而非常巧的是，dandelion这个单词可以重组为Don Daniel(丹尼尔阁下)。
+                </p>
+                <p>上个世纪的产物其实都挺有意思的，是没有对节奏的追求的，具有美学的，比如这个win98操作系统。很多东西我自己其实是没有用过的，最耳熟，接近那个年代的可能还是红白机这样的游戏机了。
 
+                    但是我很喜欢这些老物件，他们很慢，慢到你可以完全地感受到它们的真实，与他们在一起的时候也通常是不急不躁的时刻。这让我想起从前坐在回家的车上，就算堵车，也可以享受广播中的城市之声音乐频率，听着故事，听着广告，听着新闻，听着音乐。那种感觉很美好，很放松。
 
-我学习计算机科学，专注于操作系统和底层软件。当我不在写内核或调试构建系统时，我会写作、阅读和做笔记 —— 经常试图理解那些还没有明确答案的想法。
+                    这个网站是一个安静的地方，用来收集我正在构建、学习和思考的东西。</p>
 
-我其实还有挺多爱好的，有时骑骑车，有时玩玩游戏，有时听听广播，最喜欢以前在放学路上的车里听城市之声的音乐频道。不过到了大学也渐渐有些嘈杂，所以我开始寻找网络上的广播电台，发现了很多有趣的东西。
-
-这个网站是一个安静的地方，用来收集我正在构建、学习和思考的东西。</p>
-                
-                <p style="margin-top: 15px;">对了，这里还有一个小伙伴 —— 我的宠物 <strong>MewMew</strong>（一只粉色的猫咪）。她有点害羞，但如果你耐心等待一会儿，她会主动跟你说话的~ 😺</p>
+                <p style="margin-top: 15px;">对了，这里还有一个小伙伴 —— 我的宠物
+                    <strong>MewMew</strong>（一只粉色的猫咪）。她有点害羞，但如果你耐心等待一会儿，她会主动跟你说话的~ 😺</p>
                 <br>
                 <fieldset>
                     <legend>关于我</legend>
                     <ul>
-                        <li>职业：开发者 / Developer</li>
-                        <li>爱好：编程、游戏、写博客、听广播</li>
+                        <li>职业：Student / Developer</li>
+                        <li>爱好：<del>编程</del>、游戏、写博客、听广播</li>
                         <li>位置：I am in the INTERNET</li>
                     </ul>
                 </fieldset>
             </div>
             <div class="status-bar" style="margin-top: 10px;">
-                <p class="status-bar-field">3 Objects</p>
-                <p class="status-bar-field">12.5 MB</p>
+                <p class="status-bar-field">9 Objects</p>
+                <p class="status-bar-field">126.5 MB</p>
             </div>
         </div>
         <div class="resize-handle"></div>
     </div>
 
     <!-- Window: Guestbook -->
-    <div id="window-guestbook" class="window" data-window-title="留言板" data-window-icon="icon/notepad-5.png" style="width: 350px;">
+    <div id="window-guestbook" class="window" data-window-title="留言板" data-window-icon="icon/notepad-5.png"
+        style="width: 350px;">
         <div class="title-bar">
             <div class="title-bar-text">留言板.txt - 记事本</div>
             <div class="title-bar-controls">
@@ -138,7 +154,8 @@
     </div>
 
     <!-- Window: Recycle Bin -->
-    <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="icon/recycle_bin_full.png" style="width: 420px; height: 320px;">
+    <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="icon/recycle_bin_full.png"
+        style="width: 420px; height: 320px;">
         <div class="title-bar">
             <div class="title-bar-text">回收站</div>
             <div class="title-bar-controls">
@@ -166,7 +183,8 @@
     </div>
 
     <!-- Window: Gallery -->
-    <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="icon/camera.png" style="width: 800px; height: 600px;">
+    <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="icon/camera.png"
+        style="width: 800px; height: 600px;">
         <div class="title-bar">
             <div class="title-bar-text">我的相册 - 图片查看器</div>
             <div class="title-bar-controls">
@@ -184,7 +202,8 @@
     </div>
 
     <!-- Window: readme.txt (from Recycle Bin) -->
-    <div id="window-recycle-readme" class="window" data-window-title="readme.txt" data-window-icon="icon/notepad-5.png" style="width: 520px; height: 420px;">
+    <div id="window-recycle-readme" class="window" data-window-title="readme.txt" data-window-icon="icon/notepad-5.png"
+        style="width: 520px; height: 420px;">
         <div class="title-bar">
             <div class="title-bar-text">readme.txt - 记事本</div>
             <div class="title-bar-controls">
@@ -205,7 +224,8 @@
     </div>
 
     <!-- Window: Wisdom Tree (PVZ-like) -->
-    <div id="window-wisdomtree" class="window" data-window-title="植物大战僵尸" data-window-icon="icon/pvz_icon.png" style="width: 640px; height: 460px;">
+    <div id="window-wisdomtree" class="window" data-window-title="植物大战僵尸" data-window-icon="icon/pvz_icon.png"
+        style="width: 640px; height: 460px;">
         <div class="title-bar">
             <div class="title-bar-text">Plants vs Zombies (Lite)</div>
             <div class="title-bar-controls">
@@ -234,7 +254,8 @@
     </div>
 
     <!-- Window: Resume -->
-    <div id="window-resume" class="window" data-window-title="我的简历" data-window-icon="icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" style="width: 700px; height: 600px;">
+    <div id="window-resume" class="window" data-window-title="我的简历"
+        data-window-icon="icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" style="width: 700px; height: 600px;">
         <div class="title-bar">
             <div class="title-bar-text">我的简历.doc - Microsoft Word</div>
             <div class="title-bar-controls">
@@ -258,7 +279,8 @@
     </div>
 
     <!-- Window: Minesweeper -->
-    <div id="window-minesweeper" class="window" data-window-title="扫雷" data-window-icon="icon/minesweeper-0.png" style="width: 380px; height: 480px;">
+    <div id="window-minesweeper" class="window" data-window-title="扫雷" data-window-icon="icon/minesweeper-0.png"
+        style="width: 380px; height: 480px;">
         <div class="title-bar">
             <div class="title-bar-text">扫雷</div>
             <div class="title-bar-controls">
@@ -274,7 +296,8 @@
     </div>
 
     <!-- Window: MS-DOS Prompt (CMD) -->
-    <div id="window-cmd" class="window" data-window-title="MS-DOS Prompt" data-window-icon="icon/command_prompt-0.png" style="width: 650px; height: 450px;">
+    <div id="window-cmd" class="window" data-window-title="MS-DOS Prompt" data-window-icon="icon/command_prompt-0.png"
+        style="width: 650px; height: 450px;">
         <div class="title-bar">
             <div class="title-bar-text">MS-DOS Prompt</div>
             <div class="title-bar-controls">
@@ -297,7 +320,8 @@
     </div>
 
     <!-- Window: Music Player -->
-    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="icon/cd_playerpng" style="width: 760px; height: 520px;">
+    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="icon/cd_playerpng"
+        style="width: 760px; height: 520px;">
         <div class="title-bar">
             <div class="title-bar-text">音乐播放器 - Windows Media Player (Lite)</div>
             <div class="title-bar-controls">
@@ -338,7 +362,8 @@
     </div>
 
     <!-- Window: Browser -->
-    <div id="window-browser" class="window" data-window-title="Internet Explorer" data-window-icon="icon/msie1-0.png" style="width: 800px; height: 600px;">
+    <div id="window-browser" class="window" data-window-title="Internet Explorer" data-window-icon="icon/msie1-0.png"
+        style="width: 800px; height: 600px;">
         <div class="title-bar">
             <div class="title-bar-text">Internet Explorer</div>
             <div class="title-bar-controls">
@@ -458,7 +483,7 @@
 
     <script src="pet.js"></script>
     <script src="cmd.js"></script>
-    
+
     <!-- Modularized Scripts -->
     <script src="js/core.js"></script>
     <script src="js/window-manager.js"></script>
@@ -469,4 +494,5 @@
     <script src="js/gallery.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>

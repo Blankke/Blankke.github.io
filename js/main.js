@@ -1,6 +1,76 @@
 // Main Entry Point
 // Initializes the desktop environment
 
+// Helper for Ethernet Window Tabs
+window.switchEthernetTab = function(tabId) {
+    const tabs = ['tab-status', 'tab-speed', 'tab-ip'];
+    tabs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (id === tabId) ? 'block' : 'none';
+    });
+};
+
+// Network Tools Helpers
+window.fetchIPInfo = function() {
+    const container = document.getElementById('net-ip-content');
+    if (!container) return;
+    
+    container.innerHTML = '正在获取 IP 信息...';
+    fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: 80px 1fr; gap: 5px; font-size: 12px;">
+                    <div><strong>IP地址:</strong></div><div>${data.ip}</div>
+                    <div><strong>位置:</strong></div><div>${data.city}, ${data.region}, ${data.country_name}</div>
+                    <div><strong>运营商:</strong></div><div>${data.org}</div>
+                    <div><strong>ASN:</strong></div><div>${data.asn}</div>
+                </div>
+            `;
+        })
+        .catch(err => {
+            container.innerHTML = '<div style="color: red;">获取失败。可能是由于广告拦截器或网络限制。</div>';
+            console.error(err);
+        });
+};
+
+window.startSpeedTest = function() {
+    const statusEl = document.getElementById('speed-status');
+    const valueEl = document.getElementById('speed-value');
+    if (!statusEl || !valueEl) return;
+
+    statusEl.textContent = '正在准备...';
+    valueEl.textContent = '--- Mbps';
+    
+    const startTime = performance.now();
+    // Use Cloudflare speed test endpoint (1MB file)
+    const fileSize = 1048576; 
+    const url = 'https://speed.cloudflare.com/__down?bytes=' + fileSize + '&t=' + startTime;
+
+    statusEl.textContent = '正在下载测速文件 (1MB)...';
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error('Network error');
+            return response.blob();
+        })
+        .then(blob => {
+            const endTime = performance.now();
+            const durationInSeconds = (endTime - startTime) / 1000;
+            // bits = bytes * 8
+            const speedBps = (fileSize * 8) / durationInSeconds;
+            const speedMbps = (speedBps / (1024 * 1024)).toFixed(2);
+            
+            statusEl.textContent = '测速完成';
+            valueEl.textContent = `${speedMbps} Mbps`;
+        })
+        .catch(err => {
+            statusEl.textContent = '测速失败';
+            valueEl.textContent = 'Error';
+            console.error(err);
+        });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Load Icon Positions
     if (typeof loadIconPositions === 'function') {
@@ -47,22 +117,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const trayEthernet = document.getElementById('tray-ethernet');
     if (trayEthernet) {
         trayEthernet.addEventListener('click', () => {
+            // Remove existing window to ensure content update (if it was created with old content)
+            const existingWin = document.getElementById('window-ethernet-status');
+            if (existingWin) existingWin.remove();
+
             if (typeof createWindow === 'function') {
                 createWindow({
                     id: 'window-ethernet-status',
-                    title: '本地连接 状态',
+                    title: '网络工具箱',
                     icon: 'icon/Pictogrammers-Material-Ethernet-cable.512.png',
-                    width: 300,
+                    width: 400,
                     content: `
-                        <div style="display: flex; gap: 10px; align-items: flex-start;">
-                            <img src="icon/Pictogrammers-Material-Ethernet-cable.512.png" style="width: 32px; height: 32px;">
-                            <div>
-                                <p><strong>连接状态</strong></p>
-                                <p>状态: 已连接</p>
-                                <p>持续时间: 00:00:00</p>
-                                <p>速度: 100.0 Mbps</p>
+                        <div style="display: flex; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid #808080; padding-bottom: 5px;">
+                            <button onclick="switchEthernetTab('tab-status')">状态</button>
+                            <button onclick="switchEthernetTab('tab-speed')">测速</button>
+                            <button onclick="switchEthernetTab('tab-ip')">IP信息</button>
+                        </div>
+                        
+                        <div id="tab-status">
+                            <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                <img src="icon/Pictogrammers-Material-Ethernet-cable.512.png" style="width: 32px; height: 32px;">
+                                <div>
+                                    <p><strong>连接状态</strong></p>
+                                    <p>状态: 已连接</p>
+                                    <p>持续时间: 00:00:00</p>
+                                    <p>速度: 100.0 Mbps</p>
+                                </div>
                             </div>
                         </div>
+
+                        <div id="tab-speed" style="display: none;">
+                            <fieldset>
+                                <legend>网络测速</legend>
+                                <div style="text-align: center; margin: 15px 0;">
+                                    <div id="speed-value" style="font-size: 28px; font-weight: bold; color: #008000; font-family: 'Courier New', monospace;">--- Mbps</div>
+                                    <div id="speed-status" style="font-size: 12px; color: #666; margin-top: 5px;">准备就绪</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <button onclick="startSpeedTest()">开始测速</button>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <div id="tab-ip" style="display: none;">
+                            <fieldset>
+                                <legend>IP 信息概览</legend>
+                                <div id="net-ip-content" style="padding: 5px;">
+                                    点击下方按钮获取信息...
+                                </div>
+                                <div style="text-align: center; margin-top: 10px;">
+                                    <button onclick="fetchIPInfo()">获取 IP 信息</button>
+                                </div>
+                            </fieldset>
+                        </div>
+
                         <br>
                         <div style="text-align: right;">
                             <button onclick="closeWindow('window-ethernet-status')">关闭</button>
