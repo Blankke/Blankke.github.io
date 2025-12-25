@@ -284,6 +284,8 @@ document.getElementById('ctx-properties')?.addEventListener('click', async () =>
                 <div>适配器: GitHub Pages Accelerator</div>
             `
         });
+    } else {
+        alert('桌面属性\n\n分辨率: ' + window.innerWidth + ' x ' + window.innerHeight + '\n颜色: 32 位\n适配器: GitHub Pages Accelerator');
     }
     hideContextMenu();
 });
