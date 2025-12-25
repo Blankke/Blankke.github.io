@@ -107,9 +107,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 6. Set Last Updated Time
-    const lastUpdatedTime = document.getElementById('last-updated-time');
-    if (lastUpdatedTime) {
-        const date = new Date(document.lastModified);
-        lastUpdatedTime.textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    const lastUpdatedContainer = document.getElementById('last-updated');
+    if (lastUpdatedContainer) {
+        fetch('https://api.github.com/repos/Blankke/Blankke.github.io/commits?per_page=1')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const commit = data[0].commit;
+                    const dateObj = new Date(commit.committer.date);
+                    const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString();
+                    const message = commit.message.split('\n')[0]; // Use first line of commit message
+                    
+                    lastUpdatedContainer.innerHTML = `last update : <span style="color: #FFFF00;">${dateStr}</span> with <span style="color: #FFFF00;">${message}</span>`;
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching commit info:', err);
+                // Fallback to document.lastModified
+                const date = new Date(document.lastModified);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                lastUpdatedContainer.innerHTML = `last update : <span style="color: #FFFF00;">${dateStr}</span>`;
+            });
     }
 });
