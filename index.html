@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dent du Lion</title>
+    <!-- Site Favicon -->
+    <link rel="icon" type="image/png" href="icon/web_logo.png">
+    <link rel="shortcut icon" href="icon/web_logo.png">
     <!-- 98.css for the core look and feel -->
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <link rel="stylesheet" href="style.css?v=2">
@@ -139,7 +142,7 @@
             </div>
         </div>
         <div class="window-body">
-            <div class="window-description-bar">欢迎来到留言板，请留下你的足迹。</div>
+            <div class="window-description-bar">由于上一个留言需要登陆不是很方便，我部署了一个匿名的……但是好像需要一点魔法才能访问。</div>
             <div class="guestbook-container">
                 <!-- Waline Container -->
                 <div id="waline-container"></div>
@@ -151,6 +154,7 @@
     <!-- Window: Recycle Bin -->
     <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="icon/recycle_bin_full.png"
         style="width: 420px; height: 320px;">
+        <div class="window-description-bar" style="border-bottom: 1px solid #808080;">不是每个文件都有右键菜单。</div>
         <div class="title-bar">
             <div class="title-bar-text">回收站</div>
             <div class="title-bar-controls">
@@ -163,10 +167,6 @@
             <div class="recyclebin-layout">
                 <div class="recyclebin-list" id="recyclebin-list" aria-label="Recycle Bin Items"></div>
                 <div class="recyclebin-preview">
-                    <fieldset>
-                        <legend>说明</legend>
-                        <div id="recyclebin-preview-text" style="white-space: pre-wrap; font-size: 12px;">右键文件试试。</div>
-                    </fieldset>
                     <fieldset style="margin-top: 10px;">
                         <legend>操作</legend>
                         <button type="button" disabled>清空回收站</button>
@@ -180,6 +180,7 @@
     <!-- Window: Gallery -->
     <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="icon/camera.png"
         style="width: 800px; height: 600px;">
+        <div class="window-description-bar" style="border-bottom: 1px solid #808080;">一些需要用魔法才能访问的照片？</div>
         <div class="title-bar">
             <div class="title-bar-text">我的相册 - 图片查看器</div>
             <div class="title-bar-controls">
@@ -217,6 +218,7 @@
     <!-- Window: Wisdom Tree (PVZ-like) -->
     <div id="window-wisdomtree" class="window" data-window-title="植物大战僵尸" data-window-icon="icon/pvz_icon.png"
         style="width: 640px; height: 460px;">
+        <div class="window-description-bar" style="border-bottom: 1px solid #808080;">他可能可以被施肥？</div>
         <div class="title-bar">
             <div class="title-bar-text">Plants vs Zombies (Lite)</div>
             <div class="title-bar-controls">
@@ -256,7 +258,7 @@
             </div>
         </div>
         <div class="window-body">
-            <div class="window-description-bar">这是我的个人简历。</div>
+            <div class="window-description-bar">这是我的个人简历，从某个同学那里copy的，还没有填好。</div>
             <div class="resume-container">
                 <iframe src="resume.html" frameborder="0"></iframe>
             </div>
@@ -317,7 +319,7 @@
             </div>
         </div>
         <div class="window-body">
-            <div class="window-description-bar">播放一些轻松的音乐。</div>
+            <div class="window-description-bar">播放一些轻松的音乐，但是不要太吵。</div>
             <div class="music-container">
                 <div class="music-list" id="music-list">
                     <div style="padding: 4px;">正在加载 music/manifest.json ...</div>
@@ -354,7 +356,7 @@
             </div>
         </div>
         <div class="window-body" style="display: flex; flex-direction: column; height: 100%; padding: 0;">
-            <div class="window-description-bar" style="border-bottom: 1px solid #808080;">浏览互联网的世界。</div>
+            <div class="window-description-bar" style="border-bottom: 1px solid #808080;">我小时候就是拿这个玩4399的（。</div>
             <div style="padding: 4px; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #808080;">
                 <span>地址(D):</span>
                 <input type="text" id="browser-address" style="flex: 1;" readonly>

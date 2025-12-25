@@ -47,7 +47,7 @@ window.startSpeedTest = function() {
     const fileSize = 1048576; 
     const url = 'https://speed.cloudflare.com/__down?bytes=' + fileSize + '&t=' + startTime;
 
-    statusEl.textContent = '正在下载测速文件 (1MB)...';
+    statusEl.textContent = '正在测速...';
 
     fetch(url)
         .then(response => {
@@ -177,6 +177,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `
                 });
+            } else if (typeof showMessageBox === 'function') {
+                showMessageBox({
+                    title: '网络状态',
+                    message: '已连接: Ethernet<br>速度: 100.0 Mbps<br>状态: 已连接'
+                });
             } else {
                 alert('已连接: Ethernet\n速度: 100.0 Mbps\n状态: 已连接');
             }
@@ -207,6 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button onclick="closeWindow('window-qq-msg')">发送</button>
                         </div>
                     `
+                });
+            } else if (typeof showMessageBox === 'function') {
+                showMessageBox({
+                    title: '消息',
+                    message: '来自 群星 的消息:<br><br>“你帮我看看american pie这首歌有多大。”'
                 });
             } else {
                 alert('来自 群星 的消息:\n\n“你帮我看看american pie这首歌有多大。”');

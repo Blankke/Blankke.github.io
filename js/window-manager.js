@@ -279,6 +279,134 @@ window.createWindow = function({ id, title, icon, content, width = 300, height =
     return win;
 };
 
+// Unified dialog helper (Win98-styled, non-blocking)
+window.showMessageBox = function(options = {}) {
+    const {
+        id,
+        title = '提示',
+        icon,
+        message = '',
+        detail = '',
+        width = 360,
+        buttons = [{ label: '确定', value: true, primary: true }],
+        closeValue = null
+    } = options;
+
+    const dialogId = id || `dialog-${Date.now()}`;
+    const btnDefs = (Array.isArray(buttons) && buttons.length ? buttons : [{ label: '确定', value: true }]).map((btn, idx) => ({
+        label: btn.label || `按钮${idx + 1}`,
+        value: typeof btn.value === 'undefined' ? idx : btn.value,
+        primary: !!btn.primary
+    }));
+
+    const buttonsHtml = btnDefs.map(btn => {
+        const primaryClass = btn.primary ? 'message-box-btn-primary' : '';
+        return `<button class="${primaryClass}" data-dialog-value="${btn.value}">${btn.label}</button>`;
+    }).join('');
+
+    const bodyHtml = `
+        <div class="message-box">
+            <div class="message-box-main">
+                ${icon ? `<img class="message-box-icon" src="${icon}" alt="">` : ''}
+                <div class="message-box-text">${message}</div>
+            </div>
+            ${detail ? `<div class="message-box-detail">${detail}</div>` : ''}
+            <div class="message-box-buttons">${buttonsHtml}</div>
+        </div>
+    `;
+
+    return new Promise((resolve) => {
+        let resolved = false;
+        const resolveOnce = (val) => {
+            if (resolved) return;
+            resolved = true;
+            resolve(val);
+        };
+
+        if (typeof createWindow === 'function') {
+            createWindow({ id: dialogId, title, icon, width, content: bodyHtml });
+
+            setTimeout(() => {
+                const win = document.getElementById(dialogId);
+                if (!win) return;
+
+                win.querySelectorAll('[data-dialog-value]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        resolveOnce(btn.dataset.dialogValue);
+                        closeWindow(dialogId);
+                    });
+                });
+
+                const closeBtn = win.querySelector('.title-bar-controls button');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => resolveOnce(closeValue));
+                }
+
+                const firstBtn = win.querySelector('[data-dialog-value]');
+                if (firstBtn) firstBtn.focus();
+            }, 30);
+        } else {
+            // Lightweight fallback when window manager is unavailable
+            const overlay = document.createElement('div');
+            overlay.id = `${dialogId}-overlay`;
+            overlay.className = 'message-box-overlay';
+            overlay.innerHTML = `
+                <div class="message-box-fallback" style="width: ${width}px;">
+                    <div class="title-bar">
+                        <div class="title-bar-text">${title}</div>
+                        <div class="title-bar-controls"><button aria-label="Close"></button></div>
+                    </div>
+                    <div class="window-body">${bodyHtml}</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            overlay.querySelectorAll('[data-dialog-value]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    resolveOnce(btn.dataset.dialogValue);
+                    overlay.remove();
+                });
+            });
+
+            const closeBtn = overlay.querySelector('.title-bar-controls button');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    resolveOnce(closeValue);
+                    overlay.remove();
+                });
+            }
+
+            const firstBtn = overlay.querySelector('[data-dialog-value]');
+            if (firstBtn) firstBtn.focus();
+        }
+    });
+};
+
+window.showConfirmDialog = function(options = {}) {
+    const {
+        title = '确认',
+        icon,
+        message = '',
+        detail = '',
+        confirmText = '确定',
+        cancelText = '取消',
+        width
+    } = options;
+
+    return window.showMessageBox({
+        title,
+        icon,
+        message,
+        detail,
+        width,
+        buttons: [
+            { label: confirmText, value: true, primary: true },
+            { label: cancelText, value: false }
+        ],
+        closeValue: false
+    }).then(val => val === true || val === 'true' || val === '1' || val === confirmText);
+};
+
 
 // Common Window Openers
 function openCMD() {

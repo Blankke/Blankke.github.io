@@ -190,7 +190,7 @@ function hideIconContextMenu() {
     if (iconContextMenu) iconContextMenu.style.display = 'none';
     contextMenuTargetIcon = null;
 }
-
+ 
 document.addEventListener('contextmenu', (e) => {
     const icon = e.target.closest('.icon[data-icon-id]');
     if (icon) {
@@ -273,8 +273,18 @@ document.getElementById('ctx-paste')?.addEventListener('click', () => {
     hideContextMenu();
 });
 
-document.getElementById('ctx-properties')?.addEventListener('click', () => {
-    alert('桌面属性\\n\\n分辨率: ' + window.innerWidth + ' x ' + window.innerHeight + '\\n颜色: 32 位\\n适配器: GitHub Pages Accelerator');
+document.getElementById('ctx-properties')?.addEventListener('click', async () => {
+    if (typeof showMessageBox === 'function') {
+        await showMessageBox({
+            title: '桌面属性',
+            width: 380,
+            message: `
+                <div>分辨率: ${window.innerWidth} x ${window.innerHeight}</div>
+                <div>颜色: 32 位</div>
+                <div>适配器: GitHub Pages Accelerator</div>
+            `
+        });
+    }
     hideContextMenu();
 });
 
@@ -303,16 +313,24 @@ document.getElementById('icon-ctx-copy')?.addEventListener('click', () => {
     hideIconContextMenu();
 });
 
-document.getElementById('icon-ctx-delete')?.addEventListener('click', () => {
+document.getElementById('icon-ctx-delete')?.addEventListener('click', async () => {
     if (contextMenuTargetIcon && contextMenuTargetIcon.dataset.iconId) {
         const iconId = contextMenuTargetIcon.dataset.iconId;
         const iconName = contextMenuTargetIcon.querySelector('.icon-text')?.textContent || iconId;
         const iconImg = contextMenuTargetIcon.querySelector('img');
         const iconSrc = iconImg ? iconImg.getAttribute('src') : 'icon/settings_gear-4.png';
         
-        if (confirm(`确定要删除 "${iconName}" 吗?
+        const confirmed = typeof showConfirmDialog === 'function'
+            ? await showConfirmDialog({
+                title: '删除到回收站',
+                icon: 'icon/recycle_bin_full.png',
+                message: `确定要删除 "${iconName}" 吗？`,
+                detail: '删除的图标将移至回收站。',
+                width: 380
+            })
+            : confirm(`确定要删除 "${iconName}" 吗?\n\n删除的图标将移至回收站。`);
 
-删除的图标将移至回收站。`)) {
+        if (confirmed) {
             // Save icon data to recycle bin
             const iconData = {
                 name: iconName,
@@ -354,11 +372,23 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', () => {
     hideIconContextMenu();
 });
 
-document.getElementById('icon-ctx-properties')?.addEventListener('click', () => {
+document.getElementById('icon-ctx-properties')?.addEventListener('click', async () => {
     if (contextMenuTargetIcon) {
         const iconText = contextMenuTargetIcon.querySelector('.icon-text')?.textContent || '未知';
         const iconId = contextMenuTargetIcon.dataset.iconId || 'unknown';
-        alert(`图标属性\\n\\n名称: ${iconText}\\nID: ${iconId}\\n位置: (${contextMenuTargetIcon.offsetLeft}, ${contextMenuTargetIcon.offsetTop})`);
+        const iconImg = contextMenuTargetIcon.querySelector('img');
+        const iconSrc = iconImg ? iconImg.getAttribute('src') : undefined;
+
+        if (typeof showMessageBox === 'function') {
+            await showMessageBox({
+                title: '图标属性',
+                icon: iconSrc,
+                width: 360,
+                message: `名称: ${iconText}<br>ID: ${iconId}<br>位置: (${contextMenuTargetIcon.offsetLeft}, ${contextMenuTargetIcon.offsetTop})`
+            });
+        } else {
+            alert(`图标属性\n\n名称: ${iconText}\nID: ${iconId}\n位置: (${contextMenuTargetIcon.offsetLeft}, ${contextMenuTargetIcon.offsetTop})`);
+        }
     }
     hideIconContextMenu();
 });

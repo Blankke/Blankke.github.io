@@ -213,6 +213,11 @@ function showTrackProperties(track) {
                 }
             }
         }, 50); // Increased timeout slightly to ensure DOM is ready
+    } else if (typeof showMessageBox === 'function') {
+        showMessageBox({
+            title: '属性',
+            message: `标题: ${title}<br>文件: ${track.file}`
+        });
     } else {
         // Fallback if window manager not ready
         alert(`属性:\n\n标题: ${title}\n文件: ${track.file}`);
