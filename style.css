@@ -194,6 +194,7 @@ body::after {
 
 /* Context menu (Recycle Bin restore) */
 .context-menu {
+  display: none; /* Hidden by default */
   position: fixed;
   z-index: 10002;
   min-width: 120px;
@@ -585,24 +586,31 @@ body::after {
   }
 }
 
-/* Overriding some Gitalk styles to fit better (Optional) */
-#gitalk-container .gt-container .gt-header-textarea {
+/* Waline Customization to fit Win98 theme */
+#waline-container {
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  --waline-theme-color: #008080;
+  --waline-active-color: #000080;
+}
+
+#waline-container .wl-editor {
+  border: 2px inset #dfdfdf;
+  background: #fff;
+}
+
+#waline-container .wl-btn.primary {
+  border: 2px outset #fff;
+  background: #c0c0c0;
+  color: #000;
+  border-right-color: #404040;
+  border-bottom-color: #404040;
   border-radius: 0;
+  font-weight: bold;
+}
+
+#waline-container .wl-btn.primary:active {
   border: 2px inset #dfdfdf;
 }
-
-#gitalk-container .gt-container .gt-btn {
-  border-radius: 0;
-  border: 2px outset #dfdfdf;
-  background-color: #c0c0c0;
-  color: black;
-  font-family: "Comic Sans MS", "Comic Sans", cursive;
-}
-
-#gitalk-container .gt-container .gt-btn:hover {
-  background-color: #000080;
-  color: white;
-  border-color: white;
 }
 /* 右键菜单 */
 .context-menu {
@@ -813,4 +821,16 @@ body::after {
 
 #visitor-counter img {
   vertical-align: middle;
+}
+
+/* Window Description Bar */
+.window-description-bar {
+  padding: 4px 8px;
+  background-color: #c0c0c0;
+  color: #000;
+  font-size: 12px;
+  border-bottom: 1px solid #808080;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

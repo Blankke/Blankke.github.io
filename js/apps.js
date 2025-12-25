@@ -353,21 +353,41 @@ musicPlayEl?.addEventListener('click', () => {
 });
 musicPauseEl?.addEventListener('click', () => musicAudioEl?.pause());
 
-// Gitalk
-const gitalk = new Gitalk({
-  clientID: 'Ov23lifhLcm9lmBzlp1d',
-  clientSecret: 'f9152db39b5d9b851839ee606371d9171c29a608',
-  repo: 'Blankke.github.io',
-  owner: 'Blankke',
-  admin: ['Blankke'],
-  id: 'guestbook',
-  distractionFreeMode: false
-});
+// Waline (Guestbook)
+// 文档: https://waline.js.org/
+function initWaline() {
+    const container = document.querySelector('#waline-container');
+    if (!container) return;
 
-try {
-    gitalk.render('gitalk-container');
-} catch (e) {
-    console.error("Gitalk render failed:", e);
+    if (typeof Waline === 'undefined') {
+        console.error('Waline script not loaded.');
+        container.innerHTML = '<div style="padding: 10px; color: red;">评论系统加载失败，请检查网络或刷新页面。</div>';
+        return;
+    }
+
+    try {
+        Waline.init({
+            el: '#waline-container',
+            serverURL: 'https://gitpage-three.vercel.app/', 
+            emoji: [
+                'https://unpkg.com/@waline/emojis@1.1.0/weibo',
+                'https://unpkg.com/@waline/emojis@1.1.0/bilibili',
+            ],
+            placeholder: '欢迎留言！(无需登录)',
+            dark: 'body[data-theme="dark"]',
+        });
+        console.log('Waline initialized');
+    } catch (e) {
+        console.error("Waline init failed:", e);
+        container.innerHTML = `<div style="padding: 10px; color: red;">评论系统初始化错误: ${e.message}</div>`;
+    }
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWaline);
+} else {
+    initWaline();
 }
 
 // Shortcuts
