@@ -81,27 +81,35 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof createWindow === 'function') {
                 createWindow({
                     id: 'window-qq-msg',
-                    title: '消息 - 群星',
+                    title: '与 群星 聊天中',
                     icon: 'icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png',
-                    width: 320,
+                    width: 350,
                     content: `
-                        <div style="display: flex; gap: 10px;">
-                            <img src="icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png" style="width: 32px; height: 32px;">
-                            <div>
-                                <p><strong>群星</strong></p>
-                                <p style="margin-top: 8px;">“把文件夹里的 American Pie 看看属性。”</p>
+                        <div style="background: #fff; border: 2px inset #dfdfdf; padding: 10px; height: 180px; overflow-y: auto; margin-bottom: 8px;">
+                            <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                <img src="icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png" style="width: 24px; height: 24px;">
+                                <div>
+                                    <div style="color: #000080; font-size: 12px; margin-bottom: 2px;">群星</div>
+                                    <div>你帮我看看american pie这首歌有多大。</div>
+                                </div>
                             </div>
                         </div>
-                        <br>
-                        <div style="text-align: right;">
-                            <button onclick="closeWindow('window-qq-msg')">回复</button>
-                            <button onclick="closeWindow('window-qq-msg')">关闭</button>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" style="flex: 1;">
+                            <button onclick="closeWindow('window-qq-msg')">发送</button>
                         </div>
                     `
                 });
             } else {
-                alert('来自 群星 的消息:\n\n“把文件夹里的 American Pie 看看属性。”');
+                alert('来自 群星 的消息:\n\n“你帮我看看american pie这首歌有多大。”');
             }
         });
+    }
+
+    // 6. Set Last Updated Time
+    const lastUpdatedTime = document.getElementById('last-updated-time');
+    if (lastUpdatedTime) {
+        const date = new Date(document.lastModified);
+        lastUpdatedTime.textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
     }
 });

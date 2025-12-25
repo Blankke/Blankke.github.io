@@ -779,13 +779,22 @@ body::after {
   background: #fff;
 }
 
-/* Visitor Counter */
-#visitor-counter {
+/* Top Right Info Container */
+#top-right-info {
   position: absolute !important;
   top: 20px !important;
   right: 20px !important;
   left: auto !important;
-  z-index: 2000 !important; /* Ensure it's on top */
+  z-index: 2000 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  pointer-events: auto;
+}
+
+/* Visitor Counter */
+#visitor-counter {
   font-family: "Comic Sans MS", "Comic Sans", cursive;
   color: white;
   text-shadow: 1px 1px 0px black;
@@ -793,7 +802,13 @@ body::after {
   display: flex;
   align-items: center;
   gap: 5px;
-  pointer-events: auto;
+}
+
+#last-updated {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  color: white;
+  text-shadow: 1px 1px 0px black;
+  font-size: 14px;
 }
 
 #visitor-counter img {
