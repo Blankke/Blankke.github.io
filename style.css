@@ -1,6 +1,6 @@
 body {
   background-color: #008080; /* Classic Win98 Teal */
-  background-image: url('icon/bg-dither.svg');
+  background-image: url('assets/icon/bg-dither.svg');
   background-repeat: repeat;
   background-size: 4px 4px;
   margin: 0;
@@ -18,7 +18,7 @@ body::after {
   content: "";
   position: fixed;
   inset: 0;
-  background: url('icon/windows-0.png') center 42% / 300px auto no-repeat;
+  background: url('assets/icon/windows-0.png') center 42% / 300px auto no-repeat;
   opacity: 0.15;
   pointer-events: none;
   z-index: 0;

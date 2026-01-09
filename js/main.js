@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 createWindow({
                     id: 'window-ethernet-status',
                     title: '网络工具箱',
-                    icon: 'icon/Pictogrammers-Material-Ethernet-cable.512.png',
+                    icon: 'assets/icon/Pictogrammers-Material-Ethernet-cable.512.png',
                     width: 400,
                     content: `
                         <div style="display: flex; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid #808080; padding-bottom: 5px;">
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         <div id="tab-status">
                             <div style="display: flex; gap: 10px; align-items: flex-start;">
-                                <img src="icon/Pictogrammers-Material-Ethernet-cable.512.png" style="width: 32px; height: 32px;">
+                                <img src="assets/icon/Pictogrammers-Material-Ethernet-cable.512.png" style="width: 32px; height: 32px;">
                                 <div>
                                     <p><strong>连接状态</strong></p>
                                     <p>状态: 已连接</p>
@@ -195,12 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 createWindow({
                     id: 'window-qq-msg',
                     title: '与 群星 聊天中',
-                    icon: 'icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png',
+                    icon: 'assets/icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png',
                     width: 350,
                     content: `
                         <div style="background: #fff; border: 2px inset #dfdfdf; padding: 10px; height: 180px; overflow-y: auto; margin-bottom: 8px;">
                             <div style="display: flex; gap: 8px; align-items: flex-start;">
-                                <img src="icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png" style="width: 24px; height: 24px;">
+                                <img src="assets/icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png" style="width: 24px; height: 24px;">
                                 <div>
                                     <div style="color: #000080; font-size: 12px; margin-bottom: 2px;">群星</div>
                                     <div>你帮我看看american pie这首歌有多大。</div>

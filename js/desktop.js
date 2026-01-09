@@ -320,12 +320,12 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', async () =
         const iconId = contextMenuTargetIcon.dataset.iconId;
         const iconName = contextMenuTargetIcon.querySelector('.icon-text')?.textContent || iconId;
         const iconImg = contextMenuTargetIcon.querySelector('img');
-        const iconSrc = iconImg ? iconImg.getAttribute('src') : 'icon/settings_gear-4.png';
+        const iconSrc = iconImg ? iconImg.getAttribute('src') : 'assets/icon/settings_gear-4.png';
         
         const confirmed = typeof showConfirmDialog === 'function'
             ? await showConfirmDialog({
                 title: '删除到回收站',
-                icon: 'icon/recycle_bin_full.png',
+                icon: 'assets/icon/recycle_bin_full.png',
                 message: `确定要删除 "${iconName}" 吗？`,
                 detail: '删除的图标将移至回收站。',
                 width: 380

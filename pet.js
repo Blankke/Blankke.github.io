@@ -41,7 +41,7 @@ class DesktopPet {
         
         // 使用粉色猫咪图片
         const img = document.createElement('img');
-        img.src = 'icon/icon.png';
+        img.src = 'assets/icon/icon.png';
         img.style.width = '48px';
         img.style.height = '48px';
         img.style.display = 'block';

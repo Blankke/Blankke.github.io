@@ -4,10 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Dent Du Lion">
+    <meta property="og:description" content="Welcome to my personal website.">
+    <meta property="og:image" content="https://blankke.github.io/assets/icon/web_logo.png">
+    <meta property="og:url" content="https://blankke.github.io/">
+    <meta name="twitter:card" content="summary_large_image">
+
     <title>Dent du Lion</title>
     <!-- Site Favicon -->
-    <link rel="icon" type="image/png" href="icon/web_logo.png">
-    <link rel="shortcut icon" href="icon/web_logo.png">
+    <link rel="icon" type="image/png" href="assets/icon/web_logo.png">
+    <link rel="shortcut icon" href="assets/icon/web_logo.png">
     <!-- 98.css for the core look and feel -->
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <link rel="stylesheet" href="style.css?v=2">
@@ -23,53 +30,59 @@
     <div class="desktop-icons" id="desktop">
         <div class="icon" id="icon-computer" data-icon-id="computer" data-default-left="20" data-default-top="20"
             ondblclick="openWindow('window-computer')">
-            <img src="icon/computer_explorer-4.png" alt="My Computer">
+            <img src="assets/icon/computer_explorer-4.png" alt="My Computer">
             <div class="icon-text">我的电脑</div>
         </div>
         <div class="icon" id="icon-guestbook" data-icon-id="guestbook" data-default-left="20" data-default-top="110"
             ondblclick="openWindow('window-guestbook')">
-            <img src="icon/notepad-5.png" alt="Guestbook">
+            <img src="assets/icon/notepad-5.png" alt="Guestbook">
             <div class="icon-text">留言板.txt</div>
         </div>
         <div class="icon" id="icon-github" data-icon-id="github" data-default-left="20" data-default-top="200"
             ondblclick="window.open('https://github.com', '_blank')">
-            <img src="icon/network_internet_pcs_installer-2.png" alt="Internet">
+            <img src="assets/icon/network_internet_pcs_installer-2.png" alt="Internet">
             <div class="icon-text">网上邻居</div>
         </div>
         <div class="icon" id="icon-resume" data-icon-id="resume" data-default-left="20" data-default-top="290"
             ondblclick="openWindow('window-resume')">
-            <img src="icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" alt="Resume">
+            <img src="assets/icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" alt="Resume">
             <div class="icon-text">我的简历</div>
         </div>
 
         <div class="icon" id="icon-music" data-icon-id="music" data-default-left="20" data-default-top="380"
             ondblclick="openWindow('window-music')">
-            <img src="icon/cd_player.png" alt="Music">
+            <img src="assets/icon/cd_player.png" alt="Music">
             <div class="icon-text">音乐播放器</div>
         </div>
 
         <div class="icon" id="icon-radio" data-icon-id="radio" data-default-left="20" data-default-top="470"
             ondblclick="window.open('https://radio.garden/visit/glasgow/CtpxHQ6P', '_blank')">
-            <img src="icon/radio.svg" alt="Radio">
+            <img src="assets/icon/radio.svg" alt="Radio">
             <div class="icon-text">收音机</div>
         </div>
 
         <div class="icon" id="icon-minesweeper" data-icon-id="minesweeper" data-default-left="20" data-default-top="560"
             ondblclick="openWindow('window-minesweeper')">
-            <img src="icon/minesweeper-0.png" alt="Minesweeper">
+            <img src="assets/icon/minesweeper-0.png" alt="Minesweeper">
             <div class="icon-text">扫雷</div>
         </div>
 
         <div class="icon" id="icon-recyclebin" data-icon-id="recyclebin" data-default-left="120" data-default-top="20"
             ondblclick="openWindow('window-recyclebin')">
-            <img id="recyclebin-desktop-icon" src="icon/recycle_bin_full.png" alt="Recycle Bin">
+            <img id="recyclebin-desktop-icon" src="assets/icon/recycle_bin_full.png" alt="Recycle Bin">
             <div class="icon-text">回收站</div>
         </div>
 
         <div class="icon" id="icon-gallery" data-icon-id="gallery" data-default-left="120" data-default-top="110"
             ondblclick="openWindow('window-gallery'); initGallery();">
-            <img src="icon/camera.png" alt="Gallery" onerror="this.src='icon/directory_open_file_mydocs-4.png'">
+            <img src="assets/icon/camera.png" alt="Gallery" onerror="this.src='assets/icon/directory_open_file_mydocs-4.png'">
             <div class="icon-text">我的相册</div>
+        </div>
+
+        <div class="icon" id="icon-not-robot" data-icon-id="not-robot" data-default-left="120" data-default-top="200"
+            ondblclick="window.open('https://neal.fun/not-a-robot/', '_blank')">
+            <img src="assets/icon/network_internet_pcs_installer-2.png" alt="Verification">
+            <div class="icon-text">不是机器人</div>
         </div>
     </div>
 
@@ -85,7 +98,7 @@
     </div>
 
     <!-- Window: My Computer (Personal Info) -->
-    <div id="window-computer" class="window" data-window-title="我的电脑" data-window-icon="icon/computer_explorer-4.png"
+    <div id="window-computer" class="window" data-window-title="我的电脑" data-window-icon="assets/icon/computer_explorer-4.png"
         style="width: 400px;">
         <div class="title-bar">
             <div class="title-bar-text">我的电脑 - 个人介绍</div>
@@ -131,7 +144,7 @@
     </div>
 
     <!-- Window: Guestbook -->
-    <div id="window-guestbook" class="window" data-window-title="留言板" data-window-icon="icon/notepad-5.png"
+    <div id="window-guestbook" class="window" data-window-title="留言板" data-window-icon="assets/icon/notepad-5.png"
         style="width: 350px;">
         <div class="title-bar">
             <div class="title-bar-text">留言板.txt - 记事本</div>
@@ -152,7 +165,7 @@
     </div>
 
     <!-- Window: Recycle Bin -->
-    <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="icon/recycle_bin_full.png"
+    <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="assets/icon/recycle_bin_full.png"
         style="width: 420px; height: 320px;">
         <div class="window-description-bar" style="border-bottom: 1px solid #808080;">不是每个文件都有右键菜单。</div>
         <div class="title-bar">
@@ -178,7 +191,7 @@
     </div>
 
     <!-- Window: Gallery -->
-    <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="icon/camera.png"
+    <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="assets/icon/camera.png"
         style="width: 800px; height: 600px;">
         <div class="window-description-bar" style="border-bottom: 1px solid #808080;">一些需要用魔法才能访问的照片？</div>
         <div class="title-bar">
@@ -198,7 +211,7 @@
     </div>
 
     <!-- Window: readme.txt (from Recycle Bin) -->
-    <div id="window-recycle-readme" class="window" data-window-title="readme.txt" data-window-icon="icon/notepad-5.png"
+    <div id="window-recycle-readme" class="window" data-window-title="readme.txt" data-window-icon="assets/icon/notepad-5.png"
         style="width: 520px; height: 420px;">
         <div class="title-bar">
             <div class="title-bar-text">readme.txt - 记事本</div>
@@ -216,7 +229,7 @@
     </div>
 
     <!-- Window: Wisdom Tree (PVZ-like) -->
-    <div id="window-wisdomtree" class="window" data-window-title="植物大战僵尸" data-window-icon="icon/pvz_icon.png"
+    <div id="window-wisdomtree" class="window" data-window-title="植物大战僵尸" data-window-icon="assets/icon/pvz_icon.png"
         style="width: 640px; height: 460px;">
         <div class="window-description-bar" style="border-bottom: 1px solid #808080;">他可能可以被施肥？</div>
         <div class="title-bar">
@@ -231,13 +244,13 @@
             <div id="pvz-tree" class="pvz-tree">
                 <div class="pvz-tree-topbar">
                     <button id="pvz-fertilize" type="button" class="btn pvz-fertilize" title="施肥">
-                        <img src="icon/TreeFood.png" alt="Fertilizer">
+                        <img src="assets/icon/TreeFood.png" alt="Fertilizer">
                         <span id="pvz-food-count">x 10</span>
                     </button>
                 </div>
                 <div class="pvz-tree-body">
                     <div class="pvz-tree-stage">
-                        <img src="icon/Store_TreeOfWisdomIcon.png" alt="Wisdom Tree" class="pvz-tree-img">
+                        <img src="assets/icon/Store_TreeOfWisdomIcon.png" alt="Wisdom Tree" class="pvz-tree-img">
                     </div>
                     <div class="pvz-tree-speech" id="pvz-tree-speech">……</div>
                 </div>
@@ -248,7 +261,7 @@
 
     <!-- Window: Resume -->
     <div id="window-resume" class="window" data-window-title="我的简历"
-        data-window-icon="icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" style="width: 700px; height: 600px;">
+        data-window-icon="assets/icon/Hopstarter-Soft-Scraps-Adobe-PDF-Document.256.png" style="width: 700px; height: 600px;">
         <div class="title-bar">
             <div class="title-bar-text">我的简历.doc - Microsoft Word</div>
             <div class="title-bar-controls">
@@ -260,14 +273,14 @@
         <div class="window-body">
             <div class="window-description-bar">这是我的个人简历，从某个同学那里copy的，还没有填好。</div>
             <div class="resume-container">
-                <iframe src="resume.html" frameborder="0"></iframe>
+                <iframe src="apps/resume.html" frameborder="0"></iframe>
             </div>
         </div>
         <div class="resize-handle"></div>
     </div>
 
     <!-- Window: Minesweeper -->
-    <div id="window-minesweeper" class="window" data-window-title="扫雷" data-window-icon="icon/minesweeper-0.png"
+    <div id="window-minesweeper" class="window" data-window-title="扫雷" data-window-icon="assets/icon/minesweeper-0.png"
         style="width: 380px; height: 480px;">
         <div class="title-bar">
             <div class="title-bar-text">扫雷</div>
@@ -278,13 +291,13 @@
             </div>
         </div>
         <div class="window-body" style="padding: 0; overflow: hidden;">
-            <iframe src="minesweeper.html" frameborder="0" style="width: 100%; height: 100%; border: none;"></iframe>
+            <iframe src="apps/minesweeper.html" frameborder="0" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
         <div class="resize-handle"></div>
     </div>
 
     <!-- Window: MS-DOS Prompt (CMD) -->
-    <div id="window-cmd" class="window" data-window-title="MS-DOS Prompt" data-window-icon="icon/command_prompt-0.png"
+    <div id="window-cmd" class="window" data-window-title="MS-DOS Prompt" data-window-icon="assets/icon/command_prompt-0.png"
         style="width: 650px; height: 450px;">
         <div class="title-bar">
             <div class="title-bar-text">MS-DOS Prompt</div>
@@ -308,7 +321,7 @@
     </div>
 
     <!-- Window: Music Player -->
-    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="icon/cd_playerpng"
+    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="assets/icon/cd_playerpng"
         style="width: 760px; height: 520px;">
         <div class="title-bar">
             <div class="title-bar-text">音乐播放器 - Windows Media Player (Lite)</div>
@@ -322,7 +335,7 @@
             <div class="window-description-bar">播放一些轻松的音乐，但是不要太吵。</div>
             <div class="music-container">
                 <div class="music-list" id="music-list">
-                    <div style="padding: 4px;">正在加载 music/manifest.json ...</div>
+                    <div style="padding: 4px;">正在加载 assets/music/manifest.json ...</div>
                 </div>
                 <div class="music-now">
                     <div class="music-now-title" id="music-now-title">未选择歌曲</div>
@@ -345,7 +358,7 @@
     </div>
 
     <!-- Window: Browser -->
-    <div id="window-browser" class="window" data-window-title="Internet Explorer" data-window-icon="icon/msie1-0.png"
+    <div id="window-browser" class="window" data-window-title="Internet Explorer" data-window-icon="assets/icon/msie1-0.png"
         style="width: 800px; height: 600px;">
         <div class="title-bar">
             <div class="title-bar-text">Internet Explorer</div>
@@ -375,20 +388,20 @@
         </div>
         <div class="start-menu-items">
             <div class="menu-item" onclick="openWindow('window-computer')">
-                <img src="icon/computer_explorer-4.png">
+                <img src="assets/icon/computer_explorer-4.png">
                 <span>我的电脑</span>
             </div>
             <div class="menu-item" onclick="window.open('https://github.com', '_blank')">
-                <img src="icon/directory_open_file_mydocs-4.png">
+                <img src="assets/icon/directory_open_file_mydocs-4.png">
                 <span>我的 GitHub 项目</span>
             </div>
             <div class="menu-item">
-                <img src="icon/settings_gear-4.png">
+                <img src="assets/icon/settings_gear-4.png">
                 <span>设置</span>
             </div>
             <hr style="width: 100%; border-top: 1px solid #808080; border-bottom: 1px solid #fff;">
             <div class="menu-item" onclick="window.close()">
-                <img src="icon/shut_down_normal-4.png">
+                <img src="assets/icon/shut_down_normal-4.png">
                 <span>关闭系统...</span>
             </div>
         </div>
@@ -397,13 +410,13 @@
     <!-- Taskbar -->
     <div class="taskbar">
         <button id="start-button" class="start-button">
-            <img src="icon/windows-0.png" alt="win">
+            <img src="assets/icon/windows-0.png" alt="win">
             Start
         </button>
         <div class="taskbar-separator"></div>
         <div class="quick-launch">
-            <button class="quick-launch-btn" title="Internet Explorer" onclick="openBrowser('ie_start.html')">
-                <img src="icon/msie1-0.png" alt="IE">
+            <button class="quick-launch-btn" title="Internet Explorer" onclick="openBrowser('apps/ie_start.html')">
+                <img src="assets/icon/msie1-0.png" alt="IE">
             </button>
         </div>
         <div class="taskbar-separator"></div>
@@ -411,10 +424,10 @@
         <div class="taskbar-divider"></div>
         <div class="system-tray">
             <div class="tray-icon" id="tray-ethernet" title="网络连接">
-                <img src="icon/Pictogrammers-Material-Ethernet-cable.512.png" alt="Ethernet">
+                <img src="assets/icon/Pictogrammers-Material-Ethernet-cable.512.png" alt="Ethernet">
             </div>
             <div class="tray-icon" id="tray-qq" title="QQ">
-                <img src="icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png" alt="QQ">
+                <img src="assets/icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png" alt="QQ">
             </div>
             <div class="taskbar-time" id="taskbar-time">12:00 PM</div>
         </div>

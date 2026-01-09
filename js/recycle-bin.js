@@ -9,12 +9,12 @@ const recycleBinCatalog = {
     readme: {
         id: 'readme',
         name: 'readme.txt',
-        icon: 'icon/notepad-5.png',
+        icon: 'assets/icon/notepad-5.png',
         preview: 'readme.txt\n\n我本来想写一个提示系统……\n写到一半又觉得太直白。\n\n最后我决定：把它删掉。\n\n（但是它为什么还在回收站里？）\n',
         canRestore: true,
         restoreData: { 
             type: 'desktop-icon',
-            content: '<img src="icon/notepad-5.png" alt="readme"><div class="icon-text">readme.txt</div>',
+            content: '<img src="assets/icon/notepad-5.png" alt="readme"><div class="icon-text">readme.txt</div>',
             ondblclick: function() { openRecycleReadme(); },
             left: 20,
             top: 320
@@ -23,7 +23,7 @@ const recycleBinCatalog = {
     pvz: {
         id: 'pvz',
         name: 'PlantsVsZombies.lnk',
-        icon: 'icon/pvz_icon.png',
+        icon: 'assets/icon/pvz_icon.png',
         preview: '一个奇怪的快捷方式。\n右键它，也许会有“还原”。',
         canRestore: true,
         restoreData: { type: 'desktop-icon' }
@@ -69,7 +69,7 @@ function updateRecycleBinDesktopIcon() {
     const img = document.getElementById('recyclebin-desktop-icon');
     if (!img) return;
     const items = getRecycleItems();
-    img.src = items.length ? 'icon/recycle_bin_full.png' : 'icon/recycle_bin_empty.png';
+    img.src = items.length ? 'assets/icon/recycle_bin_full.png' : 'assets/icon/recycle_bin_empty.png';
 }
 
 function renderRecycleBin() {
@@ -213,7 +213,7 @@ function restoreRecycleItem(itemId) {
             icon.dataset.defaultTop = '120';
             icon.setAttribute('ondblclick', "openWindow('window-wisdomtree')");
             icon.innerHTML = `
-                <img src="icon/pvz_icon.png" alt="PVZ">
+                <img src="assets/icon/pvz_icon.png" alt="PVZ">
                 <div class="icon-text">植物大战僵尸</div>
             `;
         } else {

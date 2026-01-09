@@ -146,11 +146,11 @@ function showTrackProperties(track) {
     let content = `
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="icon/cd_player.png" style="width: 32px; height: 32px;">
+                <img src="assets/icon/cd_player.png" style="width: 32px; height: 32px;">
                 <div>
                     <p><strong>${title}</strong></p>
                     <p>类型: MP3 Audio</p>
-                    <p>位置: music/</p>
+                    <p>位置: assets/music/</p>
                 </div>
             </div>
             <div style="border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 5px 0;"></div>
@@ -188,7 +188,7 @@ function showTrackProperties(track) {
         createWindow({
             id: 'window-track-properties',
             title: '属性',
-            icon: 'icon/settings_gear-4.png',
+            icon: 'assets/icon/settings_gear-4.png',
             width: 350,
             content: content
         });
@@ -231,7 +231,7 @@ let musicCurrentIndex = -1;
 
 async function loadMusicManifest() {
     try {
-        const res = await fetch('music/manifest.json', { cache: 'no-store' });
+        const res = await fetch('assets/music/manifest.json', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const tracks = Array.isArray(data.tracks) ? data.tracks : [];
@@ -239,7 +239,7 @@ async function loadMusicManifest() {
         renderTrackList(tracks);
     } catch (err) {
         if (musicListEl) {
-            musicListEl.innerHTML = `<div style="padding: 6px;">无法读取 music/manifest.json。<br>请确认已部署并且文件存在。<br><br>错误：${String(err)}</div>`;
+            musicListEl.innerHTML = `<div style="padding: 6px;">无法读取 assets/music/manifest.json。<br>请确认已部署并且文件存在。<br><br>错误：${String(err)}</div>`;
         }
     }
 }
@@ -247,7 +247,7 @@ async function loadMusicManifest() {
 function renderTrackList(tracks) {
     if (!musicListEl) return;
     if (!tracks.length) {
-        musicListEl.innerHTML = `<div style="padding: 6px;">music/manifest.json 里没有歌曲。</div>`;
+        musicListEl.innerHTML = `<div style="padding: 6px;">assets/music/manifest.json 里没有歌曲。</div>`;
         return;
     }
 
@@ -295,7 +295,7 @@ function playTrackByIndex(index) {
 function playTrack(track) {
     if (!musicAudioEl) return;
     if (!track?.file) return;
-    const src = `music/${encodeURIComponent(track.file)}`;
+    const src = `assets/music/${encodeURIComponent(track.file)}`;
     musicAudioEl.src = src;
     musicNowTitleEl.textContent = track.title || track.file;
     musicStatusEl.textContent = '播放中...';
