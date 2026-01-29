@@ -77,18 +77,25 @@ body {
     justify-content: center;
     align-items: flex-end; /* 底部吸附 */
     padding-bottom: 0;
-    /* Move perspective here so all books share the same vanishing point */
+    /* 
+       修正视角：
+       之前的 perspective-origin: 50% -200px 太高了，导致书本看起来严重拉伸且位置偏上。
+       改为 center 让视线平视，或者稍微偏上一点点，这样更自然。
+    */
     perspective: 3000px; 
-    perspective-origin: 50% -200px; /* 看向稍高处，产生俯视感 */
+    perspective-origin: 50% 50vh; 
 }
 
 .bookshelf {
     display: flex;
     /* 关键属性：允许换行，反向（从下往上堆叠） */
     flex-wrap: wrap-reverse; 
-    justify-content: center; /* 每一层居中 */
+    justify-content: center;
+    /* 增加 align-content: flex-start 确保行从底部开始紧密堆叠，防止散开 */
+    align-content: flex-start;
+    
     width: 90%;
-    max-width: 1200px; /* 限制最大宽度，防止书太散 */
+    max-width: 1200px;
     margin: 0 auto;
     
     /* 
@@ -109,7 +116,6 @@ body {
     /* 底部内边距 */
     padding-bottom: 32px; 
     
-    /* Preserve 3D context for children */
     transform-style: preserve-3d;
 }
 
