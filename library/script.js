@@ -17,8 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 应用样式变量
             bookEl.style.backgroundColor = book.color;
-            bookEl.style.height = `${book.height}px`;
-            // 稍微随机化动画延迟，让加载时书架有一个参差不齐浮动的效果
+            
+            // 随机高度生成：260px 到 350px 之间
+            // Math.random() generates 0-1. *90 -> 0-90. +260 -> 260-350.
+            const randomHeight = Math.floor(Math.random() * 90) + 260;
+            bookEl.style.height = `${randomHeight}px`;
+
+            // 动画延迟
             bookEl.style.animationDelay = `${index * 0.05}s`;
             
             // 如果JSON里特别指定了文字颜色则使用，否则默认
@@ -50,7 +55,7 @@ const modalAuthor = document.getElementById('modal-author');
 const modalQuotes = document.getElementById('modal-quotes');
 
 function openBook(book) {
-    modalTitle.innerText = book.title;
+    modalTitle.innerText = book.fullTitle || book.title; // 优先使用 fullTitle，如果书脊太短写不下可以用 title
     modalAuthor.innerText = book.author || '';
     
     // 清空旧内容并填入新名言
