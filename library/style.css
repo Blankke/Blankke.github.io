@@ -77,6 +77,9 @@ body {
     justify-content: center;
     align-items: flex-end; /* 底部吸附 */
     padding-bottom: 0;
+    /* Move perspective here so all books share the same vanishing point */
+    perspective: 3000px; 
+    perspective-origin: 50% -200px; /* 看向稍高处，产生俯视感 */
 }
 
 .bookshelf {
@@ -89,38 +92,41 @@ body {
     margin: 0 auto;
     
     /* 
-       背景技术实现“每一层都有书架”：
-       线性渐变创建一个30px高的木纹条，重复间距是var(--shelf-height)
+       背景技术实现“每一层都有书架”
     */
     background-image: linear-gradient(
         to top,
         var(--shelf-color) 0px,
         var(--shelf-color) 30px,
-        #3e2723 30px, /* 高光边框 */
+        #3e2723 30px,
         #3e2723 32px,
         transparent 32px,
         transparent var(--shelf-height)
     );
     background-size: 100% var(--shelf-height);
-    background-position: bottom center; /* 从底部开始对齐 */
+    background-position: bottom center;
     
-    /* 底部内边距，确保第一层书站在第一层架子上 */
+    /* 底部内边距 */
     padding-bottom: 32px; 
-}
-
-/* 隐藏单独的 shelf-wood 元素，因为我们现在用背景做架子 */
-.shelf-wood {
-    display: none;
+    
+    /* Preserve 3D context for children */
+    transform-style: preserve-3d;
 }
 
 /* === Book Styles (True 3D) === */
 .book {
     width: 50px; /* 书脊宽度 */
     /* 高度由 JS 控制 */
-    margin: 0 12px; /* 增加间距，让侧面露出来 */
+    margin: 0 10px; /* 侧面展示需要更多空间 */
     
-    align-self: flex-start; /* 底部对齐 (在 wrap-reverse 中) */
-    margin-top: 50px; /* 层间距 */
+    align-self: flex-start; /* 底部对齐 */
+    
+    /* 层间距调整: 
+       因为书是斜着的，实际占据的高度比物理高度小一点点，
+       但透视会让它看起来更高或更矮。
+       主要目的是不重叠。
+    */
+    margin-top: 60px; 
     
     position: relative;
     cursor: pointer;
@@ -128,34 +134,45 @@ body {
     
     /* 启用 3D 空间 */
     transform-style: preserve-3d;
-    /* 默认视角：向左偏转，露出右侧封面 */
-    transform: perspective(2000px) rotateY(-25deg) translateZ(0);
+    
+    /* 
+       核心修正：
+       1. 移除 perspective()，使用父级透视。
+       2. rotateY(-30deg) 让书向左转，露出右侧。
+       3. rotateX(5deg) 稍微仰视/俯视一点？不，书是垂直放置的。
+       让书稍微有点不规则的旋转（在JS里微调更自然，这里给个基准）。 
+    */
+    transform: rotateY(-30deg);
     
     /* 颜色由变量控制 */
     background-color: var(--book-color); 
-    /* 书脊纹理 + 装饰线 (Binder bands) */
     background-image: 
         linear-gradient(to bottom, transparent 15%, rgba(0,0,0,0.3) 15%, rgba(0,0,0,0.3) 17%, transparent 17%),
         linear-gradient(to bottom, transparent 85%, rgba(0,0,0,0.3) 85%, rgba(0,0,0,0.3) 87%, transparent 87%),
         linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 10%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.4) 100%);
         
-    box-shadow: inset 2px 0 5px rgba(255,255,255,0.1); /* 轻微高光 */
-    border-radius: 1px; /* 硬朗一点 */
+    /* 优化书脊阴影：不再使用 spread 很大的 shadow，而是紧贴的 */
+    box-shadow: inset 2px 0 5px rgba(255,255,255,0.1); 
+    border-radius: 1px;
 }
 
-/* 顶部书页 (Top Face) - 展示书的纵深 */
+/* 顶部书页 (Top Face) - 修正错位 */
 .book::before {
     content: '';
     position: absolute;
     top: 0; left: 0;
     width: 100%;
-    height: var(--book-depth); /* 使用 JS 生成的随机深度 */
+    height: var(--book-depth); /* 深度 */
     
     transform-origin: top;
-    transform: rotateX(90deg);
+    /* 
+       FIXED: rotateX(-90deg) 
+       负90度才是向“屏幕后方”折叠，构成立方体的顶部。
+       之前的正90度是向屏幕前方翻，导致错位。
+    */
+    transform: rotateX(-90deg);
     
-    background-color: #eaddcf; /* 泛黄的纸张色 */
-    /* 书页纹理 */
+    background-color: #eaddcf; 
     background-image: repeating-linear-gradient(90deg, 
         rgba(0,0,0,0.06) 0px, 
         rgba(0,0,0,0.06) 1px, 
@@ -163,29 +180,60 @@ body {
         transparent 4px
     );
     
-    /* 书页阴影：靠近书脊处有阴影，远处有光 */
-    box-shadow: inset 0 10px 20px rgba(0,0,0,0.1);
+    /* 顶部光影优化 */
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
 }
 
-/* 书本侧面/封面 (Right Face) */
+/* 书本侧面/封面 (Right Face) - 修正错位 */
 .book::after {
     content: '';
     position: absolute;
     top: 0; 
-    left: 100%; /* 接在书脊右侧 */
-    width: var(--book-depth); /* 深度与 Top 一致 */
+    /* 紧贴书脊右边缘 */
+    left: 100%; 
+    width: var(--book-depth); /* 深度 */
     height: 100%;
     
     transform-origin: left;
+    /* 
+       FIXED: rotateY(90deg)
+       以左边框为轴，向后转90度。
+       由于 CSS Y轴向下，+90度是Z轴正向转X轴正向（向后）。这是对的。
+    */
     transform: rotateY(90deg);
     
-    /* 侧面颜色：比书脊暗一点 */
-    background-color: var(--book-color);
-    filter: brightness(0.85); /* 自动变暗 */
+    /* 侧面颜色处理 */
+    background-color: var(--book-color); /* 继承封面色 */
+    /* 叠加一层黑色半透明，模拟侧面阴影 */
+    background-image: linear-gradient(to right, rgba(0,0,0,0.4), rgba(0,0,0,0.1));
     
-    /* 封面纹理：模拟皮质或布面 */
-    background-image: url('https://www.transparenttextures.com/patterns/leather.png');
-    box-shadow: inset 5px 0 30px rgba(0,0,0,0.4); /* 深邃感 */
+    /* 
+       为了更像书，给侧面加一点纹理（皮质）
+    */
+    background-image: 
+        linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.1)),
+        url('https://www.transparenttextures.com/patterns/leather.png');
+}
+
+/* 
+   新增：真实的地面投影 (Shadow) 
+   之前的 box-shadow 是贴在书脊上的，还是像纸片。
+   我们需要一个躺在地板上的阴影。
+*/
+.book .shadow {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    height: var(--book-depth);
+    background: rgba(0,0,0,0.4);
+    box-shadow: 0 0 20px 5px rgba(0,0,0,0.4);
+    
+    transform-origin: bottom;
+    /* 躺平在书本底部，Z轴稍微向下一点防止重叠 */
+    transform: rotateX(90deg) translateZ(1px); 
+    
+    pointer-events: none;
+    z-index: -1;
 }
 
 /* 书脊文字 */

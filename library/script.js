@@ -40,6 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             bookEl.appendChild(titleEl);
 
+            // 新增：真实的底部投影 Div
+            const shadowEl = document.createElement('div');
+            shadowEl.classList.add('shadow');
+            bookEl.appendChild(shadowEl);
+
             // 点击事件：打开书
             bookEl.addEventListener('click', () => {
                 openBook(book);
