@@ -113,106 +113,110 @@ body {
     display: none;
 }
 
-/* === Book Styles === */
+/* === Book Styles (True 3D) === */
 .book {
-    width: 55px;
-    margin: 0 4px; 
+    width: 50px; /* 书脊宽度 */
+    /* 高度由 JS 控制 */
+    margin: 0 12px; /* 增加间距，让侧面露出来 */
     
-    /* 
-       Fix alignment: In wrap-reverse flex container (bottom-to-top), 
-       'flex-start' is the bottom of the line (Cross Start).
-       'flex-end' is the top of the line (Cross End).
-       User wants bottom alignment, so we need flex-start.
-    */
-    align-self: flex-start;
+    align-self: flex-start; /* 底部对齐 (在 wrap-reverse 中) */
+    margin-top: 50px; /* 层间距 */
     
-    /* Spacer to prevent overlap with shelf above */
-    margin-top: 40px; 
-    
-    border-radius: 2px; /* Sharper corners for 3D look */
     position: relative;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     
-    /* Deep shadow to make it pop */
-    box-shadow: 
-        inset 4px 0 10px rgba(0,0,0,0.3), /* Spine curvature (left) */
-        inset -1px 0 2px rgba(255,255,255,0.1), /* Highlight (right) */
-        5px 5px 15px rgba(0,0,0,0.5); /* Drop shadow */
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    /* 3D Perspective setup */
+    /* 启用 3D 空间 */
     transform-style: preserve-3d;
-    transform: perspective(1000px) rotateY(-5deg); /* Slightly angled */
+    /* 默认视角：向左偏转，露出右侧封面 */
+    transform: perspective(2000px) rotateY(-25deg) translateZ(0);
+    
+    /* 颜色由变量控制 */
+    background-color: var(--book-color); 
+    /* 书脊纹理 + 装饰线 (Binder bands) */
+    background-image: 
+        linear-gradient(to bottom, transparent 15%, rgba(0,0,0,0.3) 15%, rgba(0,0,0,0.3) 17%, transparent 17%),
+        linear-gradient(to bottom, transparent 85%, rgba(0,0,0,0.3) 85%, rgba(0,0,0,0.3) 87%, transparent 87%),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 10%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.4) 100%);
+        
+    box-shadow: inset 2px 0 5px rgba(255,255,255,0.1); /* 轻微高光 */
+    border-radius: 1px; /* 硬朗一点 */
 }
 
-/* 3D Top Edge (Pages/Cover) */
+/* 顶部书页 (Top Face) - 展示书的纵深 */
 .book::before {
     content: '';
     position: absolute;
-    top: -10px;
-    left: 0;
+    top: 0; left: 0;
     width: 100%;
-    height: 10px;
-    background-color: #e0e0e0; /* Page color */
-    /* Texture for pages */
-    background-image: repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.05) 1px, rgba(0,0,0,0.05) 2px);
+    height: var(--book-depth); /* 使用 JS 生成的随机深度 */
     
-    transform-origin: bottom;
-    transform: rotateX(60deg) skewX(-10deg);
-    border-radius: 2px 2px 0 0;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    transform-origin: top;
+    transform: rotateX(90deg);
+    
+    background-color: #eaddcf; /* 泛黄的纸张色 */
+    /* 书页纹理 */
+    background-image: repeating-linear-gradient(90deg, 
+        rgba(0,0,0,0.06) 0px, 
+        rgba(0,0,0,0.06) 1px, 
+        transparent 1px, 
+        transparent 4px
+    );
+    
+    /* 书页阴影：靠近书脊处有阴影，远处有光 */
+    box-shadow: inset 0 10px 20px rgba(0,0,0,0.1);
 }
 
-/* 3D Side/Right visual (Thickness) - optional, 
-   but since we rotateY(-5deg), we see a bit of the right side? 
-   Actually standard spine view is front.
-   Let's add a "Binder" effect (horizontal bands) */
+/* 书本侧面/封面 (Right Face) */
 .book::after {
     content: '';
     position: absolute;
-    top: 15%;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(0,0,0,0.2);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.2), 0 -3px 0 rgba(0,0,0,0.2);
+    top: 0; 
+    left: 100%; /* 接在书脊右侧 */
+    width: var(--book-depth); /* 深度与 Top 一致 */
+    height: 100%;
+    
+    transform-origin: left;
+    transform: rotateY(90deg);
+    
+    /* 侧面颜色：比书脊暗一点 */
+    background-color: var(--book-color);
+    filter: brightness(0.85); /* 自动变暗 */
+    
+    /* 封面纹理：模拟皮质或布面 */
+    background-image: url('https://www.transparenttextures.com/patterns/leather.png');
+    box-shadow: inset 5px 0 30px rgba(0,0,0,0.4); /* 深邃感 */
 }
-/* Allow customized bands for variety? We can use logic in JS, but simple CSS after is good for now. */
-
 
 /* 书脊文字 */
 .spine-title {
     writing-mode: vertical-rl;
     text-orientation: mixed;
-    color: rgba(255,255,255,0.85); /* Brighter text */
+    color: rgba(255,255,255,0.85);
     
     font-family: "Songti SC", "Noto Serif SC", STSong, "SimSun", serif;
-    font-size: 16px; 
+    font-size: 17px; 
     font-weight: bold;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
     max-height: 80%;
     overflow: hidden;
     pointer-events: none;
-    z-index: 2;
+    
+    /* 确保文字浮在书脊面上 */
+    transform: translateZ(1px);
 }
 
 /* Hover Effects */
 .book:hover {
-    transform: translateY(-30px) perspective(1000px) rotateY(-5deg) scale(1.05); /* Maintain perspective */
+    /* 抽书效果：向前移动 + 稍微修正角度 */
+    transform: perspective(2000px) rotateY(-25deg) translateZ(50px) translateY(-10px);
     z-index: 100;
-    box-shadow: 
-        inset 4px 0 10px rgba(0,0,0,0.3),
-        10px 20px 30px rgba(0,0,0,0.8);
 }
 .book:hover .spine-title {
     color: #ffd700;
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
 }
 
 /* === Modal === */

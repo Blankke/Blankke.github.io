@@ -15,9 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const bookEl = document.createElement('div');
             bookEl.classList.add('book');
             
-            // 应用样式变量
-            bookEl.style.backgroundColor = book.color;
-            
+            // 应用样式变量 (改为 CSS 变量以便伪元素继承)
+            bookEl.style.setProperty('--book-color', book.color);
+            // 随机设置一个书本深度（纵深），让每本书看起来厚度不一更真实
+            const randomDepth = Math.floor(Math.random() * 40) + 180; // 180-220px
+            bookEl.style.setProperty('--book-depth', `${randomDepth}px`);
+
             // 随机高度生成：260px 到 350px 之间
             const randomHeight = Math.floor(Math.random() * 90) + 260;
             bookEl.style.height = `${randomHeight}px`;
