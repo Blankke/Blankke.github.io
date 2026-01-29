@@ -66,8 +66,7 @@ const libraryBooks = [
     ]
   },
   {
-    "title": "一个孤独的...", 
-    "fullTitle": "一个孤独的散步者的遐想",
+    "title": "一个孤独的散步者的遐想",
     "author": "卢梭",
     "color": "#5d4037",
     "quotes": [
@@ -83,8 +82,7 @@ const libraryBooks = [
     ]
   },
   {
-    "title": "克林索尔...",
-    "fullTitle": "克林索尔的最后夏天",
+    "title": "克林索尔的最后夏天",
     "author": "赫尔曼·黑塞",
     "color": "#ff6f00",
     "textColor": "#000",
