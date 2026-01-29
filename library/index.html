@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blankke's Library</title>
+    <!-- 引入Google字体，增加学术感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="room">
+        <!-- 氛围吊灯层：负责制造光源和暗角 -->
+        <div class="lighting-layer">
+            <div class="lamp-glow"></div>
+        </div>
+
+        <!-- 标题（可选，如果不想要可以删掉） -->
+        <div class="library-header">
+            <h1>My Mental Corner</h1>
+        </div>
+        
+        <!-- 书架层 -->
+        <div class="shelf-container">
+            <div class="bookshelf" id="bookshelf">
+                <!-- JavaScript 会把书填在这里 -->
+            </div>
+            <div class="shelf-wood"></div>
+        </div>
+
+        <!-- 读书笔记弹出层 (Modal) -->
+        <div id="overlay" class="overlay">
+            <div class="book-modal">
+                <button class="close-btn" onclick="closeBook()">×</button>
+                <div class="modal-content">
+                    <h2 id="modal-title">书名</h2>
+                    <h3 id="modal-author">作者</h3>
+                    <div class="divider"></div>
+                    <div id="modal-quotes" class="quotes-container">
+                        <!-- 引用内容 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
