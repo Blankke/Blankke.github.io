@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const bookshelf = document.getElementById('bookshelf');
 
-    // 1. 获取书籍数据
-    fetch('books.json')
-        .then(response => response.json())
-        .then(books => {
-            renderBooks(books);
-        })
-        .catch(error => console.error('Error loading books:', error));
+    // 1. 直接渲染书籍（数据来自 books-data.js）
+    // 检查数据是否存在
+    if (typeof libraryBooks !== 'undefined') {
+        renderBooks(libraryBooks);
+    } else {
+        console.error('Error: libraryBooks data not found. Please ensure books-data.js is loaded.');
+    }
 
     // 2. 渲染书籍函数
     function renderBooks(books) {
@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
             bookEl.style.backgroundColor = book.color;
             
             // 随机高度生成：260px 到 350px 之间
-            // Math.random() generates 0-1. *90 -> 0-90. +260 -> 260-350.
             const randomHeight = Math.floor(Math.random() * 90) + 260;
             bookEl.style.height = `${randomHeight}px`;
 
@@ -55,7 +54,7 @@ const modalAuthor = document.getElementById('modal-author');
 const modalQuotes = document.getElementById('modal-quotes');
 
 function openBook(book) {
-    modalTitle.innerText = book.fullTitle || book.title; // 优先使用 fullTitle，如果书脊太短写不下可以用 title
+    modalTitle.innerText = book.fullTitle || book.title; 
     modalAuthor.innerText = book.author || '';
     
     // 清空旧内容并填入新名言
