@@ -1,11 +1,16 @@
 body {
     font-family: "SimSun", "Songti SC", serif; /* Matching the serif look in the image */
     line-height: 1.5;
-    color: #000;
+    color: #111;
     max-width: 210mm; /* A4 width approx */
     margin: 0 auto;
     padding: 40px;
     background-color: #fff;
+}
+
+:root {
+    --resume-link: #5f87b5;
+    --resume-link-hover: #456f9f;
 }
 
 /* Reset and basics */
@@ -16,6 +21,19 @@ body {
 h1, h2, h3, p, ul, li {
     margin: 0;
     padding: 0;
+}
+
+a {
+    color: var(--resume-link);
+    text-decoration: underline;
+    text-decoration-color: rgba(95, 135, 181, 0.45);
+    text-underline-offset: 2px;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+a:hover {
+    color: var(--resume-link-hover);
+    text-decoration-color: rgba(69, 111, 159, 0.75);
 }
 
 /* Header */
@@ -42,6 +60,35 @@ h1, h2, h3, p, ul, li {
     line-height: 1.6;
 }
 
+.contact-line {
+    margin-bottom: 2px;
+}
+
+.contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin: 2px 0;
+}
+
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--resume-link);
+}
+
+.contact-link:hover {
+    color: var(--resume-link-hover);
+}
+
+.contact-icon {
+    width: 13px;
+    height: 13px;
+    opacity: 0.82;
+}
+
 .header-right {
     margin-left: 20px;
 }
@@ -62,17 +109,76 @@ h1, h2, h3, p, ul, li {
 .section-title {
     font-size: 16px;
     font-weight: bold;
-    border-bottom: 1px solid #000;
-    padding-bottom: 3px;
-    margin-bottom: 8px;
+    border-bottom: 1px solid #1f1f1f;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    letter-spacing: 0.03em;
+}
+
+.section-title-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.section-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.82;
 }
 
 /* Education Section */
-.edu-basic-info, .edu-stats {
+.edu-basic-info {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
     margin-bottom: 4px;
+}
+
+.edu-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+    margin: 8px 0 6px;
+}
+
+.edu-stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 7px 9px 6px;
+    border: 1px solid rgba(95, 135, 181, 0.22);
+    border-left: 2px solid rgba(95, 135, 181, 0.55);
+    background-color: rgba(95, 135, 181, 0.05);
+    border-radius: 4px;
+    width: fit-content;
+    min-width: 110px;
+    max-width: 100%;
+}
+
+.edu-stat-item-wide {
+    min-width: 220px;
+}
+
+.edu-stat-label {
+    font-size: 11px;
+    color: #5b6673;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+}
+
+.edu-stat-value {
+    font-size: 14px;
+    font-weight: bold;
+    color: #24384f;
+    line-height: 1.35;
+}
+
+.edu-stat-note {
+    font-size: 11px;
+    color: #6c7b8d;
+    line-height: 1.25;
 }
 
 .edu-courses {
@@ -92,9 +198,18 @@ h1, h2, h3, p, ul, li {
     margin-bottom: 4px;
 }
 
+.project-title-link {
+    color: var(--resume-link);
+}
+
+.project-title-link:hover {
+    color: var(--resume-link-hover);
+}
+
 .project-content {
     font-size: 14px;
     text-align: justify;
+    color: #1f1f1f;
 }
 
 .project-row {
@@ -105,6 +220,7 @@ h1, h2, h3, p, ul, li {
 .project-label {
     font-weight: bold;
     flex-shrink: 0; /* Prevent label from shrinking */
+    margin-right: 2px;
 }
 
 /* Awards Section */
@@ -116,18 +232,39 @@ h1, h2, h3, p, ul, li {
 .award-item {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 4px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.award-leading-icon {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.award-year {
+    min-width: 78px;
 }
 
 .award-name {
     flex: 1;
-    margin-left: 20px;
+    margin-left: 8px;
 }
 
 .award-level {
-    margin-left: 20px;
+    margin-left: 8px;
     min-width: 80px;
     text-align: right;
+    color: #303030;
+}
+
+.award-rank {
+    min-width: 96px;
+    display: inline-block;
+    text-align: right;
+    white-space: nowrap;
 }
 
 /* Skills & Work */
@@ -142,6 +279,93 @@ h1, h2, h3, p, ul, li {
     justify-content: space-between;
 }
 
+.inline-skill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.inline-skill-icon {
+    width: 11px;
+    height: 11px;
+    opacity: 0.8;
+    transform: translateY(0.5px);
+}
+
+.inline-skill-icon-rust {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.inline-skill-icon-git,
+.inline-skill-icon-ocaml {
+    width: 12px;
+    height: 12px;
+}
+
+.inline-skill-label {
+    gap: 5px;
+}
+
+.collapsible-section {
+    border-top: 1px solid #1f1f1f;
+    padding-top: 4px;
+}
+
+.collapsible-title {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.collapsible-title::-webkit-details-marker {
+    display: none;
+}
+
+.collapsible-hint {
+    font-size: 11px;
+    font-weight: normal;
+    color: #7b8896;
+    letter-spacing: 0;
+    margin-left: 4px;
+}
+
+.collapsible-section[open] .collapsible-hint::before {
+    content: "点击收起";
+}
+
+.collapsible-section[open] .collapsible-hint {
+    font-size: 0;
+}
+
+.collapsible-title::after {
+    content: "+";
+    float: right;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.collapsible-section[open] .collapsible-title::after {
+    content: "-";
+}
+
+.collapsible-content {
+    margin-top: 10px;
+}
+
+.course-item {
+    margin-bottom: 12px;
+}
+
+.course-item:last-child {
+    margin-bottom: 0;
+}
+
 .indent {
     text-indent: 0px; 
 }
@@ -151,5 +375,22 @@ h1, h2, h3, p, ul, li {
     body {
         padding: 0;
         max-width: 100%;
+    }
+
+    .edu-stats {
+        gap: 6px;
+    }
+
+    .edu-stat-item {
+        background-color: transparent;
+    }
+
+    .collapsible-section {
+        border-top: none;
+        padding-top: 0;
+    }
+
+    .collapsible-section:not([open]) .collapsible-content {
+        display: none;
     }
 }

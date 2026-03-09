@@ -14,9 +14,18 @@
             <div class="header-left">
                 <h1 class="name">曹子宸</h1> <!-- User's Name -->
                 <div class="contact-info">
-                    武汉大学 (WHU) &nbsp;|&nbsp; 计算机科学与技术 (Computer Science and Technology)<br>
-                    邮箱: 1169809321@qq.com  GitHub: https://github.com/Blankke<br>
-                    电话: 15982191108
+                    <div class="contact-line">武汉大学 (WHU) &nbsp;|&nbsp; 计算机科学与技术 (Computer Science and Technology)</div>
+                    <div class="contact-links">
+                        <a class="contact-link" href="mailto:1169809321@qq.com">
+                            <img class="contact-icon" src="../assets/icon/email.svg" alt="">
+                            <span>1169809321@qq.com</span>
+                        </a>
+                        <a class="contact-link" href="https://github.com/Blankke" target="_blank" rel="noreferrer">
+                            <img class="contact-icon" src="../assets/icon/github.svg" alt="">
+                            <span>github.com/Blankke</span>
+                        </a>
+                    </div>
+                    <div class="contact-line">电话: 15982191108</div>
                 </div>
             </div>
         </header>
@@ -30,11 +39,27 @@
                 <span>2023.09 - 至今</span>
             </div>
             <div class="edu-stats">
-                <span>CET6/CET4(597/645)</span>
-                <span>IELTS: 7.5</span>
-                <span>GPA: 3.91/4.0</span>
-                <span>加权平均分: 90.89/100</span>
-                <span>学习成绩排名（截至大二）: 8/238</span>
+                <div class="edu-stat-item">
+                    <span class="edu-stat-label">CET-6 / CET-4</span>
+                    <span class="edu-stat-value">597 / 645</span>
+                </div>
+                <div class="edu-stat-item">
+                    <span class="edu-stat-label">IELTS</span>
+                    <span class="edu-stat-value">7.5</span>
+                </div>
+                <div class="edu-stat-item">
+                    <span class="edu-stat-label">GPA</span>
+                    <span class="edu-stat-value">3.91 / 4.0</span>
+                </div>
+                <div class="edu-stat-item">
+                    <span class="edu-stat-label">加权平均分</span>
+                    <span class="edu-stat-value">90.89 / 100</span>
+                </div>
+                <div class="edu-stat-item edu-stat-item-wide">
+                    <span class="edu-stat-label">学习成绩排名（截至前五学期）</span>
+                    <span class="edu-stat-value">8 / 238</span>
+                    <span class="edu-stat-note">Top 3.36%</span>
+                </div>
             </div>
             <div class="edu-courses">
                 <strong>核心课程：</strong> 操作系统、计算机网络、计算机组成原理、数据结构、离散数学、数据库原理、编译原理、算法设计与分析、计算机图形学等。
@@ -43,21 +68,22 @@
 
         <!-- Project Experience Section -->
         <section class="section">
-            <h2 class="section-title">项目经历</h2>
+            <h2 class="section-title">
+                <span class="section-title-content">
+                    <img class="section-icon" src="../assets/icon/project.svg" alt="">
+                    <span>项目经历</span>
+                </span>
+            </h2>
             
             <div class="project-item">
                 <div class="project-header">
-                    <span>1. F7LY-OS（系统能力大赛 · 操作系统内核实现赛道）</span>
+                    <span><a class="project-title-link" href="https://github.com/Blankke/F7LY" target="_blank" rel="noreferrer">1. F7LY-OS（系统能力大赛 · 操作系统内核实现赛道）</a></span>
                     <span>2025.03 – 2025.08</span>
                 </div>
                 <div class="project-content">
                     <div class="project-row">
                         <span class="project-label">项目描述：</span>
                         <span>负责人，设计并实现一个基于 C++ 的宏内核操作系统，支持 RISC-V / LoongArch 双架构，实现 200+ POSIX 系统调用，通过大部分 LTP 测试及竞赛官方用例，验证内核稳定性与兼容性；负责核心子系统架构设计与关键功能落地。</span>
-                    </div>
-                    <div class="project-row">
-                        <span class="project-label">项目地址：</span>
-                        <span><a href="https://github.com/Blankke/F7LY" target="_blank">https://github.com/Blankke/F7LY</a></span>
                     </div>
                     <div class="project-row">
                         <span class="project-label">Tech Stack：</span>
@@ -68,7 +94,7 @@
 
             <div class="project-item">
                 <div class="project-header">
-                    <span>2. StarryOS（2025 秋冬季开源操作系统训练营 · 项目一）</span>
+                    <span><a class="project-title-link" href="https://github.com/orgs/Starry-OS/discussions/15" target="_blank" rel="noreferrer">2. StarryOS（2025 秋冬季开源操作系统训练营 · 项目一）</a></span>
                     <span>2025.09 – 2025.12</span>
                 </div>
                 <div class="project-content">
@@ -77,22 +103,21 @@
                         <span>优秀学员，参与 组件化操作系统 StarryOS 的架构实践，在 Rust 生态下完成驱动与硬件抽象相关工作；负责 LoongArch 物理开发板适配，并实现 板级无关的 AHCI 驱动，解决缓冲区异常与 I/O 稳定性问题。</span>
                     </div>
                     <div class="project-row">
-                        <span class="project-label">工作记录：</span>
-                        <span><a href="https://github.com/orgs/Starry-OS/discussions/15" target="_blank">https://github.com/orgs/Starry-OS/discussions/15</a></span>
-                    </div>
-                    <div class="project-row">
                         <span class="project-label">Tech Stack：</span>
                         <span>Rust / Component-based OS / LoongArch / AHCI / Block Device Driver / DMA / Buffer Management / rcore / ArceOS</span>
                     </div>
                 </div>
             </div>
 
-            <div class="project-item">
-                <div class="project-header">
         </section>
 
         <section class="section">
-            <h2 class="section-title">科研经历</h2>
+            <h2 class="section-title">
+                <span class="section-title-content">
+                    <img class="section-icon" src="../assets/icon/research.svg" alt="">
+                    <span>科研经历</span>
+                </span>
+            </h2>
 
             <div class="project-item">
                 <div class="project-header">
@@ -101,7 +126,7 @@
                 </div>
                 <div class="project-content">
                     <div class="project-row">
-                        <span class="project-label">项目描述：</span>
+                        <span class="project-label">研究内容：</span>
                         <span>针对 3DGS 在 SLAM 动态建图中拓扑频繁变化引发的实时性与网络同步问题，构建 可见性驱动的模型剪枝机制 与 基于 MQTT 的在线 3DGStream 传输系统。通过可见性与 LoD 联合过滤冗余高斯点保证训练与渲染实时性，并设计基于 持久化 ID + 操作日志的增量同步协议，在受限带宽下实现训练端与用户端的稳定一致渲染，相关成果在投。</span>
                     </div>
                     <div class="project-row">
@@ -114,57 +139,110 @@
 
         <!-- Awards Section -->
         <section class="section">
-            <h2 class="section-title">获奖情况</h2>
+            <h2 class="section-title">
+                <span class="section-title-content">
+                    <img class="section-icon" src="../assets/icon/award.svg" alt="">
+                    <span>获奖情况</span>
+                </span>
+            </h2>
             <ul class="award-list">
                 <li class="award-item">
-                    <span>2024-2025</span>
+                    <img class="award-leading-icon" src="../assets/icon/honor.svg" alt="">
+                    <span class="award-year">2024-2025</span>
                     <span class="award-name">国家奖学金 (National Scholarship)证书编号	BZK2025024184</span>
                     <span class="award-level">国家级</span>
-                    <span>TOP 0.4%</span>
+                    <span class="award-rank">TOP 0.4%</span>
                 </li>
                 <li class="award-item">
-                    <span>2024-2025</span>
+                    <img class="award-leading-icon" src="../assets/icon/honor.svg" alt="">
+                    <span class="award-year">2024-2025</span>
                     <span class="award-name">优秀学生甲等奖学金、校级三好学生</span>
                     <span class="award-level">校级</span>
-                    <span>Top 10%</span>
+                    <span class="award-rank">Top 10%</span>
                 </li>
                 <li class="award-item">
-                    <span>2023-2024</span>
+                    <img class="award-leading-icon" src="../assets/icon/honor.svg" alt="">
+                    <span class="award-year">2023-2024</span>
                     <span class="award-name">优秀学生乙等奖学金、校级三好学生</span>
                     <span class="award-level">校级</span>
-                    <span>Top 15%</span>
+                    <span class="award-rank">Top 15%</span>
                 </li>
                 <li class="award-item">
-                    <span>2023</span>
+                    <img class="award-leading-icon" src="../assets/icon/honor.svg" alt="">
+                    <span class="award-year">2023</span>
                     <span class="award-name">黄彰任奖学金</span>
                     <span class="award-level">校级</span>
-                    <span>荣誉称号</span>
+                    <span class="award-rank">荣誉称号</span>
                 </li>                
                 <li class="award-item">
-                    <span>2025</span>
+                    <img class="award-leading-icon" src="../assets/icon/honor.svg" alt="">
+                    <span class="award-year">2025</span>
                     <span class="award-name">全国大学生计算机系统能力大赛操作系统内核实现赛道</span>
-                    <span class="award-level">全国</span>
-                    <span>二等奖</span>
+                    <span class="award-level">国家级</span>
+                    <span class="award-rank">二等奖</span>
                 </li>
                 <li class="award-item">
-                    <span>2025</span>
+                    <img class="award-leading-icon" src="../assets/icon/honor.svg" alt="">
+                    <span class="award-year">2025</span>
                     <span class="award-name">华中杯数学建模竞赛</span>
                     <span class="award-level">省级</span>
-                    <span>二等奖</span>
+                    <span class="award-rank">二等奖</span>
                 </li>
             </ul>
             </section>
 
         <!-- Scientific Research Skills -->
         <section class="section">
-            <h2 class="section-title">科研技能</h2>
+            <h2 class="section-title">
+                <span class="section-title-content">
+                    <img class="section-icon" src="../assets/icon/code.svg" alt="">
+                    <span>科研技能</span>
+                </span>
+            </h2>
             <ol class="skill-list">
-                <li>掌握 C/C++, Rust, Python 等编程语言；熟悉 Linux 开发环境。</li>
-                <li>熟悉操作系统原理 (OS)、计算机网络、编译原理。自学完成过MIT S081操作系统课程，STANFORD CS144计算机网络课程，使用ocaml书写过达到90%水平gcc -O2的编译器。</li>
-                <li>掌握 Git 版本控制工具，参与过多个开源项目，熟悉PR合并流程</li>
+                <li>掌握 <span class="inline-skill"><img class="inline-skill-icon" src="../assets/icon/c.svg" alt=""><img class="inline-skill-icon" src="../assets/icon/cpp.svg" alt=""><span>C/C++</span></span>、<span class="inline-skill"><img class="inline-skill-icon" src="../assets/icon/csharp.svg" alt=""><span>C#</span></span>、<span class="inline-skill"><img class="inline-skill-icon inline-skill-icon-rust" src="../assets/icon/rust.png" alt=""><span>Rust</span></span>、<span class="inline-skill"><img class="inline-skill-icon" src="../assets/icon/python.svg" alt=""><span>Python</span></span> 等编程语言；熟悉 Linux 开发环境。</li>
+                <li>熟悉操作系统原理 (OS)、计算机网络、编译原理。自学完成过MIT S081操作系统课程，STANFORD CS144计算机网络课程。</li>
+                <li>使用 <span class="inline-skill"><img class="inline-skill-icon inline-skill-icon-ocaml" src="../assets/icon/ocaml.svg" alt=""><span>OCaml</span></span> 书写过达到 90% 水平 gcc -O2 的编译器；使用 Verilog 在计组课设中设计实现五级流水线 RV32I 架构 CPU。</li>
+                <li>掌握 <span class="inline-skill"><img class="inline-skill-icon inline-skill-icon-git" src="../assets/icon/git.png" alt=""><span>Git</span></span> 版本控制工具，参与过多个开源项目，熟悉 PR 合并流程。</li>
                 <li>熟悉LaTex文档编写</li>
-                <li>英语水平：CET-6 ，能流畅阅读英文技术文档。</li>
+                <li><span class="inline-skill inline-skill-label"><img class="inline-skill-icon" src="../assets/icon/en.svg" alt=""><span>英语水平</span></span>：CET-6，能流畅阅读英文技术文档。</li>
             </ol>
+        </section>
+
+        <section class="section">
+            <details class="collapsible-section">
+                <summary class="collapsible-title">
+                    <span class="section-title-content">
+                        <img class="section-icon" src="../assets/icon/project.svg" alt="">
+                        <span>课程项目</span>
+                        <span class="collapsible-hint">点击展开</span>
+                    </span>
+                </summary>
+                <div class="collapsible-content">
+                    <div class="project-item course-item">
+                        <div class="project-header">
+                            <span><a class="project-title-link" href="https://github.com/Blankke/My_cpu" target="_blank" rel="noreferrer">1. 计组课设：五级流水线 CPU</a></span>
+                        </div>
+                        <div class="project-content">
+                            <div class="project-row">
+                                <span class="project-label">项目概述：</span>
+                                <span>使用 Verilog 实现五级流水线 CPU，围绕 RV32I 指令执行通路完成流水线寄存器、基础数据通路与仿真验证，支撑计组课程中对处理器设计与实现流程的系统训练。</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-item course-item">
+                        <div class="project-header">
+                            <span><a class="project-title-link" href="https://github.com/Blankke/toyc" target="_blank" rel="noreferrer">2. 编译课设：ToyC 编译器</a></span>
+                        </div>
+                        <div class="project-content">
+                            <div class="project-row">
+                                <span class="project-label">项目概述：</span>
+                                <span>使用 OCaml 实现 ToyC 编译器，覆盖词法分析、语法分析、语义处理与代码生成等核心环节，并结合课程目标完成编译流程的模块化实现与调试。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
         </section>
 
         <!-- Student Work -->
