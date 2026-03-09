@@ -1,140 +1,155 @@
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    max-width: 900px;
+    font-family: "SimSun", "Songti SC", serif; /* Matching the serif look in the image */
+    line-height: 1.5;
+    color: #000;
+    max-width: 210mm; /* A4 width approx */
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 40px;
     background-color: #fff;
 }
 
-a {
-    color: #0066cc;
-    text-decoration: none;
+/* Reset and basics */
+* {
+    box-sizing: border-box;
 }
 
-a:hover {
-    text-decoration: underline;
+h1, h2, h3, p, ul, li {
+    margin: 0;
+    padding: 0;
 }
 
-header {
+/* Header */
+.resume-header {
     display: flex;
-    gap: 40px;
-    margin-bottom: 60px;
+    justify-content: space-between;
     align-items: flex-start;
-}
-
-.profile-section {
-    flex: 0 0 200px;
-    text-align: center;
-}
-
-.profile-photo {
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    background-color: #eee;
     margin-bottom: 20px;
-    object-fit: cover;
-    border: 1px solid #ddd;
+    padding-bottom: 20px;
 }
 
-.contact-info {
-    font-size: 0.9em;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-}
-
-.contact-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.contact-item img {
-    width: 16px;
-    height: 16px;
-    opacity: 0.7;
-}
-
-.main-content {
+.header-left {
     flex: 1;
 }
 
-h1 {
-    font-size: 2.5em;
-    margin: 0 0 10px 0;
-    font-weight: 700;
+.name {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
-h2 {
-    font-size: 1.5em;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    margin-top: 40px;
+.contact-info {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.header-right {
+    margin-left: 20px;
+}
+
+.profile-photo {
+    width: 100px;
+    height: 125px; /* Aspect ratio roughly 4:5 based on image */
+    object-fit: cover;
+    background-color: #ddd;
+    border: 1px solid #eee;
+}
+
+/* Section Common Styles */
+.section {
     margin-bottom: 20px;
-    color: #111;
 }
 
-.section-item {
-    margin-bottom: 20px;
-}
-
-.date-badge {
-    display: inline-block;
-    background-color: #f1f1f1;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.85em;
-    color: #555;
-    margin-right: 10px;
-    font-family: monospace;
-}
-
-.institution {
-    font-weight: 600;
-    color: #000;
-}
-
-.paper-title {
-    font-weight: 600;
-    color: #000;
-}
-
-.authors {
-    color: #555;
-    font-size: 0.95em;
-}
-
-.venue {
-    font-style: italic;
-    color: #666;
-}
-
-.links {
-    font-size: 0.9em;
-    margin-top: 4px;
-}
-
-ul {
-    padding-left: 20px;
-    margin-top: 10px;
-}
-
-li {
+.section-title {
+    font-size: 16px;
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    padding-bottom: 3px;
     margin-bottom: 8px;
 }
 
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    
-    .profile-section {
-        margin-bottom: 30px;
+/* Education Section */
+.edu-basic-info, .edu-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.edu-courses {
+    font-size: 14px;
+}
+
+/* Project Section */
+.project-item {
+    margin-bottom: 15px;
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.project-content {
+    font-size: 14px;
+    text-align: justify;
+}
+
+.project-row {
+    margin-bottom: 3px;
+    display: flex;
+}
+
+.project-label {
+    font-weight: bold;
+    flex-shrink: 0; /* Prevent label from shrinking */
+}
+
+/* Awards Section */
+.award-list {
+    list-style: none;
+    font-size: 14px;
+}
+
+.award-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.award-name {
+    flex: 1;
+    margin-left: 20px;
+}
+
+.award-level {
+    margin-left: 20px;
+    min-width: 80px;
+    text-align: right;
+}
+
+/* Skills & Work */
+.skill-list, .work-list {
+    font-size: 14px;
+    padding-left: 20px; 
+}
+
+.work-item {
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.indent {
+    text-indent: 0px; 
+}
+
+/* Print optimizations */
+@media print {
+    body {
+        padding: 0;
+        max-width: 100%;
     }
 }

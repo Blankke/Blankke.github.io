@@ -3,106 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人简历 | Resume</title>
+    <title>个人简历</title>
     <link rel="stylesheet" href="resume.css">
 </head>
 <body>
 
-    <header>
-        <div class="profile-section">
-            <!-- Placeholder for profile photo -->
-            <img src="https://avatars.githubusercontent.com/u/123186231?v=4&size=64" alt="Profile Photo" class="profile-photo">
+    <div class="resume-container">
+        <!-- Header Section -->
+        <header class="resume-header">
+            <div class="header-left">
+                <h1 class="name">曹子宸</h1> <!-- User's Name -->
+                <div class="contact-info">
+                    武汉大学 (WHU) &nbsp;|&nbsp; 计算机科学与技术 (Computer Science and Technology)<br>
+                    邮箱: 1169809321@qq.com  GitHub: https://github.com/Blankke<br>
+                    电话: 15982191108
+                </div>
+            </div>
+        </header>
+
+        <!-- Education Section -->
+        <section class="section">
+            <h2 class="section-title">教育背景</h2>
+            <div class="edu-basic-info" style="font-weight: bold;">
+                <span>武汉大学</span>
+                <span>计算机科学与技术</span>
+                <span>2023.09 - 至今</span>
+            </div>
+            <div class="edu-stats">
+                <span>CET6/CET4(597/645)</span>
+                <span>IELTS: 7.5</span>
+                <span>GPA: 3.91/4.0</span>
+                <span>加权平均分: 90.89/100</span>
+                <span>学习成绩排名（截至大二）: 8/238</span>
+            </div>
+            <div class="edu-courses">
+                <strong>核心课程：</strong> 操作系统、计算机网络、计算机组成原理、数据结构、离散数学、数据库原理、编译原理、算法设计与分析、计算机图形学等。
+            </div>
+        </section>
+
+        <!-- Project Experience Section -->
+        <section class="section">
+            <h2 class="section-title">项目经历</h2>
             
-            <div class="contact-info">
-                <div class="contact-item">
-                    <span>📧</span>
-                    <a href="mailto:1169809321@qq.com">1169809321@qq.com</a>
+            <div class="project-item">
+                <div class="project-header">
+                    <span>1. F7LY-OS（系统能力大赛 · 操作系统内核实现赛道）</span>
+                    <span>2025.03 – 2025.08</span>
                 </div>
-                <div class="contact-item">
-                    <span>🏫</span>
-                    <a href="https://www.whu.edu.cn/">WHU</a>
-                </div>
-                <div class="contact-item">
-                    <span>📍</span>
-                    <span>Wuhan, China</span>
-                </div>
-                <div class="contact-item">
-                    <span>🔗</span>
-                    <a href="https://github.com/Blankke" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <h1>我还不想被盒</h1>
-            <p>
-                这里是个人简介。我是武汉大学的计算机专业的学生。我的研究兴趣包括操作系统、网络和分布式系统。
-                <br><br>
-                Here is a short bio. I am currently a student/researcher at [University Name]. My research interests include [Interest 1], [Interest 2], and [Interest 3].
-            </p>
-
-            <h2>📖 Education (教育经历)</h2>
-            <div class="section-item">
-                <div>
-                    <span class="date-badge">2023.09 - Present</span>
-                    <span class="institution">武汉大学 (WHU)</span>
-                </div>
-                <div style="margin-top: 5px; color: #555;">
-                    Major in Computer Science (计算机科学专业)
+                <div class="project-content">
+                    <div class="project-row">
+                        <span class="project-label">项目描述：</span>
+                        <span>负责人，设计并实现一个基于 C++ 的宏内核操作系统，支持 RISC-V / LoongArch 双架构，实现 200+ POSIX 系统调用，通过大部分 LTP 测试及竞赛官方用例，验证内核稳定性与兼容性；负责核心子系统架构设计与关键功能落地。</span>
+                    </div>
+                    <div class="project-row">
+                        <span class="project-label">项目地址：</span>
+                        <span><a href="https://github.com/Blankke/F7LY" target="_blank">https://github.com/Blankke/F7LY</a></span>
+                    </div>
+                    <div class="project-row">
+                        <span class="project-label">Tech Stack：</span>
+                        <span>C++ / OS Kernel / RISC-V / LoongArch / Virtual Memory / Page Table / POSIX / LTP / FAT32 / ext4 / IPC（Shared Memory, Pipe）/ Device Tree</span>
+                    </div>
                 </div>
             </div>
 
-            <h2>📃 Publications / Projects (项目与发表)</h2>
-            
-            <div class="section-item">
-                <div class="paper-title">F7LY-OS</div>
-                <div class="authors">
-                    <strong>Blankke</strong>, Guan kaiqi, KidsZZ*
+            <div class="project-item">
+                <div class="project-header">
+                    <span>2. StarryOS（2025 秋冬季开源操作系统训练营 · 项目一）</span>
+                    <span>2025.09 – 2025.12</span>
                 </div>
-                <div class="venue">
-                    系统能力大赛操作系统内核实现赛道
-                </div>
-                <div class="links">
-                    [<a href="https://gitlab.eduxiji.net/educg-group-36002-2710490/T202510486995205-1539/-/blob/main/docs/F7LY-OS%E5%86%B3%E8%B5%9B%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3.pdf">Doc</a>] [<a href="https://gitlab.eduxiji.net/educg-group-36002-2710490/T202510486995205-1539">Code</a>]
+                <div class="project-content">
+                    <div class="project-row">
+                        <span class="project-label">项目描述：</span>
+                        <span>优秀学员，参与 组件化操作系统 StarryOS 的架构实践，在 Rust 生态下完成驱动与硬件抽象相关工作；负责 LoongArch 物理开发板适配，并实现 板级无关的 AHCI 驱动，解决缓冲区异常与 I/O 稳定性问题。</span>
+                    </div>
+                    <div class="project-row">
+                        <span class="project-label">工作记录：</span>
+                        <span><a href="https://github.com/orgs/Starry-OS/discussions/15" target="_blank">https://github.com/orgs/Starry-OS/discussions/15</a></span>
+                    </div>
+                    <div class="project-row">
+                        <span class="project-label">Tech Stack：</span>
+                        <span>Rust / Component-based OS / LoongArch / AHCI / Block Device Driver / DMA / Buffer Management / rcore / ArceOS</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- <div class="section-item">
-                <div class="paper-title">Another Cool Project</div>
-                <div class="authors">
-                    <strong>Your Name</strong>, Collaborator Name
-                </div>
-                <div class="venue">
-                    Project Description or Tech Stack
-                </div>
-                <div class="links">
-                    [<a href="#">GitHub</a>] [<a href="#">Website</a>]
-                </div>
-            </div> -->
+            <div class="project-item">
+                <div class="project-header">
+        </section>
 
-            <!-- <h2>💻 Internships (实习经历)</h2>
-            <div class="section-item">
-                <div>
-                    <span class="date-badge">2024.06 - 2024.09</span>
-                    <span class="institution">Company Name (某某科技公司)</span>
-                </div>
-                <div style="margin-top: 5px;">
-                    Software Engineer Intern
-                    <ul>
-                        <li>Developed feature X using React and Node.js.</li>
-                        <li>Optimized database queries improving performance by 20%.</li>
-                    </ul>
-                </div>
-            </div> -->
+        <section class="section">
+            <h2 class="section-title">科研经历</h2>
 
-            <h2>🎖 Honors and Awards (荣誉奖项)</h2>
-            <ul style="list-style-type: none; padding-left: 0;">
-                <li><span class="date-badge">2024-2025</span> National Scholarship (国家奖学金)(Award Rate: 0.4% nation-wide) - Ministry of Education, China</li>
-                <li><span class="date-badge">2023</span> Outstanding Student Award (优秀学生)</li>
+            <div class="project-item">
+                <div class="project-header">
+                    <span>1. SLAM 场景下 3D Gaussian Splatting 的可见性剪枝与实时流式传输系统</span>
+                    <span>2025.09 – 至今</span>
+                </div>
+                <div class="project-content">
+                    <div class="project-row">
+                        <span class="project-label">项目描述：</span>
+                        <span>针对 3DGS 在 SLAM 动态建图中拓扑频繁变化引发的实时性与网络同步问题，构建 可见性驱动的模型剪枝机制 与 基于 MQTT 的在线 3DGStream 传输系统。通过可见性与 LoD 联合过滤冗余高斯点保证训练与渲染实时性，并设计基于 持久化 ID + 操作日志的增量同步协议，在受限带宽下实现训练端与用户端的稳定一致渲染，相关成果在投。</span>
+                    </div>
+                    <div class="project-row">
+                        <span class="project-label">Tech Stack：</span>
+                        <span>3D Gaussian Splatting / SLAM / Visibility Modeling / LoD / Model Pruning / MQTT / Streaming Protocol / Operation Queue / Incremental Sync (ADD / UPDATE / DELETE)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Awards Section -->
+        <section class="section">
+            <h2 class="section-title">获奖情况</h2>
+            <ul class="award-list">
+                <li class="award-item">
+                    <span>2024-2025</span>
+                    <span class="award-name">国家奖学金 (National Scholarship)证书编号	BZK2025024184</span>
+                    <span class="award-level">国家级</span>
+                    <span>TOP 0.4%</span>
+                </li>
+                <li class="award-item">
+                    <span>2024-2025</span>
+                    <span class="award-name">优秀学生甲等奖学金、校级三好学生</span>
+                    <span class="award-level">校级</span>
+                    <span>Top 10%</span>
+                </li>
+                <li class="award-item">
+                    <span>2023-2024</span>
+                    <span class="award-name">优秀学生乙等奖学金、校级三好学生</span>
+                    <span class="award-level">校级</span>
+                    <span>Top 15%</span>
+                </li>
+                <li class="award-item">
+                    <span>2023</span>
+                    <span class="award-name">黄彰任奖学金</span>
+                    <span class="award-level">校级</span>
+                    <span>荣誉称号</span>
+                </li>                
+                <li class="award-item">
+                    <span>2025</span>
+                    <span class="award-name">全国大学生计算机系统能力大赛操作系统内核实现赛道</span>
+                    <span class="award-level">全国</span>
+                    <span>二等奖</span>
+                </li>
+                <li class="award-item">
+                    <span>2025</span>
+                    <span class="award-name">华中杯数学建模竞赛</span>
+                    <span class="award-level">省级</span>
+                    <span>二等奖</span>
+                </li>
             </ul>
+            </section>
 
-        </div>
-    </header>
+        <!-- Scientific Research Skills -->
+        <section class="section">
+            <h2 class="section-title">科研技能</h2>
+            <ol class="skill-list">
+                <li>掌握 C/C++, Rust, Python 等编程语言；熟悉 Linux 开发环境。</li>
+                <li>熟悉操作系统原理 (OS)、计算机网络、编译原理。自学完成过MIT S081操作系统课程，STANFORD CS144计算机网络课程，使用ocaml书写过达到90%水平gcc -O2的编译器。</li>
+                <li>掌握 Git 版本控制工具，参与过多个开源项目，熟悉PR合并流程</li>
+                <li>熟悉LaTex文档编写</li>
+                <li>英语水平：CET-6 ，能流畅阅读英文技术文档。</li>
+            </ol>
+        </section>
+
+        <!-- Student Work -->
+        <section class="section">
+            <h2 class="section-title">学生工作</h2>
+            <ul class="work-list" style="list-style: disc; padding-left: 20px;">
+                <li class="work-item">
+                    <span>2025</span>
+                    <span>班长</span>
+                </li>    
+                <li class="work-item">
+                    <span>2023.09 - 2025.06</span>
+                    <span>武汉大学广播台编辑部</span>
+                    <span>核心成员 / 负责人</span>
+                </li>                
+                <li class="work-item">
+                    <span>2023.09 - 至今</span>
+                    <span>武汉大学真趣书社（图书馆附属社团）</span>
+                    <span>核心成员 / 负责人</span>
+                </li>
+            </ul>
+        </section>
+
+    </div>
 
 </body>
 </html>
