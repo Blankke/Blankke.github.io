@@ -2,21 +2,159 @@
 // Includes: Icon Dragging, Selection, Context Menus
 
 const desktop = document.getElementById('desktop');
+const DESKTOP_ICON_LAYOUT = {
+    baseScale: 1,
+    minScale: 0.65,
+    scaleStep: 0.05,
+    startX: 20,
+    startY: 20,
+    columnGap: 100,
+    rowGap: 90,
+    estimatedWidth: 84,
+    estimatedHeight: 74,
+    paddingRight: 12,
+    paddingBottom: 12,
+    taskbarFallbackHeight: 32
+};
 
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
+function getDesktopIcons() {
+    return Array.from(document.querySelectorAll('.icon[data-icon-id]'));
+}
+
+function getTaskbarHeight() {
+    return document.querySelector('.taskbar')?.offsetHeight || DESKTOP_ICON_LAYOUT.taskbarFallbackHeight;
+}
+
+function getDesktopViewport() {
+    const width = desktop?.clientWidth || window.innerWidth;
+    const height = (desktop?.clientHeight || window.innerHeight) - getTaskbarHeight();
+    return {
+        width: Math.max(width, DESKTOP_ICON_LAYOUT.estimatedWidth),
+        height: Math.max(height, DESKTOP_ICON_LAYOUT.estimatedHeight)
+    };
+}
+
+function getRowsPerColumn(scale) {
+    const { height } = getDesktopViewport();
+    const startY = DESKTOP_ICON_LAYOUT.startY * scale;
+    const maxTop = height - DESKTOP_ICON_LAYOUT.estimatedHeight * scale - DESKTOP_ICON_LAYOUT.paddingBottom;
+
+    if (maxTop <= startY) {
+        return 1;
+    }
+
+    return Math.max(1, Math.floor((maxTop - startY) / (DESKTOP_ICON_LAYOUT.rowGap * scale)) + 1);
+}
+
+function getColumnsPerRow(scale) {
+    const { width } = getDesktopViewport();
+    const startX = DESKTOP_ICON_LAYOUT.startX * scale;
+    const maxLeft = width - DESKTOP_ICON_LAYOUT.estimatedWidth * scale - DESKTOP_ICON_LAYOUT.paddingRight;
+
+    if (maxLeft <= startX) {
+        return 1;
+    }
+
+    return Math.max(1, Math.floor((maxLeft - startX) / (DESKTOP_ICON_LAYOUT.columnGap * scale)) + 1);
+}
+
+function computeAdaptiveIconScale(iconCount = getDesktopIcons().length) {
+    if (iconCount <= 1) {
+        return DESKTOP_ICON_LAYOUT.baseScale;
+    }
+
+    for (let scale = DESKTOP_ICON_LAYOUT.baseScale; scale >= DESKTOP_ICON_LAYOUT.minScale; scale -= DESKTOP_ICON_LAYOUT.scaleStep) {
+        const rows = getRowsPerColumn(scale);
+        const cols = getColumnsPerRow(scale);
+        if (rows * cols >= iconCount) {
+            return Number(scale.toFixed(2));
+        }
+    }
+
+    return DESKTOP_ICON_LAYOUT.minScale;
+}
+
+function applyDesktopIconScale(iconCount = getDesktopIcons().length) {
+    const scale = computeAdaptiveIconScale(iconCount);
+    document.body.style.setProperty('--desktop-icon-scale', String(scale));
+    return scale;
+}
+
+function getArrangedIconPosition(index, scale, rowsPerColumn = getRowsPerColumn(scale)) {
+    const row = index % rowsPerColumn;
+    const column = Math.floor(index / rowsPerColumn);
+    return {
+        left: Math.round(DESKTOP_ICON_LAYOUT.startX * scale + column * DESKTOP_ICON_LAYOUT.columnGap * scale),
+        top: Math.round(DESKTOP_ICON_LAYOUT.startY * scale + row * DESKTOP_ICON_LAYOUT.rowGap * scale)
+    };
+}
+
+function clampIconToViewport(icon) {
+    const { width, height } = getDesktopViewport();
+    const left = parseInt(icon.style.left || '0', 10) || 0;
+    const top = parseInt(icon.style.top || '0', 10) || 0;
+    const maxLeft = Math.max(0, Math.floor(width - icon.offsetWidth - DESKTOP_ICON_LAYOUT.paddingRight));
+    const maxTop = Math.max(0, Math.floor(height - icon.offsetHeight - DESKTOP_ICON_LAYOUT.paddingBottom));
+    const clampedLeft = clamp(left, 0, maxLeft);
+    const clampedTop = clamp(top, 0, maxTop);
+
+    icon.style.left = `${clampedLeft}px`;
+    icon.style.top = `${clampedTop}px`;
+    return clampedLeft !== left || clampedTop !== top;
+}
+
+function arrangeDesktopIcons(options = {}) {
+    const { persist = true } = options;
+    const icons = getDesktopIcons();
+    const scale = applyDesktopIconScale(icons.length);
+    const rowsPerColumn = getRowsPerColumn(scale);
+
+    icons.forEach((icon, index) => {
+        const position = getArrangedIconPosition(index, scale, rowsPerColumn);
+        icon.style.left = `${position.left}px`;
+        icon.style.top = `${position.top}px`;
+        if (persist) {
+            saveIconPosition(icon);
+        }
+    });
+}
+
+function keepIconsInViewport() {
+    const icons = getDesktopIcons();
+    applyDesktopIconScale(icons.length);
+
+    let outOfBoundsCount = 0;
+    icons.forEach((icon) => {
+        if (clampIconToViewport(icon)) {
+            outOfBoundsCount += 1;
+        }
+    });
+
+    if (outOfBoundsCount > 0) {
+        arrangeDesktopIcons({ persist: true });
+    }
+}
+
 function loadIconPositions() {
     const saved = JSON.parse(localStorage.getItem('win98_desktop_icons') || '{}');
-    document.querySelectorAll('.icon[data-icon-id]').forEach(icon => {
+    const icons = getDesktopIcons();
+    const scale = applyDesktopIconScale(icons.length);
+
+    icons.forEach((icon, index) => {
         const id = icon.dataset.iconId;
-        const fallbackLeft = parseInt(icon.dataset.defaultLeft || '20', 10);
-        const fallbackTop = parseInt(icon.dataset.defaultTop || '20', 10);
+        const fallbackPosition = getArrangedIconPosition(index, scale);
+        const fallbackLeft = parseInt(icon.dataset.defaultLeft || String(fallbackPosition.left), 10);
+        const fallbackTop = parseInt(icon.dataset.defaultTop || String(fallbackPosition.top), 10);
         const pos = saved[id] || { left: fallbackLeft, top: fallbackTop };
         icon.style.left = `${pos.left}px`;
         icon.style.top = `${pos.top}px`;
     });
+
+    keepIconsInViewport();
 }
 
 function saveIconPosition(icon) {
@@ -55,24 +193,7 @@ if (desktop) {
 
     desktop.addEventListener('dblclick', (e) => {
         if (e.target.id === 'desktop' || e.target === document.body) {
-            // Auto arrange
-            const icons = Array.from(document.querySelectorAll('.icon[data-icon-id]'));
-            let top = 20;
-            let left = 20;
-            const spacing = 90;
-            const maxHeight = window.innerHeight - 100;
-            
-            icons.forEach((icon) => {
-                icon.style.left = `${left}px`;
-                icon.style.top = `${top}px`;
-                saveIconPosition(icon);
-                
-                top += spacing;
-                if (top > maxHeight) {
-                    top = 20;
-                    left += 90;
-                }
-            });
+            arrangeDesktopIcons({ persist: true });
         }
     });
 }
@@ -125,11 +246,25 @@ document.addEventListener('mousemove', (e) => {
 document.addEventListener('mouseup', () => {
     if (isDraggingIcon && draggingIcon) {
         draggingIcon.classList.remove('dragging');
+        clampIconToViewport(draggingIcon);
         saveIconPosition(draggingIcon);
     }
     isDraggingIcon = false;
     draggingIcon = null;
 });
+
+window.addEventListener('resize', () => {
+    keepIconsInViewport();
+});
+
+window.refreshDesktopIconLayout = function(options = {}) {
+    if (options.arrange) {
+        arrangeDesktopIcons({ persist: true });
+        return;
+    }
+
+    keepIconsInViewport();
+};
 
 // Context Menus
 const contextMenu = document.getElementById('context-menu');
@@ -215,23 +350,7 @@ document.addEventListener('click', (e) => {
 
 // Context Menu Actions
 document.getElementById('ctx-arrange')?.addEventListener('click', () => {
-    const icons = Array.from(document.querySelectorAll('.icon[data-icon-id]'));
-    let top = 20;
-    let left = 20;
-    const spacing = 90;
-    const maxHeight = window.innerHeight - 100;
-    
-    icons.forEach((icon) => {
-        icon.style.left = `${left}px`;
-        icon.style.top = `${top}px`;
-        saveIconPosition(icon);
-        
-        top += spacing;
-        if (top > maxHeight) {
-            top = 20;
-            left += 90;
-        }
-    });
+    arrangeDesktopIcons({ persist: true });
     hideContextMenu();
 });
 
@@ -269,6 +388,7 @@ document.getElementById('ctx-paste')?.addEventListener('click', () => {
     document.getElementById('desktop').appendChild(newIcon);
     bindIconInteractions(newIcon);
     saveIconPosition(newIcon);
+    window.refreshDesktopIconLayout();
     
     hideContextMenu();
 });
@@ -364,6 +484,7 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', async () =
             
             // Remove from DOM
             contextMenuTargetIcon.remove();
+            window.refreshDesktopIconLayout();
             
             // Update recycle bin icon
             if (typeof updateRecycleBinDesktopIcon === 'function') {
