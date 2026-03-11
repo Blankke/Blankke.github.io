@@ -77,6 +77,40 @@ window.mewmewTalkEnabled = false;
 
 let trackContextMenu = null;
 
+function getTrackByIndex(index, fallbackTrack = null) {
+    if (Array.isArray(musicTracks) && index >= 0 && index < musicTracks.length) {
+        return musicTracks[index];
+    }
+    return fallbackTrack;
+}
+
+function formatFileSize(sizeBytes) {
+    const size = Number(sizeBytes);
+    if (!Number.isFinite(size) || size <= 0) {
+        return '未知';
+    }
+
+    if (size < 1024) {
+        return `${size} B`;
+    }
+
+    if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[char]);
+}
+
 function ensureTrackContextMenu() {
     if (trackContextMenu) return trackContextMenu;
     trackContextMenu = document.createElement('div');
@@ -118,7 +152,7 @@ function showTrackContextMenu(x, y, track, index) {
     propItem.className = 'context-menu-item';
     propItem.textContent = '属性(R)';
     propItem.addEventListener('click', () => {
-        showTrackProperties(track);
+        showTrackProperties(index, track);
         menu.style.display = 'none';
     });
     menu.appendChild(propItem);
@@ -128,19 +162,26 @@ function showTrackContextMenu(x, y, track, index) {
     menu.style.display = 'block';
 }
 
-function showTrackProperties(track) {
-    // Ensure track is an object
+function showTrackProperties(index, fallbackTrack = null) {
+    const track = getTrackByIndex(index, fallbackTrack);
+
     if (!track || typeof track !== 'object') {
-        track = { title: 'Error', file: 'Error' };
+        return;
     }
 
     const title = track.title || track.file || 'Unknown Track';
-    // Loose matching for "American Pie"
-    const isAmericanPie = title.toLowerCase().replace(/[^a-z0-9]/g, '').includes('americanpie');
-    
-    // Close existing properties window if any (to allow switching or refreshing)
-    if (typeof closeWindow === 'function') {
-        closeWindow('window-track-properties');
+    const matchSource = `${track.title || ''} ${track.file || ''}`.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const isAmericanPie = matchSource.includes('americanpie');
+    const fileName = escapeHtml(track.file || 'Unknown');
+    const displayTitle = escapeHtml(title);
+    const displaySize = formatFileSize(track.sizeBytes);
+
+    const existingWindow = document.getElementById('window-track-properties');
+    if (existingWindow) {
+        if (typeof closeWindow === 'function') {
+            closeWindow('window-track-properties');
+        }
+        existingWindow.remove();
     }
 
     let content = `
@@ -148,7 +189,7 @@ function showTrackProperties(track) {
             <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="assets/icon/cd_player.png" style="width: 32px; height: 32px;">
                 <div>
-                    <p><strong>${title}</strong></p>
+                    <p><strong>${displayTitle}</strong></p>
                     <p>类型: MP3 Audio</p>
                     <p>位置: assets/music/</p>
                 </div>
@@ -156,9 +197,9 @@ function showTrackProperties(track) {
             <div style="border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 5px 0;"></div>
             <div style="display: grid; grid-template-columns: 80px 1fr; gap: 5px; font-size: 12px;">
                 <div>文件名:</div>
-                <div>${track.file}</div>
+                <div>${fileName}</div>
                 <div>大小:</div>
-                <div>未知</div>
+                <div>${displaySize}</div>
             </div>
     `;
 
@@ -234,7 +275,10 @@ async function loadMusicManifest() {
         const res = await fetch('assets/music/manifest.json', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        const tracks = Array.isArray(data.tracks) ? data.tracks : [];
+        const tracks = Array.isArray(data.tracks) ? data.tracks.map((track) => ({
+            ...track,
+            sizeBytes: Number(track.sizeBytes) || null
+        })) : [];
         musicTracks = tracks;
         renderTrackList(tracks);
     } catch (err) {

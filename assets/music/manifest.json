@@ -2,27 +2,38 @@
   "tracks": [
     {
       "title": "I Am Arrows - Nice try",
-      "file": "I Am Arrows - Nice try.mp3"
+      "file": "I Am Arrows - Nice try.mp3",
+      "sizeBytes": 7614971
     },
     {
       "title": "I Am Arrows - Green grass",
-      "file": "I Am Arrows - Green grass.mp3"
+      "file": "I Am Arrows - Green grass.mp3",
+      "sizeBytes": 9286139
     },
     {
       "title": "I Am Arrows - Nun",
-      "file": "I Am Arrows - Nun.mp3"
+      "file": "I Am Arrows - Nun.mp3",
+      "sizeBytes": 7516667
     },
     {
       "title": "Don McLean - American Pie",
-      "file": "Don McLean - American Pie.mp3"
+      "file": "Don McLean - American Pie.mp3",
+      "sizeBytes": 21615095
     },
     {
       "title": "Jason Mraz - Life Is Wonderful (Live in Amsterdam)",
-      "file": "Jason Mraz - Life Is Wonderful (Live in Amsterdam).mp3"
+      "file": "Jason Mraz - Life Is Wonderful (Live in Amsterdam).mp3",
+      "sizeBytes": 11069058
     },
     {
       "title": "Maroon 5 - Lucky Strike",
-      "file": "Maroon 5 - Lucky Strike.mp3"
+      "file": "Maroon 5 - Lucky Strike.mp3",
+      "sizeBytes": 7898504
+    },
+    {
+      "title": "Ludovico Einaudi - Una Mattina",
+      "file": "Ludovico Einaudi - Una Mattina.mp3",
+      "sizeBytes": 17060172
     }
   ]
 }
