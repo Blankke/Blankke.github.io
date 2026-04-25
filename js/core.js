@@ -11,7 +11,8 @@ window.BLANKKE_STATE_KEYS = {
     recycleCatalog: 'blankke_recycle_catalog_v2',
     quest: 'blankke_quest_v2',
     library: 'blankke_library_v2',
-    minesweeper: 'blankke_minesweeper_v2'
+    minesweeper: 'blankke_minesweeper_v2',
+    effects: 'blankke_effects_v1'
 };
 
 window.quest = (function() {
@@ -129,6 +130,13 @@ window.openSettingsWindow = function() {
                     </div>
                 </fieldset>
                 <fieldset style="margin-top: 10px;">
+                    <legend>视觉效果</legend>
+                    <p>切换桌面背景上的动态特效，不会影响窗口、宠物或隐藏入口。</p>
+                    <div class="message-box-buttons" style="justify-content: flex-start;">
+                        <button id="settings-effects" type="button">桌面特效...</button>
+                    </div>
+                </fieldset>
+                <fieldset style="margin-top: 10px;">
                     <legend>本地数据</legend>
                     <p>清理普通界面状态，不会改变网页文件本身。</p>
                     <div class="message-box-buttons" style="justify-content: flex-start;">
@@ -153,6 +161,12 @@ window.openSettingsWindow = function() {
             localStorage.removeItem(window.BLANKKE_STATE_KEYS.desktop);
             localStorage.removeItem('win98_desktop_icons');
             if (typeof loadIconPositions === 'function') loadIconPositions();
+        });
+
+        document.getElementById('settings-effects')?.addEventListener('click', () => {
+            if (window.desktopEffects?.openSettings) {
+                window.desktopEffects.openSettings();
+            }
         });
 
         document.getElementById('settings-clear-ui')?.addEventListener('click', () => {

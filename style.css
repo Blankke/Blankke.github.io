@@ -29,6 +29,43 @@ body::after {
   z-index: 0;
 }
 
+body.effects-night {
+  background-color: #061821;
+  background-image:
+    linear-gradient(rgba(3, 12, 20, 0.35), rgba(3, 12, 20, 0.35)),
+    url('assets/icon/bg-dither.svg');
+}
+
+body.effects-night::after {
+  opacity: 0.08;
+}
+
+.desktop-effects-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+.desktop-effects-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background:
+    radial-gradient(circle at 50% 42%, transparent 0%, rgba(0, 0, 0, 0.06) 54%, rgba(0, 0, 0, 0.22) 100%),
+    linear-gradient(135deg, rgba(255, 209, 232, 0.12), transparent 35%, rgba(115, 214, 255, 0.08));
+}
+
+body.effects-active .desktop-effects-vignette {
+  opacity: 1;
+}
+
 /* Desktop Icons */
 .desktop-icons {
   position: absolute;
@@ -321,6 +358,41 @@ body::after {
 
 .message-box-btn-primary {
   font-weight: bold;
+}
+
+.effects-settings {
+  background: #c0c0c0;
+  border: 2px inset #dfdfdf;
+  padding: 10px;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  font-size: 12px;
+  color: #000;
+}
+
+.effects-settings fieldset {
+  margin: 0 0 10px;
+}
+
+.effects-settings .field-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.effects-settings select {
+  min-width: 170px;
+}
+
+.effects-settings-preview {
+  height: 70px;
+  margin-top: 8px;
+  border: 2px inset #dfdfdf;
+  background:
+    radial-gradient(circle at 24% 42%, rgba(255, 255, 255, 0.8) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 26%, rgba(255, 205, 228, 0.9) 0 3px, transparent 4px),
+    linear-gradient(135deg, #014545, #002c3a);
 }
 
 .message-box-overlay {
