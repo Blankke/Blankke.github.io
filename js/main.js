@@ -77,29 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loadIconPositions();
     }
 
-    // 2. Initialize Recycle Bin State (Restore missing icons)
+    // 2. Initialize Recycle Bin State.
+    // PVZ and readme remain hidden recycle-bin clues by default; if the user restores
+    // them, that state is carried by the quest namespace.
     if (typeof initRecycleBinState === 'function') {
-        // Ensure PVZ starts in recycle bin (remove any desktop remnants from previous state if needed)
-        // This logic was in script.js, but initRecycleBinState handles most of it now.
-        // We just need to make sure we don't have a stale icon if we want to force a state,
-        // but initRecycleBinState is smart enough.
-        
-        // However, the original script had this specific block:
-        /*
-        const existingPvzIcon = document.getElementById('icon-pvz');
-        if (existingPvzIcon) {
-            existingPvzIcon.remove();
-            localStorage.removeItem(PVZ_RESTORED_KEY);
-        }
-        */
-        // This block in the original script seemed to be for debugging or a specific reset.
-        // But later in the script it called initRecycleBinState().
-        // Actually, looking at the original script, that block was:
-        // "Initialize on load / Ensure PVZ starts in recycle bin..."
-        // It seems the user might have wanted a hard reset at some point, but `initRecycleBinState`
-        // is the robust way to handle persistence.
-        // I will trust `initRecycleBinState` to do the right thing based on localStorage.
-        
         initRecycleBinState();
     }
 
@@ -224,7 +205,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 6. Set Last Updated Time
+    // 6. Resume reader controls
+    const resumeFrame = document.getElementById('resume-frame');
+    const resumeOpenNew = document.getElementById('resume-open-new');
+    const resumePrint = document.getElementById('resume-print');
+    const resumeZoomOut = document.getElementById('resume-zoom-out');
+    const resumeZoomIn = document.getElementById('resume-zoom-in');
+    const resumeZoomReset = document.getElementById('resume-zoom-reset');
+    const resumeZoomLabel = document.getElementById('resume-zoom-label');
+    let resumeZoom = 1;
+
+    const applyResumeZoom = () => {
+        if (!resumeFrame) return;
+        resumeZoom = Math.max(0.7, Math.min(1.4, resumeZoom));
+        resumeFrame.style.transform = `scale(${resumeZoom})`;
+        resumeFrame.style.width = `${100 / resumeZoom}%`;
+        resumeFrame.style.height = `${100 / resumeZoom}%`;
+        if (resumeZoomLabel) resumeZoomLabel.textContent = `${Math.round(resumeZoom * 100)}%`;
+    };
+
+    resumeOpenNew?.addEventListener('click', () => window.open('apps/resume.html', '_blank'));
+    resumePrint?.addEventListener('click', () => {
+        try {
+            resumeFrame?.contentWindow?.focus();
+            resumeFrame?.contentWindow?.print();
+        } catch {
+            window.open('apps/resume.html', '_blank');
+        }
+    });
+    resumeZoomOut?.addEventListener('click', () => {
+        resumeZoom -= 0.1;
+        applyResumeZoom();
+    });
+    resumeZoomIn?.addEventListener('click', () => {
+        resumeZoom += 0.1;
+        applyResumeZoom();
+    });
+    resumeZoomReset?.addEventListener('click', () => {
+        resumeZoom = 1;
+        applyResumeZoom();
+    });
+    applyResumeZoom();
+
+    // 7. Set Last Updated Time
     const lastUpdatedContainer = document.getElementById('last-updated');
     if (lastUpdatedContainer) {
         fetch('https://api.github.com/repos/Blankke/Blankke.github.io/commits?per_page=1')

@@ -8,7 +8,7 @@ class DesktopPet {
         this.isDragging = false;
         this.dialogQueue = [];
         this.currentState = 'idle';
-        this.minesweeperCleared = false;
+        this.minesweeperCleared = !!window.quest?.hasFlag('minesweeper_fast_clear');
         this.dialogShown = {};
         this.radioHintGiven = false; // 是否已经给出广播暗示
         
@@ -256,6 +256,7 @@ class DesktopPet {
             // 50秒内通关
             if (!this.minesweeperCleared) {
                 this.minesweeperCleared = true;
+                window.quest?.setFlag('minesweeper_fast_clear', true);
                 
                 // 立即显示第一条对话
                 this.showDialog(`哇！${time} 秒！太快了！`, 4000);

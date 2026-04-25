@@ -4,46 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blankke's Library</title>
-    <!-- 引入Google字体，增加学术感 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div class="room">
-        <!-- 氛围吊灯层：负责制造光源和暗角 -->
-        <div class="lighting-layer">
-            <div class="lamp-glow"></div>
-        </div>
-
-        <!-- 标题（可选，如果不想要可以删掉） -->
-        <div class="library-header">
-            <h1>My Mental Corner</h1>
-        </div>
-        
-        <!-- 书架层 -->
-        <div class="shelf-container">
-            <div class="bookshelf" id="bookshelf">
-                <!-- JavaScript 会把书填在这里 -->
+    <div class="library-shell">
+        <header class="library-toolbar">
+            <div class="library-brand">
+                <span class="brand-mark">My Mental Corner</span>
+                <span id="library-count" class="library-count">0 books</span>
             </div>
-            <!-- wood div removed as it is now part of background -->
-        </div>
+            <div class="library-controls">
+                <label class="library-search">
+                    <span>搜索</span>
+                    <input id="library-search" type="search" autocomplete="off" placeholder="书名 / 作者 / 摘录">
+                </label>
+                <label class="library-filter">
+                    <span>作者</span>
+                    <select id="author-filter"></select>
+                </label>
+                <button id="clear-library-filter" type="button">清除</button>
+            </div>
+        </header>
 
-        <!-- 读书笔记弹出层 (Modal) -->
-        <div id="overlay" class="overlay">
-            <div class="book-modal">
-                <button class="close-btn" onclick="closeBook()">×</button>
-                <div class="modal-content">
-                    <h2 id="modal-title">书名</h2>
-                    <h3 id="modal-author">作者</h3>
-                    <div class="divider"></div>
-                    <div id="modal-quotes" class="quotes-container">
-                        <!-- 引用内容 -->
+        <main class="library-room">
+            <section class="shelf-zone" aria-label="Bookshelf">
+                <div class="shelf-head">
+                    <div>
+                        <h1>私人阅读馆</h1>
+                        <p id="library-subtitle">正在整理书架...</p>
+                    </div>
+                    <div class="shelf-meter">
+                        <span id="quote-count">0</span>
+                        <small>摘录</small>
                     </div>
                 </div>
+                <div class="bookshelf-wrap">
+                    <div class="bookshelf" id="bookshelf"></div>
+                    <div class="library-empty" id="library-empty">没有找到匹配的书。</div>
+                </div>
+            </section>
+
+            <aside class="reading-panel" id="reading-panel" aria-label="Reading details">
+                <div class="panel-grip"></div>
+                <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+                <div class="panel-kicker">Selected Book</div>
+                <h2 id="panel-title">选择一本书</h2>
+                <p id="panel-author"></p>
+                <div class="panel-tags" id="panel-tags"></div>
+                <p class="panel-note" id="panel-note"></p>
+                <div class="panel-actions">
+                    <button id="open-book-card" type="button">阅读卡片</button>
+                </div>
+                <div class="panel-divider"></div>
+                <h3>摘录</h3>
+                <div class="panel-quotes" id="panel-quotes"></div>
+                <div class="same-author" id="same-author"></div>
+            </aside>
+        </main>
+
+        <section class="quote-index" aria-label="Quote index">
+            <div class="quote-index-head">
+                <h2>摘录索引</h2>
+                <span id="quote-index-count">0 entries</span>
             </div>
-        </div>
+            <div class="quote-grid" id="quote-index"></div>
+        </section>
+    </div>
+
+    <div id="overlay" class="overlay" aria-hidden="true">
+        <article class="book-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <button class="close-btn" type="button" onclick="closeBook()" aria-label="Close">×</button>
+            <div class="modal-content">
+                <div class="modal-kicker" id="modal-status">Reading Card</div>
+                <h2 id="modal-title">书名</h2>
+                <h3 id="modal-author">作者</h3>
+                <p id="modal-note" class="modal-note"></p>
+                <div class="divider"></div>
+                <div id="modal-quotes" class="quotes-container"></div>
+                <div id="modal-related" class="modal-related"></div>
+            </div>
+        </article>
     </div>
 
     <script src="books-data.js"></script>

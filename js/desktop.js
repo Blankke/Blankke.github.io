@@ -2,6 +2,8 @@
 // Includes: Icon Dragging, Selection, Context Menus
 
 const desktop = document.getElementById('desktop');
+const DESKTOP_STATE_KEY = window.BLANKKE_STATE_KEYS?.desktop || 'blankke_desktop_v2';
+const LEGACY_DESKTOP_STATE_KEY = 'win98_desktop_icons';
 const DESKTOP_ICON_LAYOUT = {
     baseScale: 1,
     minScale: 0.65,
@@ -140,7 +142,18 @@ function keepIconsInViewport() {
 }
 
 function loadIconPositions() {
-    const saved = JSON.parse(localStorage.getItem('win98_desktop_icons') || '{}');
+    let saved = {};
+    try {
+        saved = JSON.parse(localStorage.getItem(DESKTOP_STATE_KEY) || 'null');
+        if (!saved || typeof saved !== 'object') {
+            saved = JSON.parse(localStorage.getItem(LEGACY_DESKTOP_STATE_KEY) || '{}');
+            if (saved && typeof saved === 'object') {
+                localStorage.setItem(DESKTOP_STATE_KEY, JSON.stringify(saved));
+            }
+        }
+    } catch {
+        saved = {};
+    }
     const icons = getDesktopIcons();
     const scale = applyDesktopIconScale(icons.length);
 
@@ -160,9 +173,15 @@ function loadIconPositions() {
 function saveIconPosition(icon) {
     const id = icon.dataset.iconId;
     if (!id) return;
-    const saved = JSON.parse(localStorage.getItem('win98_desktop_icons') || '{}');
+    let saved = {};
+    try {
+        saved = JSON.parse(localStorage.getItem(DESKTOP_STATE_KEY) || '{}');
+        if (!saved || typeof saved !== 'object') saved = {};
+    } catch {
+        saved = {};
+    }
     saved[id] = { left: icon.offsetLeft, top: icon.offsetTop };
-    localStorage.setItem('win98_desktop_icons', JSON.stringify(saved));
+    localStorage.setItem(DESKTOP_STATE_KEY, JSON.stringify(saved));
 }
 
 let isDraggingIcon = false;
@@ -381,7 +400,9 @@ document.getElementById('ctx-paste')?.addEventListener('click', () => {
     
     newIcon.innerHTML = copiedIcon.content;
     
-    if (copiedIcon.ondblclick) {
+    if (copiedIcon.ondblclickAttr) {
+        newIcon.setAttribute('ondblclick', copiedIcon.ondblclickAttr);
+    } else if (copiedIcon.ondblclick) {
         newIcon.ondblclick = copiedIcon.ondblclick;
     }
     
@@ -428,7 +449,8 @@ document.getElementById('icon-ctx-copy')?.addEventListener('click', () => {
             content: contextMenuTargetIcon.innerHTML,
             left: contextMenuTargetIcon.offsetLeft,
             top: contextMenuTargetIcon.offsetTop,
-            ondblclick: contextMenuTargetIcon.ondblclick
+            ondblclick: contextMenuTargetIcon.ondblclick,
+            ondblclickAttr: contextMenuTargetIcon.getAttribute('ondblclick')
         };
         updatePasteButton();
     }
@@ -460,7 +482,8 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', async () =
                 content: contextMenuTargetIcon.innerHTML,
                 left: contextMenuTargetIcon.offsetLeft,
                 top: contextMenuTargetIcon.offsetTop,
-                ondblclick: contextMenuTargetIcon.ondblclick
+                ondblclick: contextMenuTargetIcon.ondblclick,
+                ondblclickAttr: contextMenuTargetIcon.getAttribute('ondblclick')
             };
             
             // Add to recycle catalog and items list
@@ -474,13 +497,19 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', async () =
             }
             
             // Clear PVZ/Readme restored flag
-            if (iconId === 'pvz') localStorage.removeItem('pvz_restored_v1');
-            if (iconId === 'readme') localStorage.removeItem('readme_restored_v1');
+            if (iconId === 'pvz') {
+                localStorage.removeItem('pvz_restored_v1');
+                window.quest?.setFlag('pvz_restored', false);
+            }
+            if (iconId === 'readme') {
+                localStorage.removeItem('readme_restored_v1');
+                window.quest?.setFlag('readme_restored', false);
+            }
             
             // Remove from localStorage position data
-            const saved = JSON.parse(localStorage.getItem('win98_desktop_icons') || '{}');
+            const saved = JSON.parse(localStorage.getItem(DESKTOP_STATE_KEY) || '{}');
             delete saved[iconId];
-            localStorage.setItem('win98_desktop_icons', JSON.stringify(saved));
+            localStorage.setItem(DESKTOP_STATE_KEY, JSON.stringify(saved));
             
             // Remove from DOM
             contextMenuTargetIcon.remove();

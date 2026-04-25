@@ -1,6 +1,8 @@
 // Recycle Bin Logic
 
-const RECYCLE_KEY = 'recycle_bin_items_v1';
+const RECYCLE_KEY = window.BLANKKE_STATE_KEYS?.recycle || 'blankke_recycle_v2';
+const RECYCLE_CATALOG_KEY = window.BLANKKE_STATE_KEYS?.recycleCatalog || 'blankke_recycle_catalog_v2';
+const LEGACY_RECYCLE_KEY = 'recycle_bin_items_v1';
 const PVZ_RESTORED_KEY = 'pvz_restored_v1';
 const README_RESTORED_KEY = 'readme_restored_v1';
 
@@ -30,12 +32,68 @@ const recycleBinCatalog = {
     }
 };
 
+let selectedRecycleItemId = null;
+
+function loadStoredRecycleCatalog() {
+    try {
+        const raw = localStorage.getItem(RECYCLE_CATALOG_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return;
+
+        Object.keys(parsed).forEach((id) => {
+            const item = parsed[id];
+            if (!item || recycleBinCatalog[id]) return;
+            recycleBinCatalog[id] = {
+                id,
+                name: item.name || id,
+                icon: item.icon || 'assets/icon/settings_gear-4.png',
+                preview: item.preview || `已删除的图标\n\n名称: ${item.name || id}`,
+                canRestore: true,
+                restoreData: {
+                    type: 'desktop-icon',
+                    iconId: id,
+                    content: item.content || '',
+                    left: item.left || 120,
+                    top: item.top || 120,
+                    ondblclickAttr: item.ondblclickAttr || ''
+                }
+            };
+        });
+    } catch {
+        // Ignore corrupt optional catalog data.
+    }
+}
+
+function saveStoredRecycleCatalogEntry(iconId, item) {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(RECYCLE_CATALOG_KEY) || '{}');
+        parsed[iconId] = item;
+        localStorage.setItem(RECYCLE_CATALOG_KEY, JSON.stringify(parsed));
+    } catch {
+        // Optional persistence should not block recycle behavior.
+    }
+}
+
+function removeStoredRecycleCatalogEntry(iconId) {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(RECYCLE_CATALOG_KEY) || '{}');
+        delete parsed[iconId];
+        localStorage.setItem(RECYCLE_CATALOG_KEY, JSON.stringify(parsed));
+    } catch {
+        // no-op
+    }
+}
+
+loadStoredRecycleCatalog();
+
 function addIconToRecycleBin(iconId, iconData) {
+    const preview = `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`;
     recycleBinCatalog[iconId] = {
         id: iconId,
         name: iconData.name || iconId,
         icon: iconData.icon || 'settings_gear-4.png',
-        preview: `已删除的图标\n\n名称: ${iconData.name || iconId}\n原位置: (${iconData.left || 0}, ${iconData.top || 0})`,
+        preview,
         canRestore: true,
         restoreData: {
             type: 'desktop-icon',
@@ -43,15 +101,36 @@ function addIconToRecycleBin(iconId, iconData) {
             content: iconData.content,
             left: iconData.left,
             top: iconData.top,
-            ondblclick: iconData.ondblclick
+            ondblclick: iconData.ondblclick,
+            ondblclickAttr: iconData.ondblclickAttr
         }
     };
+
+    saveStoredRecycleCatalogEntry(iconId, {
+        name: iconData.name || iconId,
+        icon: iconData.icon || 'assets/icon/settings_gear-4.png',
+        preview,
+        content: iconData.content,
+        left: iconData.left,
+        top: iconData.top,
+        ondblclickAttr: iconData.ondblclickAttr
+    });
 }
 
 function getRecycleItems() {
     try {
         const raw = localStorage.getItem(RECYCLE_KEY);
-        if (!raw) return [...recycleBinDefaults];
+        if (!raw) {
+            const legacyRaw = localStorage.getItem(LEGACY_RECYCLE_KEY);
+            if (legacyRaw) {
+                const legacy = JSON.parse(legacyRaw);
+                if (Array.isArray(legacy)) {
+                    localStorage.setItem(RECYCLE_KEY, JSON.stringify(legacy));
+                    return legacy.filter(id => typeof id === 'string');
+                }
+            }
+            return [...recycleBinDefaults];
+        }
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return [...recycleBinDefaults];
         return parsed.filter(id => typeof id === 'string');
@@ -77,19 +156,27 @@ function renderRecycleBin() {
 
     const listEl = document.getElementById('recyclebin-list');
     const previewEl = document.getElementById('recyclebin-preview-text');
+    const openBtn = document.getElementById('recyclebin-open');
+    const restoreBtn = document.getElementById('recyclebin-restore');
+    const deleteBtn = document.getElementById('recyclebin-delete');
+    const emptyBtn = document.getElementById('recyclebin-empty');
     if (!listEl) return;
 
     const items = getRecycleItems();
     listEl.innerHTML = '';
-    let selectedId = null;
 
     const selectItem = (id) => {
-        selectedId = id;
+        selectedRecycleItemId = id;
         listEl.querySelectorAll('.recyclebin-item').forEach(el => {
             el.classList.toggle('is-selected', el.dataset.itemId === id);
         });
         const meta = recycleBinCatalog[id];
         if (previewEl) previewEl.textContent = meta?.preview || '…';
+        const canRestore = !!meta?.canRestore;
+        const isProtectedClue = recycleBinDefaults.includes(id);
+        if (openBtn) openBtn.disabled = id !== 'readme';
+        if (restoreBtn) restoreBtn.disabled = !canRestore;
+        if (deleteBtn) deleteBtn.disabled = isProtectedClue;
     };
 
     items.forEach((id) => {
@@ -126,7 +213,16 @@ function renderRecycleBin() {
     });
 
     if (items.length) selectItem(items[0]);
-    else if (previewEl) previewEl.textContent = '回收站是空的。';
+    else {
+        selectedRecycleItemId = null;
+        if (previewEl) previewEl.textContent = '回收站是空的。';
+        if (openBtn) openBtn.disabled = true;
+        if (restoreBtn) restoreBtn.disabled = true;
+        if (deleteBtn) deleteBtn.disabled = true;
+    }
+
+    const removableCount = items.filter(id => !recycleBinDefaults.includes(id)).length;
+    if (emptyBtn) emptyBtn.disabled = removableCount === 0;
 }
 
 function openRecycleReadme() {
@@ -208,7 +304,7 @@ function restoreRecycleItem(itemId) {
         
         if (itemId === 'pvz') {
             // Special handling for PVZ
-            // localStorage.setItem(PVZ_RESTORED_KEY, '1'); // No persistence for puzzle items
+            window.quest?.setFlag('pvz_restored', true);
             icon.dataset.defaultLeft = '120';
             icon.dataset.defaultTop = '120';
             icon.setAttribute('ondblclick', "openWindow('window-wisdomtree')");
@@ -218,7 +314,7 @@ function restoreRecycleItem(itemId) {
             `;
         } else {
             if (itemId === 'readme') {
-                // localStorage.setItem(README_RESTORED_KEY, '1'); // No persistence for puzzle items
+                window.quest?.setFlag('readme_restored', true);
             }
             // Restore from saved data
             icon.dataset.defaultLeft = String(restoreData.left || 120);
@@ -226,7 +322,9 @@ function restoreRecycleItem(itemId) {
             icon.style.left = `${restoreData.left || 120}px`;
             icon.style.top = `${restoreData.top || 120}px`;
             icon.innerHTML = restoreData.content || '';
-            if (restoreData.ondblclick) {
+            if (restoreData.ondblclickAttr) {
+                icon.setAttribute('ondblclick', restoreData.ondblclickAttr);
+            } else if (restoreData.ondblclick) {
                 icon.ondblclick = restoreData.ondblclick;
             }
         }
@@ -240,13 +338,16 @@ function restoreRecycleItem(itemId) {
         }
     }
 
+    if (!recycleBinDefaults.includes(itemId)) {
+        removeStoredRecycleCatalogEntry(itemId);
+    }
+
     renderRecycleBin();
 }
 
 function initRecycleBinState() {
     // 1. Check PVZ
-    // const pvzRestored = localStorage.getItem(PVZ_RESTORED_KEY) === '1';
-    const pvzRestored = false; // Always reset to recycle bin on reload
+    const pvzRestored = window.quest?.hasFlag('pvz_restored') || localStorage.getItem(PVZ_RESTORED_KEY) === '1';
     let items = getRecycleItems();
     let changed = false;
 
@@ -269,8 +370,7 @@ function initRecycleBinState() {
     }
 
     // 2. Check Readme
-    // const readmeRestored = localStorage.getItem(README_RESTORED_KEY) === '1';
-    const readmeRestored = false; // Always reset to recycle bin on reload
+    const readmeRestored = window.quest?.hasFlag('readme_restored') || localStorage.getItem(README_RESTORED_KEY) === '1';
 
     if (readmeRestored) {
         if (!document.getElementById('icon-readme')) {
@@ -296,6 +396,34 @@ function initRecycleBinState() {
     
     renderRecycleBin();
 }
+
+document.getElementById('recyclebin-open')?.addEventListener('click', () => {
+    if (selectedRecycleItemId === 'readme') {
+        openRecycleReadme();
+    }
+});
+
+document.getElementById('recyclebin-restore')?.addEventListener('click', () => {
+    if (selectedRecycleItemId) restoreRecycleItem(selectedRecycleItemId);
+});
+
+document.getElementById('recyclebin-delete')?.addEventListener('click', () => {
+    if (!selectedRecycleItemId || recycleBinDefaults.includes(selectedRecycleItemId)) return;
+    const items = getRecycleItems().filter(id => id !== selectedRecycleItemId);
+    removeStoredRecycleCatalogEntry(selectedRecycleItemId);
+    setRecycleItems(items);
+    selectedRecycleItemId = null;
+    renderRecycleBin();
+});
+
+document.getElementById('recyclebin-empty')?.addEventListener('click', () => {
+    const protectedItems = getRecycleItems().filter(id => recycleBinDefaults.includes(id));
+    const removedItems = getRecycleItems().filter(id => !recycleBinDefaults.includes(id));
+    removedItems.forEach(removeStoredRecycleCatalogEntry);
+    setRecycleItems(protectedItems);
+    selectedRecycleItemId = null;
+    renderRecycleBin();
+});
 
 // Hook into openWindow to refresh recycle bin
 if (typeof addOpenWindowHook === 'function') {

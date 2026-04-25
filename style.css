@@ -109,6 +109,31 @@ body::after {
   flex: 0 0 170px;
 }
 
+.recyclebin-preview fieldset {
+  margin: 0;
+}
+
+.recyclebin-preview pre {
+  width: 100%;
+  min-height: 116px;
+  max-height: 156px;
+  margin: 0;
+  padding: 6px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #fff;
+  border: 2px inset #dfdfdf;
+  box-sizing: border-box;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  font-size: 12px;
+}
+
+.recyclebin-preview button {
+  width: 100%;
+  margin-top: 5px;
+}
+
 .recyclebin-item {
   display: flex;
   align-items: center;
@@ -318,6 +343,52 @@ body::after {
 
 .window-body > ul[role="menu-bar"] {
   flex: 0 0 auto;
+}
+
+.window-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px;
+  background: #c0c0c0;
+  border-bottom: 1px solid #808080;
+  flex: 0 0 auto;
+  min-height: 30px;
+  box-sizing: border-box;
+}
+
+.window-toolbar button {
+  min-width: 58px;
+}
+
+.toolbar-separator {
+  width: 2px;
+  height: 20px;
+  background: #808080;
+  box-shadow: 1px 0 #fff;
+  margin: 0 3px;
+}
+
+.toolbar-label {
+  min-width: 42px;
+  text-align: center;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  font-size: 12px;
+}
+
+.win98-empty,
+.win98-error {
+  margin: 8px;
+  padding: 10px;
+  border: 2px inset #dfdfdf;
+  background: #fff;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  font-size: 12px;
+  color: #000;
+}
+
+.win98-error {
+  color: #800000;
 }
 
 /* Resize Handle */
@@ -577,17 +648,27 @@ body::after {
 .resume-container {
   flex: 1;
   display: flex;
-  overflow: hidden;
+  overflow: auto;
   background: white;
   min-height: 0;
 }
 
 .resume-container iframe {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 100%;
+  border: 2px inset #dfdfdf;
+  box-sizing: border-box;
+  transform-origin: top left;
+}
+
+.library-frame {
   flex: 1;
   width: 100%;
   height: 100%;
   border: 2px inset #dfdfdf;
   box-sizing: border-box;
+  background: #101010;
 }
 
 /* Music player */
@@ -657,6 +738,19 @@ body::after {
   width: 100%;
 }
 
+.music-slider-row {
+  display: grid;
+  grid-template-columns: 42px minmax(120px, 1fr) 88px;
+  align-items: center;
+  gap: 8px;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  font-size: 12px;
+}
+
+.music-slider-row input[type="range"] {
+  width: 100%;
+}
+
 @media (max-width: 720px) {
   .music-container {
     grid-template-columns: 1fr;
@@ -688,7 +782,7 @@ body::after {
 #waline-container .wl-btn.primary:active {
   border: 2px inset #dfdfdf;
 }
-}
+
 /* 右键菜单 */
 .context-menu {
   position: fixed;
@@ -910,4 +1004,55 @@ body::after {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@media (max-width: 760px) {
+  body {
+    --desktop-icon-scale: 0.82;
+  }
+
+  #top-right-info {
+    display: none;
+  }
+
+  .window {
+    min-width: 260px;
+  }
+
+  .taskbar-window-btn {
+    min-width: 42px;
+    max-width: 120px;
+    padding: 2px 4px;
+  }
+
+  .taskbar-window-btn span {
+    display: none;
+  }
+
+  .system-tray {
+    flex-shrink: 0;
+  }
+
+  .recyclebin-layout,
+  .music-container {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .recyclebin-preview {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .music-slider-row {
+    grid-template-columns: 38px 1fr;
+  }
+
+  .music-slider-row span {
+    grid-column: 2;
+  }
+
+  .resume-toolbar {
+    overflow-x: auto;
+  }
 }

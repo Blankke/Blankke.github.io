@@ -100,6 +100,38 @@ function toggleMaximizeWindow(id) {
     bringToFront(win);
 }
 
+function getWindowViewportBounds() {
+    const taskbarHeight = document.querySelector('.taskbar')?.offsetHeight || 32;
+    return {
+        width: window.innerWidth,
+        height: Math.max(220, window.innerHeight - taskbarHeight),
+        taskbarHeight
+    };
+}
+
+function clampWindowToViewport(win) {
+    if (!win || win.classList.contains('window-maximized')) return;
+    const bounds = getWindowViewportBounds();
+    const margin = window.innerWidth < 760 ? 6 : 10;
+    const maxWidth = Math.max(260, bounds.width - margin * 2);
+    const maxHeight = Math.max(200, bounds.height - margin * 2);
+
+    if (win.offsetWidth > maxWidth) {
+        win.style.width = `${maxWidth}px`;
+    }
+    if (win.offsetHeight > maxHeight) {
+        win.style.height = `${maxHeight}px`;
+    }
+
+    const left = parseInt(win.style.left || `${win.offsetLeft}`, 10) || 0;
+    const top = parseInt(win.style.top || `${win.offsetTop}`, 10) || 0;
+    const maxLeft = Math.max(margin, bounds.width - win.offsetWidth - margin);
+    const maxTop = Math.max(margin, bounds.height - win.offsetHeight - margin);
+
+    win.style.left = `${Math.max(margin, Math.min(left, maxLeft))}px`;
+    win.style.top = `${Math.max(margin, Math.min(top, maxTop))}px`;
+}
+
 // Hookable openWindow function
 let _openWindowHooks = [];
 function openWindow(id) {
@@ -112,10 +144,24 @@ function openWindow(id) {
     
     // Center window if it's the first open (simple check)
     if (!win.dataset.positioned) {
-        win.style.top = '20%';
-        win.style.left = '20%';
+        const bounds = getWindowViewportBounds();
+        const margin = window.innerWidth < 760 ? 6 : 10;
+        const maxWidth = Math.max(260, bounds.width - margin * 2);
+        const maxHeight = Math.max(200, bounds.height - margin * 2);
+
+        if (win.offsetWidth > maxWidth) {
+            win.style.width = `${maxWidth}px`;
+        }
+        if (win.offsetHeight > maxHeight) {
+            win.style.height = `${maxHeight}px`;
+        }
+
+        win.style.left = `${Math.max(margin, Math.round((bounds.width - win.offsetWidth) / 2))}px`;
+        win.style.top = `${Math.max(margin, Math.round((bounds.height - win.offsetHeight) / 2))}px`;
         win.dataset.positioned = 'true';
     }
+
+    clampWindowToViewport(win);
 
     // Run hooks (for apps like Recycle Bin or Wisdom Tree to react)
     _openWindowHooks.forEach(hook => hook(id));
@@ -180,8 +226,12 @@ document.addEventListener('mousedown', (e) => {
 document.addEventListener('mousemove', (e) => {
     if (isDragging && currentWindow) {
         e.preventDefault();
-        currentWindow.style.left = (e.clientX - offset.x) + 'px';
-        currentWindow.style.top = (e.clientY - offset.y) + 'px';
+        const bounds = getWindowViewportBounds();
+        const margin = 0;
+        const left = Math.max(margin, Math.min(e.clientX - offset.x, bounds.width - currentWindow.offsetWidth));
+        const top = Math.max(margin, Math.min(e.clientY - offset.y, bounds.height - 24));
+        currentWindow.style.left = left + 'px';
+        currentWindow.style.top = top + 'px';
     }
 });
 
@@ -222,8 +272,17 @@ document.addEventListener('mousemove', (e) => {
         const deltaX = e.clientX - resizeStartX;
         const deltaY = e.clientY - resizeStartY;
         
-        const newWidth = Math.max(300, resizeStartWidth + deltaX);
-        const newHeight = Math.max(200, resizeStartHeight + deltaY);
+        const bounds = getWindowViewportBounds();
+        const currentLeft = resizingWindow.offsetLeft;
+        const currentTop = resizingWindow.offsetTop;
+        const newWidth = Math.min(
+            Math.max(300, resizeStartWidth + deltaX),
+            Math.max(300, bounds.width - currentLeft)
+        );
+        const newHeight = Math.min(
+            Math.max(200, resizeStartHeight + deltaY),
+            Math.max(200, bounds.height - currentTop)
+        );
         
         resizingWindow.style.width = newWidth + 'px';
         resizingWindow.style.height = newHeight + 'px';
@@ -236,6 +295,7 @@ window.addEventListener('resize', () => {
         win.style.width = `${window.innerWidth}px`;
         win.style.height = `${window.innerHeight - 32}px`;
     });
+    document.querySelectorAll('.window.window-open:not(.window-maximized)').forEach(clampWindowToViewport);
 });
 
 // Dynamic Window Creation Helper

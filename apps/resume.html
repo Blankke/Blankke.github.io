@@ -12,7 +12,7 @@
         <!-- Header Section -->
         <header class="resume-header">
             <div class="header-left">
-                <h1 class="name">曹子宸</h1> <!-- User's Name -->
+                <h1 class="name">曹子宸</h1> 
                 <div class="contact-info">
                     <div class="contact-line">武汉大学 (WHU) &nbsp;|&nbsp; 计算机科学与技术 (Computer Science and Technology)</div>
                     <div class="contact-links">
@@ -51,14 +51,10 @@
                     <span class="edu-stat-label">GPA</span>
                     <span class="edu-stat-value">3.91 / 4.0</span>
                 </div>
-                <div class="edu-stat-item">
-                    <span class="edu-stat-label">加权平均分</span>
-                    <span class="edu-stat-value">90.89 / 100</span>
-                </div>
                 <div class="edu-stat-item edu-stat-item-wide">
                     <span class="edu-stat-label">学习成绩排名（截至前五学期）</span>
-                    <span class="edu-stat-value">8 / 238</span>
-                    <span class="edu-stat-note">Top 3.36%</span>
+                    <span class="edu-stat-value">8 / 236</span>
+                    <span class="edu-stat-note">Top 3.38%</span>
                 </div>
             </div>
             <div class="edu-courses">
@@ -121,34 +117,34 @@
 
             <div class="project-item">
                 <div class="project-header">
-                    <span>1. SLAM 场景下 3D Gaussian Splatting 的可见性剪枝与实时流式传输系统</span>
-                    <span>2025.09 – 2025.12</span>
+                    <span>1. 基于 3DGS 与射频预测的连通性感知多机器人探索系统 (Nexus²)</span>
+                    <span>2025.10 – 2026.03</span>
                 </div>
                 <div class="project-content">
                     <div class="project-row">
                         <span class="project-label">研究内容：</span>
-                        <span>针对 3DGS 在 SLAM 动态建图中拓扑频繁变化引发的实时性与网络同步问题，构建 可见性驱动的模型剪枝机制 与 基于 MQTT 的在线 3DGStream 传输系统。通过可见性与 LoD 联合过滤冗余高斯点保证训练与渲染实时性，并设计基于 持久化 ID + 操作日志的增量同步协议，在受限带宽下实现训练端与用户端的稳定一致渲染，相关成果在投。</span>
+                        <span>针对复杂三维环境中多机器人协同探索的通信断连问题，提出连通性感知的探索框架 <strong>Nexus²</strong>（<strong>在投 IEEE TMC，共同一作</strong>）。基于 3DGS 构建体素级射频预测模块，结合在线稀疏信号与 LiDAR 点云渲染空间无线电场，解决多径与遮挡难题；并将射频预测作为主动决策先验，设计去中心化的角色分化机制（探索者/中继者）与连通性感知路径规划，实现无人车网络拓扑自适应重构，探索效率提升达 23.8%。</span>
                     </div>
                     <div class="project-row">
                         <span class="project-label">Tech Stack：</span>
-                        <span>3D Gaussian Splatting / SLAM / Visibility Modeling / LoD / Model Pruning / MQTT / Streaming Protocol / Operation Queue / Incremental Sync (ADD / UPDATE / DELETE)</span>
+                        <span>3D Gaussian Splatting / RF Modeling / Multi-Robot Exploration / Role Differentiation / Path Planning / PyTorch / ROS</span>
                     </div>
                 </div>
             </div>
 
             <div class="project-item">
                 <div class="project-header">
-                    <span>2. 基于 3D Gaussian Splatting 的连通性感知多机器人探索通信预测系统</span>
-                    <span>2026.01 – 2026.03</span>
+                    <span>2. 基于空间射频建模的连通性感知双向 3DGS 流媒体系统 (NexusStream)</span>
+                    <span>2025.12 – 2026.04</span>
                 </div>
                 <div class="project-content">
                     <div class="project-row">
                         <span class="project-label">研究内容：</span>
-                        <span>围绕 Connectivity-Aware Multi-Robot Exploration 课题，主要负责 communication prediction 模块的设计与落地实现。基于 3D Gaussian Splatting 构建体通信预测模型，将场景几何、LiDAR 点云与 RSS 观测联合建模，形成可用于未知区域推断的 3D RF 表达；针对低频无线传播中穿透、绕射和多径效应，设计基于功率域叠加的 RSS 渲染机制与仿射校准方法.</span>
+                        <span>面向商品级 WiFi 场景下低延迟全息远程会议（Telepresence）需求，提出双向 3DGS 流媒体框架 <strong>NexusStream</strong>（<strong>在投 UbiComp，共同一作</strong>）。摒弃传统被动式的比特率自适应算法，引入特定场景的 3DGS 射频地图（Radiomap）以精准预测用户移动轨迹上的未来网络传输风险；结合预测信号，设计联合视口相关性、缓冲区状态与延迟约束的双向 Layer-Tile-Segment 调度策略，在信号恶化前主动下发关键帧，显著降低网络波动导致的画面冻结与传输丢失。</span>
                     </div>
                     <div class="project-row">
                         <span class="project-label">Tech Stack：</span>
-                        <span>3D Gaussian Splatting / Communication Prediction / RF Modeling / RSS Rendering / Wireless Channel Calibration / LiDAR Point Cloud / Volumetric Representation / Multi-Robot Exploration / Connectivity-Aware Planning / PyTorch</span>
+                        <span>3D Gaussian Splatting / Volumetric Video Streaming / Spatial Radiomap / Adaptive Bitrate Scheduling / Bandwidth Prediction</span>
                     </div>
                 </div>
             </div>

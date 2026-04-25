@@ -71,6 +71,10 @@ const musicNextEl = document.getElementById('music-next');
 const musicPlayEl = document.getElementById('music-play');
 const musicPauseEl = document.getElementById('music-pause');
 const musicLoopEl = document.getElementById('music-loop');
+const musicProgressEl = document.getElementById('music-progress');
+const musicTimeEl = document.getElementById('music-time');
+const musicVolumeEl = document.getElementById('music-volume');
+const musicVolumeLabelEl = document.getElementById('music-volume-label');
 
 window.mewmewTalkEnabled = false;
 // No persistence for MewMew talk state - resets on reload
@@ -99,6 +103,13 @@ function formatFileSize(sizeBytes) {
     }
 
     return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function formatTime(seconds) {
+    const safe = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+    const mins = Math.floor(safe / 60);
+    const secs = safe % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 function escapeHtml(value) {
@@ -269,6 +280,7 @@ function showTrackProperties(index, fallbackTrack = null) {
 
 let musicTracks = [];
 let musicCurrentIndex = -1;
+let musicSeeking = false;
 
 async function loadMusicManifest() {
     try {
@@ -283,7 +295,7 @@ async function loadMusicManifest() {
         renderTrackList(tracks);
     } catch (err) {
         if (musicListEl) {
-            musicListEl.innerHTML = `<div style="padding: 6px;">无法读取 assets/music/manifest.json。<br>请确认已部署并且文件存在。<br><br>错误：${String(err)}</div>`;
+            musicListEl.innerHTML = `<div class="win98-error">无法读取 assets/music/manifest.json。<br>请确认已部署并且文件存在。<br><br>错误：${String(err)}</div>`;
         }
     }
 }
@@ -291,7 +303,7 @@ async function loadMusicManifest() {
 function renderTrackList(tracks) {
     if (!musicListEl) return;
     if (!tracks.length) {
-        musicListEl.innerHTML = `<div style="padding: 6px;">assets/music/manifest.json 里没有歌曲。</div>`;
+        musicListEl.innerHTML = `<div class="win98-empty">assets/music/manifest.json 里没有歌曲。</div>`;
         return;
     }
 
@@ -361,6 +373,23 @@ function playPrev() {
 }
 
 if (musicAudioEl) {
+    musicAudioEl.volume = 0.7;
+
+    const syncMusicProgress = () => {
+        if (musicSeeking) return;
+        const duration = Number.isFinite(musicAudioEl.duration) ? musicAudioEl.duration : 0;
+        const current = Number.isFinite(musicAudioEl.currentTime) ? musicAudioEl.currentTime : 0;
+        if (musicProgressEl) {
+            musicProgressEl.value = duration > 0 ? String(Math.round((current / duration) * 1000)) : '0';
+        }
+        if (musicTimeEl) {
+            musicTimeEl.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+        }
+    };
+
+    musicAudioEl.addEventListener('loadedmetadata', syncMusicProgress);
+    musicAudioEl.addEventListener('timeupdate', syncMusicProgress);
+    musicAudioEl.addEventListener('durationchange', syncMusicProgress);
     musicAudioEl.addEventListener('ended', () => {
         if (musicLoopEl?.checked) {
             musicStatusEl.textContent = '循环播放';
@@ -377,6 +406,32 @@ if (musicAudioEl) {
     musicAudioEl.addEventListener('play', () => {
         musicStatusEl.textContent = '播放中...';
     });
+}
+
+if (musicProgressEl && musicAudioEl) {
+    musicProgressEl.addEventListener('input', () => {
+        musicSeeking = true;
+        const duration = Number.isFinite(musicAudioEl.duration) ? musicAudioEl.duration : 0;
+        const nextTime = duration * (Number(musicProgressEl.value) / 1000);
+        if (musicTimeEl) musicTimeEl.textContent = `${formatTime(nextTime)} / ${formatTime(duration)}`;
+    });
+    musicProgressEl.addEventListener('change', () => {
+        const duration = Number.isFinite(musicAudioEl.duration) ? musicAudioEl.duration : 0;
+        if (duration > 0) {
+            musicAudioEl.currentTime = duration * (Number(musicProgressEl.value) / 1000);
+        }
+        musicSeeking = false;
+    });
+}
+
+if (musicVolumeEl && musicAudioEl) {
+    const syncVolume = () => {
+        const value = Math.max(0, Math.min(100, Number(musicVolumeEl.value) || 0));
+        musicAudioEl.volume = value / 100;
+        if (musicVolumeLabelEl) musicVolumeLabelEl.textContent = `${value}%`;
+    };
+    musicVolumeEl.addEventListener('input', syncVolume);
+    syncVolume();
 }
 
 if (musicLoopEl && musicAudioEl) {

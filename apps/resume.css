@@ -358,6 +358,82 @@ a:hover {
     margin-top: 10px;
 }
 
+@media (max-width: 760px) {
+    body {
+        padding: 18px;
+        max-width: none;
+    }
+
+    .resume-header,
+    .edu-basic-info,
+    .project-header,
+    .award-item,
+    .work-item {
+        display: block;
+    }
+
+    .project-header span,
+    .award-item span,
+    .work-item span {
+        display: block;
+        margin-bottom: 2px;
+        text-align: left;
+    }
+
+    .project-row {
+        display: block;
+    }
+
+    .award-name,
+    .award-level,
+    .award-rank {
+        margin-left: 0;
+        min-width: 0;
+        text-align: left;
+    }
+
+    .edu-stats {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .edu-stat-item,
+    .edu-stat-item-wide {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media print {
+    body {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+        color: #000;
+        background: #fff;
+        font-size: 11pt;
+    }
+
+    a {
+        color: #000;
+        text-decoration: none;
+    }
+
+    .section {
+        break-inside: avoid;
+        margin-bottom: 12px;
+    }
+
+    .collapsible-section:not([open]) .collapsible-content {
+        display: block;
+    }
+
+    .collapsible-hint,
+    .collapsible-title::after {
+        display: none;
+    }
+}
+
 .course-item {
     margin-bottom: 12px;
 }

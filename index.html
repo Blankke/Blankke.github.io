@@ -39,7 +39,7 @@
             <div class="icon-text">留言板.txt</div>
         </div>
         <div class="icon" id="icon-github" data-icon-id="github" data-default-left="20" data-default-top="200"
-            ondblclick="window.open('https://github.com', '_blank')">
+            ondblclick="window.open('https://github.com/Blankke', '_blank')">
             <img src="assets/icon/network_internet_pcs_installer-2.png" alt="Internet">
             <div class="icon-text">网上邻居</div>
         </div>
@@ -75,7 +75,7 @@
 
         <div class="icon" id="icon-gallery" data-icon-id="gallery" data-default-left="120" data-default-top="110"
             ondblclick="openWindow('window-gallery'); initGallery();">
-            <img src="assets/icon/camera.png" alt="Gallery" onerror="this.src='assets/icon/directory_open_file_mydocs-4.png'">
+            <img src="assets/icon/directory_open_file_mydocs-4.png" alt="Gallery">
             <div class="icon-text">我的相册</div>
         </div>
 
@@ -83,6 +83,12 @@
             ondblclick="window.open('https://neal.fun/not-a-robot/', '_blank')">
             <img src="assets/icon/bot.png" alt="Verification">
             <div class="icon-text">不是机器人</div>
+        </div>
+
+        <div class="icon" id="icon-library" data-icon-id="library" data-default-left="120" data-default-top="290"
+            ondblclick="openWindow('window-library')">
+            <img src="assets/icon/directory_open_file_mydocs-4.png" alt="Library">
+            <div class="icon-text">私人图书馆</div>
         </div>
     </div>
 
@@ -180,9 +186,16 @@
             <div class="recyclebin-layout">
                 <div class="recyclebin-list" id="recyclebin-list" aria-label="Recycle Bin Items"></div>
                 <div class="recyclebin-preview">
+                    <fieldset>
+                        <legend>预览</legend>
+                        <pre id="recyclebin-preview-text">选择一个项目。</pre>
+                    </fieldset>
                     <fieldset style="margin-top: 10px;">
                         <legend>操作</legend>
-                        <button type="button" disabled>清空回收站</button>
+                        <button id="recyclebin-open" type="button" disabled>打开</button>
+                        <button id="recyclebin-restore" type="button" disabled>还原</button>
+                        <button id="recyclebin-delete" type="button" disabled>删除</button>
+                        <button id="recyclebin-empty" type="button" disabled>清空回收站</button>
                     </fieldset>
                 </div>
             </div>
@@ -191,7 +204,7 @@
     </div>
 
     <!-- Window: Gallery -->
-    <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="assets/icon/camera.png"
+    <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="assets/icon/directory_open_file_mydocs-4.png"
         style="width: 800px; height: 600px;">
         <div class="window-description-bar" style="border-bottom: 1px solid #808080;">一些需要用魔法才能访问的照片？</div>
         <div class="title-bar">
@@ -206,6 +219,24 @@
             <div id="gallery-content" class="gallery-content">
                 <!-- 瀑布流内容将由 JS 动态生成 -->
             </div>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
+    <!-- Window: Library -->
+    <div id="window-library" class="window" data-window-title="私人图书馆" data-window-icon="assets/icon/directory_open_file_mydocs-4.png"
+        style="width: 980px; height: 680px;">
+        <div class="title-bar">
+            <div class="title-bar-text">私人图书馆 - My Mental Corner</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-library')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-library')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-library')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="window-description-bar">一些书，一些句子，一些尚未整理完的精神角落。</div>
+            <iframe src="library/index.html" frameborder="0" class="library-frame" title="私人图书馆"></iframe>
         </div>
         <div class="resize-handle"></div>
     </div>
@@ -272,8 +303,17 @@
         </div>
         <div class="window-body">
             <div class="window-description-bar">这是我的个人简历，从某个同学那里copy的模板，可能已经填好了，吗？</div>
+            <div class="window-toolbar resume-toolbar">
+                <button id="resume-open-new" type="button">打开</button>
+                <button id="resume-print" type="button">打印</button>
+                <span class="toolbar-separator"></span>
+                <button id="resume-zoom-out" type="button">-</button>
+                <span id="resume-zoom-label" class="toolbar-label">100%</span>
+                <button id="resume-zoom-in" type="button">+</button>
+                <button id="resume-zoom-reset" type="button">重置</button>
+            </div>
             <div class="resume-container">
-                <iframe src="apps/resume.html" frameborder="0"></iframe>
+                <iframe id="resume-frame" src="apps/resume.html" frameborder="0"></iframe>
             </div>
         </div>
         <div class="resize-handle"></div>
@@ -297,7 +337,7 @@
     </div>
 
     <!-- Window: MS-DOS Prompt (CMD) -->
-    <div id="window-cmd" class="window" data-window-title="MS-DOS Prompt" data-window-icon="assets/icon/command_prompt-0.png"
+    <div id="window-cmd" class="window" data-window-title="MS-DOS Prompt" data-window-icon="assets/icon/settings_gear-4.png"
         style="width: 650px; height: 450px;">
         <div class="title-bar">
             <div class="title-bar-text">MS-DOS Prompt</div>
@@ -321,7 +361,7 @@
     </div>
 
     <!-- Window: Music Player -->
-    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="assets/icon/cd_playerpng"
+    <div id="window-music" class="window" data-window-title="音乐播放器" data-window-icon="assets/icon/cd_player.png"
         style="width: 760px; height: 520px;">
         <div class="title-bar">
             <div class="title-bar-text">音乐播放器 - Windows Media Player (Lite)</div>
@@ -347,6 +387,16 @@
                         <label class="music-loop"><input id="music-loop" type="checkbox"> 循环</label>
                     </div>
                     <audio class="music-audio" id="music-audio" controls preload="metadata"></audio>
+                    <div class="music-slider-row">
+                        <label for="music-progress">进度</label>
+                        <input id="music-progress" type="range" min="0" max="1000" value="0" step="1">
+                        <span id="music-time">00:00 / 00:00</span>
+                    </div>
+                    <div class="music-slider-row">
+                        <label for="music-volume">音量</label>
+                        <input id="music-volume" type="range" min="0" max="100" value="70" step="1">
+                        <span id="music-volume-label">70%</span>
+                    </div>
                     <div class="status-bar">
                         <p class="status-bar-field" id="music-status">就绪</p>
                         <p class="status-bar-field">44.1 kHz</p>
@@ -386,19 +436,8 @@
         <div class="start-menu-sidebar">
             Windows 98
         </div>
-        <div class="start-menu-items">
-            <div class="menu-item" onclick="openWindow('window-computer')">
-                <img src="assets/icon/computer_explorer-4.png">
-                <span>我的电脑</span>
-            </div>
-            <div class="menu-item" onclick="window.open('https://github.com', '_blank')">
-                <img src="assets/icon/directory_open_file_mydocs-4.png">
-                <span>我的 GitHub 项目</span>
-            </div>
-            <div class="menu-item">
-                <img src="assets/icon/settings_gear-4.png">
-                <span>设置</span>
-            </div>
+        <div class="start-menu-items" id="start-menu-items">
+            <!-- Visible apps are rendered by js/app-registry.js. Hidden puzzle apps are intentionally excluded. -->
             <hr style="width: 100%; border-top: 1px solid #808080; border-bottom: 1px solid #fff;">
             <div class="menu-item" onclick="window.close()">
                 <img src="assets/icon/shut_down_normal-4.png">
@@ -476,6 +515,7 @@
     <script src="js/core.js?v=3"></script>
     <script src="js/window-manager.js?v=3"></script>
     <script src="js/desktop.js?v=3"></script>
+    <script src="js/app-registry.js?v=3"></script>
     <script src="js/recycle-bin.js?v=3"></script>
     <script src="js/apps.js?v=3"></script>
     <script src="js/gallery-data.js?v=3"></script>

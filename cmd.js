@@ -591,6 +591,7 @@ Microsoft(R) Windows 98
                 this.acceptedKey = key;
                 if (!this.radioTokenFound) {
                     this.radioTokenFound = true;
+                    window.quest?.setFlag('diary_key_accepted', true);
                     this.print('');
                     this.print('Permission Granted.', 'success');
                     this.print('');
@@ -618,6 +619,7 @@ Microsoft(R) Windows 98
     unlockFirstLayer() {
         if (!this.unlocked) {
             this.unlocked = true;
+            window.quest?.setFlag('cmd_unlocked', true);
             setTimeout(() => {
                 this.print('');
                 this.print('===========================================', 'system');
