@@ -69,6 +69,53 @@
         ['#fff0f4', '#ffc2d8', '#ffffff', '#e889ad']
     ];
 
+    const starSprites = [
+        [
+            '...1...',
+            '...2...',
+            '.12221.',
+            '1234321',
+            '.12221.',
+            '...2...',
+            '...1...'
+        ],
+        [
+            '..1..',
+            '..2..',
+            '12321',
+            '..2..',
+            '..1..'
+        ],
+        [
+            '...1...',
+            '..121..',
+            '.12321.',
+            '1234321',
+            '.12321.',
+            '..121..',
+            '...1...'
+        ],
+        [
+            '..1..',
+            '.232.',
+            '12321',
+            '.232.',
+            '..1..'
+        ],
+        [
+            '.1.',
+            '232',
+            '.1.'
+        ]
+    ];
+
+    const starPalettes = [
+        ['#8fd7ff', '#d8f6ff', '#ffffff', '#fff4b8'],
+        ['#7ab4ff', '#b9ddff', '#f4fbff', '#ffd7ff'],
+        ['#f2cf7e', '#fff0ad', '#ffffff', '#ffd48a'],
+        ['#b996ff', '#d8c4ff', '#ffffff', '#ffd7fb']
+    ];
+
     let state = loadState();
     let canvas = null;
     let ctx = null;
@@ -312,11 +359,15 @@
             x: Math.random() * width,
             y: Math.random() * height,
             depth,
-            size: typeRand > 0.86 ? randomBetween(1.4, 2.6) : randomBetween(0.8, 1.8),
+            size: typeRand > 0.86 ? randomBetween(1.35, 2.15) : randomBetween(0.85, 1.45),
             phase: Math.random() * Math.PI * 2,
-            twinkle: randomBetween(0.45, 1.8),
-            type: typeRand > 0.9 ? 'cross' : (typeRand > 0.78 ? 'warm' : 'dot'),
-            drift: randomBetween(0.02, 0.16)
+            twinkle: randomBetween(1.6, 4.6),
+            type: typeRand > 0.78 ? 'burst' : (typeRand > 0.48 ? 'cross' : 'dot'),
+            drift: randomBetween(0.015, 0.08),
+            sprite: typeRand > 0.86 ? 0 : (typeRand > 0.72 ? 2 : Math.floor(randomBetween(1, starSprites.length))),
+            palette: Math.floor(Math.random() * starPalettes.length),
+            flashOffset: Math.random() * 0.7,
+            glint: Math.random() > 0.72
         };
     }
 
@@ -324,11 +375,11 @@
         syncParticleCount('stars');
         particles.forEach((p) => {
             p.phase += dt * p.twinkle;
-            p.x += p.drift * dt * 10;
+            p.x += p.drift * dt * 8;
             if (p.x > width + 8) p.x = -8;
         });
 
-        if (meteors.length < 2 && Math.random() < dt * 0.08 * getIntensity()) {
+        if (meteors.length < 3 && Math.random() < dt * 0.16 * getIntensity()) {
             meteors.push(createMeteor());
         }
 
@@ -341,14 +392,18 @@
     }
 
     function createMeteor() {
+        const angle = randomBetween(0.18, 0.34);
+        const speed = randomBetween(520, 760);
         return {
-            x: randomBetween(width * 0.2, width + 100),
-            y: randomBetween(-80, height * 0.35),
-            vx: randomBetween(-390, -250),
-            vy: randomBetween(210, 330),
-            life: randomBetween(0.65, 1.15),
+            x: randomBetween(width * 0.55, width + 80),
+            y: randomBetween(20, height * 0.34),
+            vx: -Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: randomBetween(0.72, 1.15),
             maxLife: 1.15,
-            size: randomBetween(1.2, 2.2)
+            size: randomBetween(1.2, 2.0),
+            hue: Math.random() > 0.5 ? 198 : 48,
+            trail: randomBetween(82, 132)
         };
     }
 
@@ -361,39 +416,79 @@
         ctx.fillRect(0, 0, width, height);
 
         particles.forEach((p) => {
-            const flicker = 0.45 + (Math.sin(p.phase) + 1) * 0.28 + p.depth * 0.2;
-            const alpha = Math.min(1, flicker);
-            const size = p.size + p.depth * 1.4;
-            const x = Math.round(p.x);
-            const y = Math.round(p.y);
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = p.type === 'warm' ? '#ffe6a3' : '#dff7ff';
-            ctx.fillRect(x, y, size, size);
-            if (p.type === 'cross') {
-                ctx.globalAlpha = alpha * 0.55;
-                ctx.fillRect(x - size * 2, y, size, size);
-                ctx.fillRect(x + size * 2, y, size, size);
-                ctx.fillRect(x, y - size * 2, size, size);
-                ctx.fillRect(x, y + size * 2, size, size);
-            }
+            drawPixelStar(p);
         });
         ctx.globalAlpha = 1;
 
-        meteors.forEach((m) => {
-            const alpha = Math.max(0, Math.min(1, m.life / m.maxLife));
-            const trail = 96;
-            const gradient = ctx.createLinearGradient(m.x, m.y, m.x - m.vx * 0.18, m.y - m.vy * 0.18);
-            gradient.addColorStop(0, `rgba(230, 252, 255, ${0.82 * alpha})`);
-            gradient.addColorStop(1, 'rgba(230, 252, 255, 0)');
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = m.size;
-            ctx.beginPath();
-            ctx.moveTo(m.x, m.y);
-            ctx.lineTo(m.x - trail, m.y + trail * 0.64);
-            ctx.stroke();
-            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.fillRect(m.x - 1, m.y - 1, m.size * 2, m.size * 2);
-        });
+        meteors.forEach(drawPixelMeteor);
+    }
+
+    function drawPixelStar(p) {
+        const pulse = (Math.sin(p.phase) + 1) / 2;
+        const flash = Math.pow(pulse, 2.8);
+        const soft = 0.26 + flash * 0.74;
+        const alpha = Math.min(1, soft + p.depth * 0.18);
+        const scale = Math.max(1, Math.round(p.size + p.depth * 1.2 + flash * (p.glint ? 1.15 : 0.55)));
+        const sprite = starSprites[p.sprite] || starSprites[0];
+        const palette = starPalettes[p.palette] || starPalettes[0];
+        const x0 = Math.round(p.x - (sprite[0].length * scale) / 2);
+        const y0 = Math.round(p.y - (sprite.length * scale) / 2);
+
+        if (p.type !== 'dot') {
+            ctx.globalAlpha = alpha * 0.22;
+            ctx.fillStyle = palette[1];
+            ctx.fillRect(Math.round(p.x - scale * 3), Math.round(p.y), scale * 7, scale);
+            ctx.fillRect(Math.round(p.x), Math.round(p.y - scale * 3), scale, scale * 7);
+        }
+
+        ctx.globalAlpha = alpha;
+        for (let y = 0; y < sprite.length; y += 1) {
+            for (let x = 0; x < sprite[y].length; x += 1) {
+                const idx = Number(sprite[y][x]);
+                if (!idx) continue;
+                ctx.globalAlpha = alpha * (idx === 1 ? 0.42 : idx === 2 ? 0.72 : 1);
+                ctx.fillStyle = palette[Math.min(idx - 1, palette.length - 1)];
+                ctx.fillRect(x0 + x * scale, y0 + y * scale, scale, scale);
+            }
+        }
+
+        if (flash > 0.74 && p.glint) {
+            ctx.globalAlpha = (flash - 0.74) * 1.8;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(Math.round(p.x - scale), Math.round(p.y - scale), scale * 2, scale * 2);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    function drawPixelMeteor(m) {
+        const age = 1 - m.life / m.maxLife;
+        const alpha = Math.sin(Math.PI * Math.max(0, Math.min(1, 1 - age))) * 0.95;
+        const len = Math.hypot(m.vx, m.vy) || 1;
+        const backX = -m.vx / len;
+        const backY = -m.vy / len;
+        const px = -backY;
+        const py = backX;
+        const block = Math.max(1, Math.round(m.size));
+
+        for (let i = 0; i < 18; i += 1) {
+            const t = i / 17;
+            const widthFactor = Math.max(1, Math.round(block * (1.9 - t * 1.35)));
+            const a = alpha * Math.pow(1 - t, 1.8);
+            const x = Math.round(m.x + backX * m.trail * t);
+            const y = Math.round(m.y + backY * m.trail * t);
+            ctx.globalAlpha = a;
+            ctx.fillStyle = m.hue === 48 ? '#fff1a8' : '#d9f9ff';
+            ctx.fillRect(Math.round(x - px * widthFactor), Math.round(y - py * widthFactor), widthFactor + block, widthFactor + block);
+        }
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(Math.round(m.x - block * 1.5), Math.round(m.y - block * 1.5), block * 3, block * 3);
+        ctx.globalAlpha = alpha * 0.55;
+        ctx.fillStyle = m.hue === 48 ? '#ffd16d' : '#77dfff';
+        ctx.fillRect(Math.round(m.x - block * 3), Math.round(m.y), block * 7, block);
+        ctx.fillRect(Math.round(m.x), Math.round(m.y - block * 3), block, block * 7);
+        ctx.globalAlpha = 1;
     }
 
     function seedBubbles(anywhere = true) {
@@ -405,19 +500,25 @@
 
     function createBubble(anywhere = false) {
         const depth = Math.random();
-        const radius = randomBetween(18, 66) + depth * 34;
-        const fromSide = Math.random() > 0.68;
+        const radius = Math.min(width, height) < 520
+            ? randomBetween(14, 42) + depth * 22
+            : randomBetween(22, 70) + depth * 34;
+        const spawnPad = radius + 6;
+        const cornerX = randomBetween(Math.max(spawnPad, width - radius * 5.2), Math.max(spawnPad, width - spawnPad));
+        const cornerY = randomBetween(Math.max(spawnPad, height - radius * 4.2), Math.max(spawnPad, height - spawnPad));
         return {
             kind: 'bubble',
-            x: anywhere ? randomBetween(radius, width - radius) : (fromSide ? (Math.random() > 0.5 ? -radius : width + radius) : randomBetween(width * 0.22, width * 0.78)),
-            y: anywhere ? randomBetween(radius, height - radius) : randomBetween(height * 0.62, height + radius * 2),
+            x: anywhere ? randomBetween(radius, Math.max(radius, width - radius)) : cornerX,
+            y: anywhere ? randomBetween(radius, Math.max(radius, height - radius)) : cornerY,
             r: radius,
-            vx: randomBetween(-18, 18) + (fromSide ? (Math.random() > 0.5 ? 34 : -34) : 0),
-            vy: -randomBetween(12, 48) - depth * 34,
+            vx: -randomBetween(10, 48) + randomBetween(-10, 14),
+            vy: -randomBetween(22, 66) - depth * 30,
             depth,
             hue: randomBetween(176, 225),
             phase: Math.random() * Math.PI * 2,
-            wobble: randomBetween(0.5, 1.6)
+            wobble: randomBetween(0.5, 1.6),
+            mass: radius * radius,
+            age: anywhere ? randomBetween(0.5, 6) : -Math.pow(Math.random(), 1.7) * 2.8
         };
     }
 
@@ -428,21 +529,36 @@
     function updateBubbles(dt) {
         syncParticleCount('bubbles');
         const speed = speedScale[state.speed] || speedScale.standard;
+        const step = Math.min(dt, 0.024);
         particles.forEach((p) => {
+            p.age += dt;
+            if (p.age < 0) return;
             p.phase += dt * p.wobble;
-            p.x += (p.vx + Math.sin(p.phase) * 13) * speed * dt;
-            p.y += p.vy * speed * dt;
+            p.vx += Math.sin(p.phase) * 2.2 * step;
+            p.vy += Math.cos(p.phase * 0.7) * 1.1 * step;
+            p.x += p.vx * speed * step;
+            p.y += p.vy * speed * step;
 
             if (p.x < p.r) {
                 p.x = p.r;
-                p.vx = Math.abs(p.vx) * 0.82;
+                p.vx = Math.abs(p.vx) * 0.92;
             }
             if (p.x > width - p.r) {
                 p.x = width - p.r;
-                p.vx = -Math.abs(p.vx) * 0.82;
+                p.vx = -Math.abs(p.vx) * 0.92;
             }
-            if (p.y < -p.r * 2) resetBubble(p);
+            if (p.y < p.r) {
+                p.y = p.r;
+                p.vy = Math.abs(p.vy) * 0.92;
+            }
+            if (p.y > height - p.r - 32) {
+                p.y = height - p.r - 32;
+                p.vy = -Math.abs(p.vy) * 0.92;
+            }
+            limitBubbleSpeed(p);
         });
+
+        resolveBubbleCollisions();
     }
 
     function drawBubbles() {
@@ -460,6 +576,7 @@
     }
 
     function drawBubble(p) {
+        if (p.age < 0) return;
         const alpha = 0.24 + p.depth * 0.22;
         const ring = ctx.createRadialGradient(
             p.x - p.r * 0.34,
@@ -497,6 +614,62 @@
         ctx.arc(p.x + p.r * 0.08, p.y + p.r * 0.08, p.r * 0.74, Math.PI * 0.15, Math.PI * 0.72);
         ctx.stroke();
         ctx.restore();
+    }
+
+    function limitBubbleSpeed(p) {
+        const max = 112 + p.depth * 46;
+        const speed = Math.hypot(p.vx, p.vy);
+        if (speed <= max) return;
+        p.vx = (p.vx / speed) * max;
+        p.vy = (p.vy / speed) * max;
+    }
+
+    function resolveBubbleCollisions() {
+        for (let i = 0; i < particles.length; i += 1) {
+            const a = particles[i];
+            if (a.kind !== 'bubble' || a.age < 0) continue;
+            for (let j = i + 1; j < particles.length; j += 1) {
+                const b = particles[j];
+                if (b.kind !== 'bubble' || b.age < 0) continue;
+
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const minDist = a.r + b.r;
+                const distSq = dx * dx + dy * dy;
+                if (distSq <= 0 || distSq >= minDist * minDist) continue;
+
+                const dist = Math.sqrt(distSq);
+                const nx = dx / dist;
+                const ny = dy / dist;
+                const overlap = minDist - dist;
+                const invMassA = 1 / a.mass;
+                const invMassB = 1 / b.mass;
+                const invSum = invMassA + invMassB;
+
+                a.x -= nx * overlap * (invMassA / invSum) * 0.82;
+                a.y -= ny * overlap * (invMassA / invSum) * 0.82;
+                b.x += nx * overlap * (invMassB / invSum) * 0.82;
+                b.y += ny * overlap * (invMassB / invSum) * 0.82;
+
+                const rvx = b.vx - a.vx;
+                const rvy = b.vy - a.vy;
+                const velAlongNormal = rvx * nx + rvy * ny;
+                if (velAlongNormal > 0) continue;
+
+                const restitution = 0.93;
+                const impulse = (-(1 + restitution) * velAlongNormal) / invSum;
+                const ix = impulse * nx;
+                const iy = impulse * ny;
+
+                a.vx -= ix * invMassA;
+                a.vy -= iy * invMassA;
+                b.vx += ix * invMassB;
+                b.vy += iy * invMassB;
+
+                limitBubbleSpeed(a);
+                limitBubbleSpeed(b);
+            }
+        }
     }
 
     function syncParticleCount(mode) {
