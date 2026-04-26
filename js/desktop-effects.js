@@ -265,10 +265,11 @@
 
     function createSakura(anywhere = false) {
         const depth = Math.random();
+        const spawn = anywhere ? null : getSakuraSpawnPoint(depth);
         return {
             kind: 'sakura',
-            x: anywhere ? randomBetween(-40, width + 120) : randomBetween(width + 20, width + 220),
-            y: anywhere ? randomBetween(-80, height + 40) : randomBetween(-120, height * 0.25),
+            x: anywhere ? randomBetween(-40, width + 120) : spawn.x,
+            y: anywhere ? randomBetween(-80, height + 40) : spawn.y,
             depth,
             baseSize: randomBetween(1.6, 3.8) + depth * 2.3,
             vx: randomBetween(38, 82) + depth * 78,
@@ -279,6 +280,23 @@
             sprite: Math.floor(Math.random() * sakuraSprites.length),
             palette: Math.floor(Math.random() * sakuraPalettes.length),
             flip: Math.random() > 0.5 ? 1 : -1
+        };
+    }
+
+    function getSakuraSpawnPoint(depth) {
+        const edge = Math.random();
+        const driftMargin = 120 + depth * 120;
+
+        if (edge < 0.58) {
+            return {
+                x: randomBetween(-driftMargin * 0.35, width + driftMargin),
+                y: randomBetween(-160, -16)
+            };
+        }
+
+        return {
+            x: randomBetween(width + 16, width + driftMargin),
+            y: randomBetween(-80, height * 0.92)
         };
     }
 
