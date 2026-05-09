@@ -290,6 +290,7 @@ const contextMenu = document.getElementById('context-menu');
 const iconContextMenu = document.getElementById('icon-context-menu');
 let copiedIcon = null;
 let contextMenuTargetIcon = null;
+const ICON_METADATA_KEYS = ['itemType', 'description', 'url', 'opensWith'];
 
 function updatePasteButton() {
     const pasteBtn = document.getElementById('ctx-paste');
@@ -343,6 +344,32 @@ function hideContextMenu() {
 function hideIconContextMenu() {
     if (iconContextMenu) iconContextMenu.style.display = 'none';
     contextMenuTargetIcon = null;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function getIconMetadata(icon) {
+    return ICON_METADATA_KEYS.reduce((metadata, key) => {
+        if (icon.dataset[key]) {
+            metadata[key] = icon.dataset[key];
+        }
+        return metadata;
+    }, {});
+}
+
+function applyIconMetadata(icon, metadata = {}) {
+    ICON_METADATA_KEYS.forEach((key) => {
+        if (metadata[key]) {
+            icon.dataset[key] = metadata[key];
+        }
+    });
 }
  
 document.addEventListener('contextmenu', (e) => {
@@ -405,6 +432,7 @@ document.getElementById('ctx-paste')?.addEventListener('click', () => {
     } else if (copiedIcon.ondblclick) {
         newIcon.ondblclick = copiedIcon.ondblclick;
     }
+    applyIconMetadata(newIcon, copiedIcon.metadata);
     
     document.getElementById('desktop').appendChild(newIcon);
     bindIconInteractions(newIcon);
@@ -450,7 +478,8 @@ document.getElementById('icon-ctx-copy')?.addEventListener('click', () => {
             left: contextMenuTargetIcon.offsetLeft,
             top: contextMenuTargetIcon.offsetTop,
             ondblclick: contextMenuTargetIcon.ondblclick,
-            ondblclickAttr: contextMenuTargetIcon.getAttribute('ondblclick')
+            ondblclickAttr: contextMenuTargetIcon.getAttribute('ondblclick'),
+            metadata: getIconMetadata(contextMenuTargetIcon)
         };
         updatePasteButton();
     }
@@ -483,7 +512,8 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', async () =
                 left: contextMenuTargetIcon.offsetLeft,
                 top: contextMenuTargetIcon.offsetTop,
                 ondblclick: contextMenuTargetIcon.ondblclick,
-                ondblclickAttr: contextMenuTargetIcon.getAttribute('ondblclick')
+                ondblclickAttr: contextMenuTargetIcon.getAttribute('ondblclick'),
+                metadata: getIconMetadata(contextMenuTargetIcon)
             };
             
             // Add to recycle catalog and items list
@@ -530,16 +560,33 @@ document.getElementById('icon-ctx-properties')?.addEventListener('click', async 
         const iconId = contextMenuTargetIcon.dataset.iconId || 'unknown';
         const iconImg = contextMenuTargetIcon.querySelector('img');
         const iconSrc = iconImg ? iconImg.getAttribute('src') : undefined;
+        const iconType = contextMenuTargetIcon.dataset.itemType || '桌面快捷方式';
+        const iconDescription = contextMenuTargetIcon.dataset.description;
+        const iconUrl = contextMenuTargetIcon.dataset.url;
+        const opensWith = contextMenuTargetIcon.dataset.opensWith;
+        const properties = [
+            ['名称', iconText],
+            ['类型', iconType],
+            iconDescription ? ['说明', iconDescription] : null,
+            iconUrl ? ['地址', iconUrl] : null,
+            opensWith ? ['打开方式', opensWith] : null,
+            ['ID', iconId],
+            ['位置', `(${contextMenuTargetIcon.offsetLeft}, ${contextMenuTargetIcon.offsetTop})`]
+        ].filter(Boolean);
+        const message = properties
+            .map(([label, value]) => `<div>${escapeHtml(label)}: ${escapeHtml(value)}</div>`)
+            .join('');
+        const fallbackText = properties.map(([label, value]) => `${label}: ${value}`).join('\n');
 
         if (typeof showMessageBox === 'function') {
             await showMessageBox({
                 title: '图标属性',
                 icon: iconSrc,
-                width: 360,
-                message: `名称: ${iconText}<br>ID: ${iconId}<br>位置: (${contextMenuTargetIcon.offsetLeft}, ${contextMenuTargetIcon.offsetTop})`
+                width: 420,
+                message
             });
         } else {
-            alert(`图标属性\n\n名称: ${iconText}\nID: ${iconId}\n位置: (${contextMenuTargetIcon.offsetLeft}, ${contextMenuTargetIcon.offsetTop})`);
+            alert(`图标属性\n\n${fallbackText}`);
         }
     }
     hideIconContextMenu();

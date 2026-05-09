@@ -56,7 +56,8 @@ function loadStoredRecycleCatalog() {
                     content: item.content || '',
                     left: item.left || 120,
                     top: item.top || 120,
-                    ondblclickAttr: item.ondblclickAttr || ''
+                    ondblclickAttr: item.ondblclickAttr || '',
+                    metadata: item.metadata || {}
                 }
             };
         });
@@ -102,7 +103,8 @@ function addIconToRecycleBin(iconId, iconData) {
             left: iconData.left,
             top: iconData.top,
             ondblclick: iconData.ondblclick,
-            ondblclickAttr: iconData.ondblclickAttr
+            ondblclickAttr: iconData.ondblclickAttr,
+            metadata: iconData.metadata || {}
         }
     };
 
@@ -113,7 +115,8 @@ function addIconToRecycleBin(iconId, iconData) {
         content: iconData.content,
         left: iconData.left,
         top: iconData.top,
-        ondblclickAttr: iconData.ondblclickAttr
+        ondblclickAttr: iconData.ondblclickAttr,
+        metadata: iconData.metadata || {}
     });
 }
 
@@ -326,6 +329,9 @@ function restoreRecycleItem(itemId) {
                 icon.setAttribute('ondblclick', restoreData.ondblclickAttr);
             } else if (restoreData.ondblclick) {
                 icon.ondblclick = restoreData.ondblclick;
+            }
+            if (typeof applyIconMetadata === 'function') {
+                applyIconMetadata(icon, restoreData.metadata);
             }
         }
         

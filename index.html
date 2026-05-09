@@ -17,7 +17,7 @@
     <link rel="shortcut icon" href="assets/icon/web_logo.png">
     <!-- 98.css for the core look and feel -->
     <link rel="stylesheet" href="https://unpkg.com/98.css">
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=4">
     <link rel="stylesheet" href="style-gallery.css">
     <!-- Waline (Anonymous Comment System) -->
     <link rel="stylesheet" href="https://unpkg.com/@waline/client@v2/dist/waline.css" />
@@ -89,6 +89,16 @@
             ondblclick="openWindow('window-library')">
             <img src="assets/icon/directory_open_file_mydocs-4.png" alt="Library">
             <div class="icon-text">私人图书馆</div>
+        </div>
+
+        <div class="icon" id="icon-blog" data-icon-id="blog" data-default-left="120" data-default-top="380"
+            data-item-type="VitePress 个人博客"
+            data-description="记录学习、实践与开源路上的一点积累。首页当前展示 6 篇文章，包含 Matmul Fusion 专题、博客搭建、Hello World、Punica 等内容。"
+            data-url="https://my-blog-gamma-puce.vercel.app/"
+            data-opens-with="站内博客窗口"
+            ondblclick="openWindow('window-blog')">
+            <img src="assets/icon/blog.svg" alt="Blog">
+            <div class="icon-text">个人博客</div>
         </div>
     </div>
 
@@ -237,6 +247,25 @@
         <div class="window-body">
             <div class="window-description-bar">一些书，一些句子，一些尚未整理完的精神角落。</div>
             <iframe src="library/index.html" frameborder="0" class="library-frame" title="私人图书馆"></iframe>
+        </div>
+        <div class="resize-handle"></div>
+    </div>
+
+    <!-- Window: Blog -->
+    <div id="window-blog" class="window" data-window-title="个人博客" data-window-icon="assets/icon/blog.svg"
+        style="width: 980px; height: 680px;">
+        <div class="title-bar">
+            <div class="title-bar-text">Blankke's Blog - Internet Explorer</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize" onclick="minimizeWindow('window-blog')"></button>
+                <button aria-label="Maximize" onclick="toggleMaximizeWindow('window-blog')"></button>
+                <button aria-label="Close" onclick="closeWindow('window-blog')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="window-description-bar">记录学习、实践与开源路上的一点积累；首页当前展示 6 篇文章，包含 Matmul Fusion 专题、博客搭建和 Hello World 等内容。</div>
+            <iframe src="https://my-blog-gamma-puce.vercel.app/" frameborder="0" class="blog-frame" title="Blankke's Blog"
+                style="flex: 1; width: 100%; height: 100%; min-height: 0; border: 2px inset #dfdfdf; box-sizing: border-box; background: white;"></iframe>
         </div>
         <div class="resize-handle"></div>
     </div>
@@ -518,10 +547,10 @@
     <!-- Modularized Scripts -->
     <script src="js/core.js?v=3"></script>
     <script src="js/window-manager.js?v=3"></script>
-    <script src="js/desktop.js?v=3"></script>
+    <script src="js/desktop.js?v=4"></script>
     <script src="js/desktop-effects.js?v=3"></script>
-    <script src="js/app-registry.js?v=3"></script>
-    <script src="js/recycle-bin.js?v=3"></script>
+    <script src="js/app-registry.js?v=4"></script>
+    <script src="js/recycle-bin.js?v=4"></script>
     <script src="js/apps.js?v=3"></script>
     <script src="js/gallery-data.js?v=3"></script>
     <script src="js/gallery.js?v=3"></script>

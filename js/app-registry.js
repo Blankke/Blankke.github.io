@@ -28,6 +28,12 @@
             open: () => openWindow('window-library')
         },
         {
+            id: 'blog',
+            label: '个人博客',
+            icon: 'assets/icon/blog.svg',
+            open: () => openWindow('window-blog')
+        },
+        {
             id: 'gallery',
             label: '我的相册',
             icon: 'assets/icon/directory_open_file_mydocs-4.png',
