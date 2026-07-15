@@ -1983,6 +1983,569 @@ body[data-effect="stars"] .desktop-effects-vignette {
   to { transform: translateY(-40px); }
 }
 
+.desktop-selection-box {
+  position: fixed;
+  z-index: 5;
+  pointer-events: none;
+  box-sizing: border-box;
+  background: rgba(0, 0, 128, 0.18);
+  border: 1px dotted #fff;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ===========================================================================
+   NEON ARCADE OS LAYER
+   方向：像素、电玩、霓虹电脑；保留可操作桌面和隐藏路线结构。
+   ========================================================================== */
+
+html[data-visual-theme="arcade"] {
+  --system-teal: #070716;
+  --system-teal-deep: #05030b;
+  --system-blue: #1713a8;
+  --system-blue-light: #16e7ff;
+  --system-silver: #17182a;
+  --system-paper: #0d1020;
+  --system-amber: #ffe95a;
+  --system-green: #72ff5c;
+  --arcade-bg: #05030b;
+  --arcade-panel: #101225;
+  --arcade-panel-2: #17142d;
+  --arcade-panel-3: #211936;
+  --arcade-cyan: #39f7ff;
+  --arcade-pink: #ff4fd8;
+  --arcade-yellow: #ffe95a;
+  --arcade-lime: #72ff5c;
+  --arcade-ink: #f4fbff;
+  --arcade-muted: #9bcbd2;
+  --arcade-shadow: #05030b;
+}
+
+html[data-visual-theme="arcade"] {
+  background: var(--arcade-bg);
+}
+
+html[data-visual-theme="arcade"] body {
+  --desktop-icon-image-size: calc(40px * var(--desktop-icon-scale));
+  --desktop-icon-font-size: calc(11px * var(--desktop-icon-scale));
+  color: var(--arcade-ink);
+  font-family: "Lucida Console", "Courier New", SimSun, monospace;
+  letter-spacing: 0;
+  background-color: var(--arcade-bg);
+  background-image:
+    linear-gradient(180deg, rgba(255, 79, 216, 0.14), transparent 24%, rgba(57, 247, 255, 0.08) 68%, rgba(255, 233, 90, 0.08)),
+    repeating-linear-gradient(0deg, rgba(57, 247, 255, 0.08) 0 1px, transparent 1px 38px),
+    repeating-linear-gradient(90deg, rgba(255, 79, 216, 0.06) 0 1px, transparent 1px 38px),
+    url('assets/icon/bg-dither.svg');
+  background-size: 100% 100%, 38px 38px, 38px 38px, 4px 4px;
+}
+
+html[data-visual-theme="arcade"] body::before {
+  opacity: 0.28;
+  background:
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.055) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, transparent 0 2px, rgba(57, 247, 255, 0.025) 2px 3px, transparent 3px 6px);
+  mix-blend-mode: screen;
+}
+
+html[data-visual-theme="arcade"] body::after {
+  background:
+    linear-gradient(180deg, transparent 0 52%, rgba(5, 3, 11, 0.18) 52% 100%),
+    repeating-linear-gradient(0deg, transparent 0 30px, rgba(255, 79, 216, 0.24) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 54px, rgba(57, 247, 255, 0.2) 55px 56px),
+    url('assets/icon/windows-0.png') center 43% / min(22vw, 250px) auto no-repeat;
+  opacity: 0.2;
+  filter: saturate(1.6) hue-rotate(126deg) contrast(1.25);
+}
+
+html[data-visual-theme="arcade"] body.effects-night {
+  background-color: #03050d;
+  background-image:
+    linear-gradient(180deg, rgba(57, 247, 255, 0.12), transparent 28%, rgba(255, 79, 216, 0.13)),
+    repeating-linear-gradient(0deg, rgba(57, 247, 255, 0.1) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(255, 233, 90, 0.05) 0 1px, transparent 1px 34px),
+    url('assets/icon/bg-dither.svg');
+}
+
+html[data-visual-theme="arcade"] .desktop-effects-canvas {
+  z-index: 0;
+  image-rendering: auto;
+  mix-blend-mode: screen;
+}
+
+html[data-visual-theme="arcade"] .desktop-effects-vignette {
+  background:
+    linear-gradient(180deg, rgba(57, 247, 255, 0.1), transparent 28%, rgba(255, 79, 216, 0.12)),
+    radial-gradient(circle at 50% 43%, transparent 0 48%, rgba(0, 0, 0, 0.38) 100%);
+}
+
+html[data-visual-theme="arcade"] body[data-effect="sakura"] .desktop-effects-vignette {
+  background:
+    linear-gradient(180deg, rgba(255, 79, 216, 0.16), transparent 32%, rgba(57, 247, 255, 0.14)),
+    radial-gradient(circle at 48% 40%, transparent 0 48%, rgba(5, 3, 11, 0.42) 100%);
+}
+
+html[data-visual-theme="arcade"] body[data-effect="stars"] .desktop-effects-vignette {
+  background:
+    linear-gradient(180deg, rgba(57, 247, 255, 0.12), transparent 46%, rgba(255, 233, 90, 0.08)),
+    radial-gradient(circle at 50% 38%, transparent 0 42%, rgba(0, 0, 0, 0.48) 100%);
+}
+
+html[data-visual-theme="arcade"] .icon {
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #05030b, 0 0 8px rgba(57, 247, 255, 0.72);
+  transition: transform 90ms steps(2, end), filter 90ms steps(2, end), background-color 90ms steps(2, end);
+}
+
+html[data-visual-theme="arcade"] .icon:hover:not(.dragging) {
+  background: rgba(57, 247, 255, 0.08);
+  border-color: rgba(57, 247, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(255, 79, 216, 0.28), 0 0 14px rgba(57, 247, 255, 0.32);
+  transform: translateY(-1px);
+}
+
+html[data-visual-theme="arcade"] .icon img {
+  image-rendering: pixelated;
+  filter:
+    drop-shadow(2px 2px 0 #05030b)
+    drop-shadow(0 0 7px rgba(255, 79, 216, 0.45));
+}
+
+html[data-visual-theme="arcade"] .icon:hover:not(.dragging) img {
+  filter:
+    brightness(1.24)
+    saturate(1.4)
+    drop-shadow(2px 2px 0 #05030b)
+    drop-shadow(0 0 10px rgba(57, 247, 255, 0.78));
+}
+
+html[data-visual-theme="arcade"] .icon-text {
+  max-width: calc(var(--desktop-icon-width) + 8px);
+  padding: 2px 4px;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-family: "Lucida Console", "Courier New", SimSun, monospace;
+  font-size: var(--desktop-icon-font-size);
+  line-height: 1.25;
+}
+
+html[data-visual-theme="arcade"] .icon.selected .icon-text,
+html[data-visual-theme="arcade"] .icon:active .icon-text,
+html[data-visual-theme="arcade"] .recyclebin-item.is-selected,
+html[data-visual-theme="arcade"] .music-track-btn.is-current {
+  color: #05030b;
+  background: var(--arcade-yellow);
+  border: 0;
+  text-shadow: none;
+  box-shadow: 0 0 10px rgba(255, 233, 90, 0.78);
+}
+
+html[data-visual-theme="arcade"] .desktop-selection-box {
+  position: fixed;
+  z-index: 5;
+  pointer-events: none;
+  box-sizing: border-box;
+  background:
+    repeating-linear-gradient(45deg, rgba(57, 247, 255, 0.2) 0 4px, rgba(255, 79, 216, 0.14) 4px 8px),
+    rgba(57, 247, 255, 0.11);
+  border: 1px solid var(--arcade-cyan);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.24),
+    0 0 12px rgba(57, 247, 255, 0.58);
+}
+
+html[data-visual-theme="arcade"] .icon-badge,
+html[data-visual-theme="arcade"] .tray-mystery-dot {
+  color: #05030b;
+  background: var(--arcade-pink);
+  border-color: #ffd8f5;
+  box-shadow: 0 0 8px rgba(255, 79, 216, 0.9);
+}
+
+html[data-visual-theme="arcade"] #top-right-info {
+  padding: 5px 7px;
+  color: var(--arcade-cyan);
+  background: rgba(5, 3, 11, 0.54);
+  border: 1px solid rgba(57, 247, 255, 0.56);
+  box-shadow: inset 0 0 0 1px rgba(255, 79, 216, 0.2), 0 0 14px rgba(57, 247, 255, 0.28);
+  text-shadow: 0 0 8px rgba(57, 247, 255, 0.8), 1px 1px 0 #05030b;
+}
+
+html[data-visual-theme="arcade"] #top-right-info #visitor-counter,
+html[data-visual-theme="arcade"] #top-right-info #last-updated {
+  color: inherit;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+html[data-visual-theme="arcade"] #last-updated-time {
+  color: var(--arcade-yellow);
+}
+
+html[data-visual-theme="arcade"] .window {
+  color: var(--arcade-ink);
+  background: var(--arcade-panel);
+  border: 2px solid var(--arcade-cyan);
+  box-shadow:
+    0 0 0 2px var(--arcade-shadow),
+    0 0 18px rgba(57, 247, 255, 0.42),
+    6px 6px 0 rgba(5, 3, 11, 0.78);
+  filter: none;
+}
+
+html[data-visual-theme="arcade"] .window.window-moving,
+html[data-visual-theme="arcade"] .window.window-resizing {
+  filter: none;
+  box-shadow:
+    0 0 0 2px var(--arcade-shadow),
+    0 0 24px rgba(255, 79, 216, 0.45),
+    8px 8px 0 rgba(5, 3, 11, 0.82);
+}
+
+html[data-visual-theme="arcade"] .title-bar {
+  min-height: 22px;
+  color: #ffffff;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 2px, transparent 2px 6px),
+    linear-gradient(90deg, #1b1588, #0d9bd4 48%, #ff4fd8);
+  border-bottom: 2px solid var(--arcade-yellow);
+  text-shadow: 1px 1px 0 #05030b, 0 0 9px rgba(255, 255, 255, 0.62);
+}
+
+html[data-visual-theme="arcade"] .title-bar:hover,
+html[data-visual-theme="arcade"] .window.is-active > .title-bar,
+html[data-visual-theme="arcade"] .window.is-active > .title-bar:hover {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 2px, transparent 2px 6px),
+    linear-gradient(90deg, #ff4fd8, #1713a8 46%, #39f7ff);
+}
+
+html[data-visual-theme="arcade"] .title-bar-text {
+  font-family: "Lucida Console", "Courier New", SimSun, monospace;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+html[data-visual-theme="arcade"] .title-bar-controls button {
+  background-color: #ffe95a;
+  border-color: #fffbd4 #7a6700 #7a6700 #fffbd4;
+  box-shadow: 0 0 8px rgba(255, 233, 90, 0.42);
+}
+
+html[data-visual-theme="arcade"] .window-body,
+html[data-visual-theme="arcade"] .message-box,
+html[data-visual-theme="arcade"] .effects-settings,
+html[data-visual-theme="arcade"] .music-container,
+html[data-visual-theme="arcade"] .signal-monitor {
+  color: var(--arcade-ink);
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 6px),
+    var(--arcade-panel-2);
+  border-color: var(--arcade-cyan);
+  font-family: "Lucida Console", "Courier New", SimSun, monospace;
+}
+
+html[data-visual-theme="arcade"] .message-box-detail,
+html[data-visual-theme="arcade"] .recyclebin-list,
+html[data-visual-theme="arcade"] .recyclebin-preview pre,
+html[data-visual-theme="arcade"] .guestbook-container,
+html[data-visual-theme="arcade"] .computer-content,
+html[data-visual-theme="arcade"] .music-list,
+html[data-visual-theme="arcade"] .music-now,
+html[data-visual-theme="arcade"] .win98-empty,
+html[data-visual-theme="arcade"] .win98-error,
+html[data-visual-theme="arcade"] .signal-stage-list,
+html[data-visual-theme="arcade"] .resume-container,
+html[data-visual-theme="arcade"] .library-frame,
+html[data-visual-theme="arcade"] .blog-frame {
+  color: #efffff;
+  background: #080b17;
+  border-color: #39f7ff #0b6570 #0b6570 #b7fbff;
+  box-shadow: inset 0 0 18px rgba(57, 247, 255, 0.1);
+  font-family: "Lucida Console", "Courier New", SimSun, monospace;
+}
+
+html[data-visual-theme="arcade"] .computer-content {
+  line-height: 1.65;
+}
+
+html[data-visual-theme="arcade"] .computer-content h3,
+html[data-visual-theme="arcade"] .music-now-title,
+html[data-visual-theme="arcade"] .signal-monitor-head h2 {
+  color: var(--arcade-yellow);
+  text-shadow: 0 0 8px rgba(255, 233, 90, 0.55);
+}
+
+html[data-visual-theme="arcade"] .window-description-bar,
+html[data-visual-theme="arcade"] .browser-command-bar,
+html[data-visual-theme="arcade"] .browser-address-bar,
+html[data-visual-theme="arcade"] .window-toolbar,
+html[data-visual-theme="arcade"] .pvz-tree-topbar,
+html[data-visual-theme="arcade"] .status-bar {
+  color: var(--arcade-cyan);
+  background:
+    repeating-linear-gradient(90deg, rgba(57, 247, 255, 0.12) 0 2px, transparent 2px 7px),
+    #101225;
+  border-color: rgba(57, 247, 255, 0.65);
+  text-shadow: 0 0 8px rgba(57, 247, 255, 0.65);
+}
+
+html[data-visual-theme="arcade"] button,
+html[data-visual-theme="arcade"] .btn,
+html[data-visual-theme="arcade"] .start-button,
+html[data-visual-theme="arcade"] .taskbar-window-btn,
+html[data-visual-theme="arcade"] .quick-launch-btn,
+html[data-visual-theme="arcade"] .menu-item,
+html[data-visual-theme="arcade"] input,
+html[data-visual-theme="arcade"] select,
+html[data-visual-theme="arcade"] textarea {
+  font-family: "Lucida Console", "Courier New", SimSun, monospace;
+  letter-spacing: 0;
+}
+
+html[data-visual-theme="arcade"] button,
+html[data-visual-theme="arcade"] .btn,
+html[data-visual-theme="arcade"] .window button,
+html[data-visual-theme="arcade"] .message-box-buttons button,
+html[data-visual-theme="arcade"] .music-list button {
+  color: #efffff;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 2px, transparent 2px 6px),
+    #17142d;
+  border: 2px solid;
+  border-color: #9ffcff #0a5864 #0a5864 #f7ffff;
+  box-shadow: 2px 2px 0 #05030b, 0 0 9px rgba(57, 247, 255, 0.28);
+}
+
+html[data-visual-theme="arcade"] button:hover,
+html[data-visual-theme="arcade"] .btn:hover,
+html[data-visual-theme="arcade"] .window button:hover,
+html[data-visual-theme="arcade"] .music-list button:hover {
+  color: #05030b;
+  background: var(--arcade-cyan);
+  box-shadow: 2px 2px 0 #05030b, 0 0 13px rgba(57, 247, 255, 0.74);
+}
+
+html[data-visual-theme="arcade"] button:active,
+html[data-visual-theme="arcade"] .btn:active,
+html[data-visual-theme="arcade"] .window button:active {
+  border-color: #0a5864 #f7ffff #f7ffff #0a5864;
+  transform: translate(1px, 1px);
+}
+
+html[data-visual-theme="arcade"] input,
+html[data-visual-theme="arcade"] select,
+html[data-visual-theme="arcade"] textarea,
+html[data-visual-theme="arcade"] #terminal-input-display {
+  color: var(--arcade-ink);
+  background: #050814;
+  border-color: #39f7ff #0a5864 #0a5864 #b7fbff;
+}
+
+html[data-visual-theme="arcade"] .taskbar {
+  height: var(--taskbar-height);
+  color: #f7ffff;
+  background: linear-gradient(180deg, #c9fbff 0%, #78e6f3 42%, #2499bc 100%);
+  border-top: 2px solid var(--arcade-cyan);
+  box-shadow: 0 -1px 0 var(--arcade-yellow), 0 -8px 24px rgba(57, 247, 255, 0.28);
+}
+
+html[data-visual-theme="arcade"] .start-button {
+  color: #05030b;
+  background: linear-gradient(180deg, #fffbd0 0%, var(--arcade-yellow) 48%, #e8c529 100%);
+  border-color: #fffbd4 #7a6700 #7a6700 #fffbd4;
+  text-shadow: none;
+}
+
+html[data-visual-theme="arcade"] .start-button.active,
+html[data-visual-theme="arcade"] .taskbar-window-btn.is-active {
+  color: #05030b;
+  background: var(--arcade-cyan);
+  box-shadow: inset 2px 2px 0 #0a5864, inset -1px -1px 0 #f7ffff, 0 0 12px rgba(57, 247, 255, 0.8);
+}
+
+html[data-visual-theme="arcade"] .taskbar-window-btn {
+  color: #f7ffff;
+  background: #122b46;
+  border-color: #39f7ff #0a5864 #0a5864 #b7fbff;
+  text-shadow: 1px 1px 0 #05030b, 0 0 8px rgba(57, 247, 255, 0.64);
+}
+
+html[data-visual-theme="arcade"] .system-tray {
+  color: #05030b;
+  background: #8ff8ff;
+  border-color: #0a5864 #f7ffff #f7ffff #0a5864;
+  box-shadow: inset 0 0 10px rgba(57, 247, 255, 0.28), 0 0 10px rgba(57, 247, 255, 0.36);
+}
+
+html[data-visual-theme="arcade"] .taskbar-time {
+  color: #05030b;
+  font-weight: bold;
+  text-shadow: none;
+}
+
+html[data-visual-theme="arcade"] .start-menu,
+html[data-visual-theme="arcade"] .context-menu {
+  color: var(--arcade-ink);
+  background: #11152a;
+  border-color: #b7fbff #0a5864 #0a5864 #b7fbff;
+  box-shadow: 4px 4px 0 #05030b, 0 0 18px rgba(57, 247, 255, 0.32);
+}
+
+html[data-visual-theme="arcade"] .start-menu-sidebar {
+  color: #05030b;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.2) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, var(--arcade-cyan), var(--arcade-pink));
+  text-shadow: none;
+}
+
+html[data-visual-theme="arcade"] .menu-item:hover,
+html[data-visual-theme="arcade"] .context-menu-item:hover {
+  color: #05030b;
+  background: var(--arcade-yellow);
+  text-shadow: none;
+}
+
+html[data-visual-theme="arcade"] .context-menu-separator {
+  border-top-color: #0a5864;
+  border-bottom-color: rgba(57, 247, 255, 0.5);
+}
+
+html[data-visual-theme="arcade"] .mystery-signal {
+  color: #05030b;
+  background:
+    repeating-linear-gradient(135deg, rgba(5, 3, 11, 0.12) 0 3px, transparent 3px 6px),
+    var(--arcade-yellow);
+  border-color: #fffbd4 #7a6700 #7a6700 #fffbd4;
+  box-shadow: 3px 3px 0 #05030b, 0 0 22px rgba(255, 233, 90, 0.48);
+}
+
+html[data-visual-theme="arcade"] .mystery-signal-led {
+  background: var(--arcade-pink);
+  border-color: #5c0046;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35), 0 0 12px rgba(255, 79, 216, 0.98);
+}
+
+html[data-visual-theme="arcade"] .mystery-signal-copy small {
+  color: #32260b;
+}
+
+html[data-visual-theme="arcade"] .mystery-signal-progress {
+  color: var(--arcade-cyan);
+  background: #05030b;
+  border-color: #7a6700 #fffbd4 #fffbd4 #7a6700;
+  text-shadow: 0 0 8px rgba(57, 247, 255, 0.85);
+}
+
+html[data-visual-theme="arcade"] .signal-monitor-head {
+  color: var(--arcade-ink);
+  background: #080b17;
+  border-color: #39f7ff #0a5864 #0a5864 #b7fbff;
+}
+
+html[data-visual-theme="arcade"] .signal-monitor-head p,
+html[data-visual-theme="arcade"] .signal-stage-copy p,
+html[data-visual-theme="arcade"] .signal-stage-copy span,
+html[data-visual-theme="arcade"] .signal-stage-state {
+  color: var(--arcade-muted);
+}
+
+html[data-visual-theme="arcade"] .signal-stage {
+  border-bottom-color: rgba(57, 247, 255, 0.2);
+}
+
+html[data-visual-theme="arcade"] .signal-stage-light {
+  background: #443d55;
+  border-color: #05030b;
+}
+
+html[data-visual-theme="arcade"] .signal-stage.is-done .signal-stage-light {
+  background: var(--arcade-lime);
+  box-shadow: 0 0 10px rgba(114, 255, 92, 0.86);
+}
+
+html[data-visual-theme="arcade"] .signal-monitor-progress i {
+  background: repeating-linear-gradient(90deg, var(--arcade-cyan) 0 8px, var(--arcade-pink) 8px 11px, transparent 11px 13px);
+}
+
+html[data-visual-theme="arcade"] .retro-boot,
+html[data-visual-theme="arcade"] .standby-screen {
+  background:
+    repeating-linear-gradient(0deg, rgba(57, 247, 255, 0.08) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(255, 79, 216, 0.08) 0 1px, transparent 1px 34px),
+    #05030b;
+}
+
+html[data-visual-theme="arcade"] .retro-boot-card span,
+html[data-visual-theme="arcade"] .standby-screen span {
+  color: var(--arcade-cyan);
+  letter-spacing: 0;
+}
+
+html[data-visual-theme="arcade"] .retro-boot-card strong,
+html[data-visual-theme="arcade"] .standby-screen strong {
+  color: #fff;
+  letter-spacing: 0;
+  text-shadow: 2px 2px 0 #1713a8, 0 0 18px rgba(255, 79, 216, 0.72);
+}
+
+html[data-visual-theme="arcade"] .retro-boot-track {
+  border-color: var(--arcade-cyan);
+  background: #05030b;
+  box-shadow: 0 0 16px rgba(57, 247, 255, 0.4);
+}
+
+html[data-visual-theme="arcade"] .retro-boot-track i {
+  background: repeating-linear-gradient(90deg, var(--arcade-cyan) 0 14px, var(--arcade-pink) 14px 20px, transparent 20px 24px);
+}
+
+html[data-visual-theme="arcade"] #terminal-container {
+  color: var(--arcade-lime);
+  background:
+    repeating-linear-gradient(0deg, rgba(114, 255, 92, 0.08) 0 1px, transparent 1px 6px),
+    #010601;
+  text-shadow: 0 0 7px rgba(114, 255, 92, 0.6);
+}
+
+html[data-visual-theme="arcade"] .terminal-system,
+html[data-visual-theme="arcade"] .prompt-path {
+  color: var(--arcade-cyan);
+}
+
+html[data-visual-theme="arcade"] .terminal-hint {
+  color: var(--arcade-yellow);
+}
+
+html[data-visual-theme="arcade"] .terminal-error {
+  color: var(--arcade-pink);
+}
+
+html[data-visual-theme="arcade"] .effects-settings-preview {
+  background:
+    repeating-linear-gradient(0deg, rgba(57, 247, 255, 0.16) 0 1px, transparent 1px 12px),
+    repeating-linear-gradient(90deg, rgba(255, 79, 216, 0.14) 0 1px, transparent 1px 12px),
+    #05030b;
+  border-color: #39f7ff #0a5864 #0a5864 #b7fbff;
+}
+
+html[data-visual-theme="arcade"] .effects-settings-preview i {
+  width: 8px;
+  height: 8px;
+  background: var(--arcade-pink);
+  border-radius: 0;
+  box-shadow: 0 0 10px rgba(255, 79, 216, 0.9);
+  animation: preview-fall 1.7s steps(8, end) infinite;
+}
+
+html[data-visual-theme="arcade"] #waline-container {
+  --waline-theme-color: #39f7ff;
+  --waline-active-color: #ffe95a;
+  color: var(--arcade-ink);
+}
+
 @media (max-width: 760px) {
   #top-right-info {
     display: none;

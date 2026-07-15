@@ -193,19 +193,145 @@ let iconNextTop = 0;
 let iconPointerId = null;
 let iconDragFrame = null;
 let selectedIcon = null;
+const selectedIcons = new Set();
+
+function clearIconSelection() {
+    selectedIcons.forEach((icon) => icon.classList.remove('selected'));
+    selectedIcons.clear();
+    selectedIcon = null;
+}
+
+function selectIcons(icons) {
+    clearIconSelection();
+    icons.forEach((icon) => {
+        if (!icon) return;
+        icon.classList.add('selected');
+        selectedIcons.add(icon);
+    });
+    selectedIcon = icons[0] || null;
+}
 
 function selectIcon(icon) {
-    if (selectedIcon) {
-        selectedIcon.classList.remove('selected');
+    selectIcons(icon ? [icon] : []);
+}
+
+let isSelectingDesktop = false;
+let desktopSelectionPointerId = null;
+let desktopSelectionStartX = 0;
+let desktopSelectionStartY = 0;
+let desktopSelectionCurrentX = 0;
+let desktopSelectionCurrentY = 0;
+let desktopSelectionBox = null;
+let desktopSelectionCaptureTarget = null;
+let didDrawDesktopSelection = false;
+
+function canStartDesktopSelection(target) {
+    if (!(target instanceof Element)) return false;
+    return !target.closest([
+        '.icon',
+        '.window',
+        '.taskbar',
+        '.start-menu',
+        '.context-menu',
+        '#icon-context-menu',
+        '#top-right-info',
+        '.mystery-signal',
+        '.message-box-overlay'
+    ].join(','));
+}
+
+function getDesktopSelectionRect() {
+    const left = Math.min(desktopSelectionStartX, desktopSelectionCurrentX);
+    const top = Math.min(desktopSelectionStartY, desktopSelectionCurrentY);
+    const right = Math.max(desktopSelectionStartX, desktopSelectionCurrentX);
+    const bottom = Math.max(desktopSelectionStartY, desktopSelectionCurrentY);
+    return { left, top, right, bottom, width: right - left, height: bottom - top };
+}
+
+function ensureDesktopSelectionBox() {
+    if (desktopSelectionBox) return desktopSelectionBox;
+    desktopSelectionBox = document.createElement('div');
+    desktopSelectionBox.className = 'desktop-selection-box';
+    desktopSelectionBox.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(desktopSelectionBox);
+    return desktopSelectionBox;
+}
+
+function updateDesktopSelectionBox() {
+    const rect = getDesktopSelectionRect();
+    const box = ensureDesktopSelectionBox();
+    box.style.left = `${rect.left}px`;
+    box.style.top = `${rect.top}px`;
+    box.style.width = `${rect.width}px`;
+    box.style.height = `${rect.height}px`;
+}
+
+function removeDesktopSelectionBox() {
+    desktopSelectionBox?.remove();
+    desktopSelectionBox = null;
+}
+
+function rectsIntersect(a, b) {
+    return a.left <= b.right && a.right >= b.left && a.top <= b.bottom && a.bottom >= b.top;
+}
+
+function updateIconsFromSelectionRect() {
+    const selectionRect = getDesktopSelectionRect();
+    const icons = getDesktopIcons().filter((icon) => {
+        const iconRect = icon.getBoundingClientRect();
+        return rectsIntersect(selectionRect, iconRect);
+    });
+    selectIcons(icons);
+}
+
+function startDesktopSelection(event) {
+    if (event.button !== 0 || !canStartDesktopSelection(event.target)) return;
+    hideContextMenu();
+    hideIconContextMenu();
+    clearIconSelection();
+    isSelectingDesktop = true;
+    didDrawDesktopSelection = false;
+    desktopSelectionPointerId = event.pointerId;
+    desktopSelectionStartX = event.clientX;
+    desktopSelectionStartY = event.clientY;
+    desktopSelectionCurrentX = event.clientX;
+    desktopSelectionCurrentY = event.clientY;
+    desktopSelectionCaptureTarget = event.target instanceof Element ? event.target : document.body;
+    desktopSelectionCaptureTarget.setPointerCapture?.(event.pointerId);
+}
+
+function updateDesktopSelection(event) {
+    if (!isSelectingDesktop || event.pointerId !== desktopSelectionPointerId) return;
+    const moved = Math.abs(event.clientX - desktopSelectionStartX) + Math.abs(event.clientY - desktopSelectionStartY);
+    if (moved < 4 && !didDrawDesktopSelection) return;
+    event.preventDefault();
+    didDrawDesktopSelection = true;
+    desktopSelectionCurrentX = event.clientX;
+    desktopSelectionCurrentY = event.clientY;
+    updateDesktopSelectionBox();
+    updateIconsFromSelectionRect();
+}
+
+function finishDesktopSelection(event) {
+    if (!isSelectingDesktop || event.pointerId !== desktopSelectionPointerId) return;
+    desktopSelectionCaptureTarget?.releasePointerCapture?.(event.pointerId);
+    removeDesktopSelectionBox();
+    isSelectingDesktop = false;
+    desktopSelectionPointerId = null;
+    desktopSelectionCaptureTarget = null;
+    if (!didDrawDesktopSelection) {
+        clearIconSelection();
     }
-    selectedIcon = icon;
-    if (icon) {
-        icon.classList.add('selected');
-    }
+    didDrawDesktopSelection = false;
 }
 
 // Desktop interactions
 if (desktop) {
+    document.addEventListener('pointerdown', startDesktopSelection);
+    document.addEventListener('pointermove', updateDesktopSelection);
+    document.addEventListener('pointerup', finishDesktopSelection);
+    document.addEventListener('pointercancel', finishDesktopSelection);
+
     desktop.addEventListener('click', (e) => {
         if (e.target.id === 'desktop' || e.target === document.body) {
             selectIcon(null);

@@ -7,7 +7,9 @@
     const LEGACY_STORAGE_KEYS = ['blankke_effects_v1'];
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
     const settingsWindowId = 'window-effects-settings';
+    const visualThemes = ['classic', 'arcade'];
     const defaults = {
+        theme: 'classic',
         mode: 'sakura',
         intensity: reduceMotion ? 'light' : 'standard',
         speed: reduceMotion ? 'slow' : 'standard',
@@ -91,6 +93,10 @@
         return Math.max(min, Math.min(max, value));
     }
 
+    function normalizeTheme(theme) {
+        return visualThemes.includes(theme) ? theme : defaults.theme;
+    }
+
     function areaScale() {
         const scale = Math.sqrt((width * height) / (1440 * 900));
         return clamp(scale * (width < 720 ? 0.72 : 1), 0.48, 1.35);
@@ -137,6 +143,7 @@
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
         context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        context.imageSmoothingEnabled = true;
     }
 
     function bindEvents() {
@@ -176,6 +183,9 @@
     }
 
     function applyBodyMode() {
+        state.theme = normalizeTheme(state.theme);
+        document.documentElement.dataset.visualTheme = state.theme;
+        document.body.dataset.visualTheme = state.theme;
         document.body.classList.toggle('effects-active', state.mode !== 'off');
         document.body.classList.toggle('effects-night', state.mode === 'stars');
         document.body.dataset.effect = state.mode;
@@ -629,6 +639,11 @@
         applyState();
     }
 
+    function setTheme(theme) {
+        state.theme = normalizeTheme(theme);
+        applyState({ reseed: false });
+    }
+
     function setPreset(preset = {}) {
         state = {
             ...state,
@@ -646,6 +661,7 @@
             if (control.type === 'checkbox') control.checked = !!value;
             else control.value = value;
         };
+        assign('effects-theme', normalizeTheme(state.theme));
         assign('effects-mode', state.mode);
         assign('effects-intensity', state.intensity);
         assign('effects-speed', state.speed);
@@ -675,6 +691,10 @@
                     <fieldset>
                         <legend>屏幕保护与环境效果</legend>
                         <div class="effects-settings-preview" data-effect-preview aria-hidden="true"><i></i><i></i><i></i></div>
+                        <div class="field-row"><label for="effects-theme">界面风格</label><select id="effects-theme">
+                            <option value="classic">经典默认</option>
+                            <option value="arcade">霓虹电玩</option>
+                        </select></div>
                         <div class="field-row"><label for="effects-mode">模式</label><select id="effects-mode">
                             <option value="off">关闭</option>
                             <option value="sakura">风中樱落</option>
@@ -709,6 +729,7 @@
             if (!win) return;
             syncSettingsControls();
             const readControls = () => ({
+                theme: win.querySelector('#effects-theme')?.value || state.theme,
                 mode: win.querySelector('#effects-mode')?.value || state.mode,
                 intensity: win.querySelector('#effects-intensity')?.value || state.intensity,
                 speed: win.querySelector('#effects-speed')?.value || state.speed,
@@ -739,6 +760,7 @@
 
     const api = {
         setMode,
+        setTheme,
         setPreset,
         openSettings,
         pause,
