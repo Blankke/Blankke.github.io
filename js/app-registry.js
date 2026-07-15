@@ -95,7 +95,7 @@
                 app.open();
                 const startMenu = document.getElementById('start-menu');
                 const startButton = document.getElementById('start-button');
-                if (startMenu) startMenu.style.display = 'none';
+                if (startMenu) startMenu.classList.remove('is-open');
                 if (startButton) startButton.classList.remove('active');
             });
 

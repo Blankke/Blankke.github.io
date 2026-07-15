@@ -2,9 +2,6 @@
 
 const RECYCLE_KEY = window.BLANKKE_STATE_KEYS?.recycle || 'blankke_recycle_v2';
 const RECYCLE_CATALOG_KEY = window.BLANKKE_STATE_KEYS?.recycleCatalog || 'blankke_recycle_catalog_v2';
-const LEGACY_RECYCLE_KEY = 'recycle_bin_items_v1';
-const PVZ_RESTORED_KEY = 'pvz_restored_v1';
-const README_RESTORED_KEY = 'readme_restored_v1';
 
 const recycleBinDefaults = ['readme', 'pvz'];
 const recycleBinCatalog = {
@@ -124,14 +121,6 @@ function getRecycleItems() {
     try {
         const raw = localStorage.getItem(RECYCLE_KEY);
         if (!raw) {
-            const legacyRaw = localStorage.getItem(LEGACY_RECYCLE_KEY);
-            if (legacyRaw) {
-                const legacy = JSON.parse(legacyRaw);
-                if (Array.isArray(legacy)) {
-                    localStorage.setItem(RECYCLE_KEY, JSON.stringify(legacy));
-                    return legacy.filter(id => typeof id === 'string');
-                }
-            }
             return [...recycleBinDefaults];
         }
         const parsed = JSON.parse(raw);
@@ -149,9 +138,19 @@ function setRecycleItems(items) {
 
 function updateRecycleBinDesktopIcon() {
     const img = document.getElementById('recyclebin-desktop-icon');
-    if (!img) return;
     const items = getRecycleItems();
-    img.src = items.length ? 'assets/icon/recycle_bin_full.png' : 'assets/icon/recycle_bin_empty.png';
+    if (img) img.src = items.length ? 'assets/icon/recycle_bin_full.png' : 'assets/icon/recycle_bin_empty.png';
+    const count = document.getElementById('recyclebin-item-count');
+    if (count) {
+        count.textContent = String(items.length);
+        count.hidden = items.length === 0;
+    }
+    const description = document.getElementById('recyclebin-description');
+    if (description) {
+        description.textContent = items.length
+            ? `ScanDisk 提示：这里仍有 ${items.length} 个未索引对象，可以尝试还原。`
+            : '回收站为空；已恢复的对象可能出现在桌面上。';
+    }
 }
 
 function renderRecycleBin() {
@@ -353,7 +352,7 @@ function restoreRecycleItem(itemId) {
 
 function initRecycleBinState() {
     // 1. Check PVZ
-    const pvzRestored = window.quest?.hasFlag('pvz_restored') || localStorage.getItem(PVZ_RESTORED_KEY) === '1';
+    const pvzRestored = window.quest?.hasFlag('pvz_restored');
     let items = getRecycleItems();
     let changed = false;
 
@@ -376,7 +375,7 @@ function initRecycleBinState() {
     }
 
     // 2. Check Readme
-    const readmeRestored = window.quest?.hasFlag('readme_restored') || localStorage.getItem(README_RESTORED_KEY) === '1';
+    const readmeRestored = window.quest?.hasFlag('readme_restored');
 
     if (readmeRestored) {
         if (!document.getElementById('icon-readme')) {

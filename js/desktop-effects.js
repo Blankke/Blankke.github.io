@@ -1,184 +1,168 @@
-// High-quality desktop visual effects: pixel sakura, starfield, and classic bubbles.
+// 桌面动态环境：风中樱落、深夜星图与经典泡泡屏保
+// 用法：在 window-manager.js 之后引入本文件；也可通过
+// window.desktopEffects.setMode('sakura' | 'stars' | 'bubbles' | 'off') 切换模式。
 
 (function() {
-    const STORAGE_KEY = window.BLANKKE_STATE_KEYS?.effects || 'blankke_effects_v1';
+    const STORAGE_KEY = window.BLANKKE_STATE_KEYS?.effects || 'blankke_effects_v2';
+    const LEGACY_STORAGE_KEYS = ['blankke_effects_v1'];
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
+    const settingsWindowId = 'window-effects-settings';
     const defaults = {
-        mode: reduceMotion ? 'off' : 'sakura',
-        intensity: 'standard',
-        speed: 'standard',
+        mode: 'sakura',
+        intensity: reduceMotion ? 'light' : 'standard',
+        speed: reduceMotion ? 'slow' : 'standard',
         opacity: 'standard',
-        quality: 'high',
-        idleBoost: true
+        quality: reduceMotion ? 'balanced' : 'high',
+        idleBoost: !reduceMotion
     };
 
-    const intensityScale = { light: 0.55, standard: 1, lush: 1.65 };
-    const speedScale = { slow: 0.68, standard: 1, fast: 1.36 };
-    const opacityScale = { low: 0.55, standard: 0.82, high: 1 };
-    const qualityScale = { balanced: 1.25, high: 1.75, ultra: 2.25 };
-    const mobileScale = () => (window.innerWidth < 720 ? 0.58 : 1);
-
-    const sakuraSprites = [
-        [
-            '...11..',
-            '..122..',
-            '.12321.',
-            '..232..',
-            '..121..',
-            '...1...'
-        ],
-        [
-            '..1....',
-            '.122...',
-            '12321..',
-            '.2321..',
-            '..11...',
-            '.......'
-        ],
-        [
-            '...1...',
-            '..121..',
-            '.12321.',
-            '1234321',
-            '.12321.',
-            '..121..',
-            '...1...'
-        ],
-        [
-            '.11....',
-            '1231...',
-            '.2321..',
-            '..121..',
-            '...1...',
-            '.......'
-        ],
-        [
-            '...11..',
-            '..123..',
-            '.12321.',
-            '...21..',
-            '..11...',
-            '.......'
-        ]
-    ];
-
-    const sakuraPalettes = [
-        ['#ffd6e8', '#ff9fc8', '#fff3f8', '#e873a8'],
-        ['#ffe0ef', '#ffb0d2', '#fff8fb', '#dc6f9e'],
-        ['#f8c4df', '#f08fbd', '#fff0f7', '#c85c91'],
-        ['#fff0f4', '#ffc2d8', '#ffffff', '#e889ad']
-    ];
-
-    const starSprites = [
-        [
-            '...1...',
-            '...2...',
-            '.12221.',
-            '1234321',
-            '.12221.',
-            '...2...',
-            '...1...'
-        ],
-        [
-            '..1..',
-            '..2..',
-            '12321',
-            '..2..',
-            '..1..'
-        ],
-        [
-            '...1...',
-            '..121..',
-            '.12321.',
-            '1234321',
-            '.12321.',
-            '..121..',
-            '...1...'
-        ],
-        [
-            '..1..',
-            '.232.',
-            '12321',
-            '.232.',
-            '..1..'
-        ],
-        [
-            '.1.',
-            '232',
-            '.1.'
-        ]
-    ];
-
-    const starPalettes = [
-        ['#8fd7ff', '#d8f6ff', '#ffffff', '#fff4b8'],
-        ['#7ab4ff', '#b9ddff', '#f4fbff', '#ffd7ff'],
-        ['#f2cf7e', '#fff0ad', '#ffffff', '#ffd48a'],
-        ['#b996ff', '#d8c4ff', '#ffffff', '#ffd7fb']
-    ];
+    const intensityScale = { light: 0.62, standard: 1, lush: 1.55 };
+    const speedScale = { slow: 0.7, standard: 1, fast: 1.32 };
+    const opacityScale = { low: 0.48, standard: 0.76, high: 0.96 };
+    const qualityDpr = { balanced: 1.15, high: 1.6, ultra: 2 };
+    const modeCounts = { sakura: 52, stars: 128, bubbles: 18 };
+    const modeLimits = { sakura: 110, stars: 260, bubbles: 38 };
 
     let state = loadState();
     let canvas = null;
-    let ctx = null;
-    let vignette = null;
-    let rafId = null;
-    let width = 0;
-    let height = 0;
+    let context = null;
+    let atmosphere = null;
+    let frameId = null;
+    let width = 1;
+    let height = 1;
     let dpr = 1;
-    let lastTime = 0;
+    let lastFrameAt = 0;
+    let lastInputAt = performance.now();
     let paused = false;
     let hiddenPaused = false;
     let particles = [];
-    let meteors = [];
-    let lastInputAt = performance.now();
-    let lastMode = null;
-    let settingsWindowId = 'window-effects-settings';
+    let transients = [];
+    let currentMode = '';
+    const pointer = { x: -1000, y: -1000, dx: 0, dy: 0, activeUntil: 0 };
 
     function loadState() {
+        const normalizeState = (value) => ({
+            ...defaults,
+            ...(value && typeof value === 'object' ? value : {})
+        });
+
+        const migrateModeToSakura = (value) => {
+            const next = normalizeState(value);
+            next.mode = 'sakura';
+            return next;
+        };
+
         try {
-            const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-            return { ...defaults, ...(parsed && typeof parsed === 'object' ? parsed : {}) };
+            const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+            if (parsed && typeof parsed === 'object') {
+                return normalizeState(parsed);
+            }
         } catch {
-            return { ...defaults };
+            // 当前版本读取失败时，继续尝试迁移旧缓存。
         }
+
+        for (const legacyKey of LEGACY_STORAGE_KEYS) {
+            try {
+                const raw = localStorage.getItem(legacyKey);
+                if (!raw) continue;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') continue;
+                const migrated = migrateModeToSakura(parsed);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+                localStorage.removeItem(legacyKey);
+                return migrated;
+            } catch {
+                // 旧缓存损坏时直接回到默认值，不让这块把页面拖死。
+            }
+        }
+
+        return { ...defaults };
     }
 
     function saveState() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    function ensureCanvas() {
+    function random(min, max) {
+        return min + Math.random() * (max - min);
+    }
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function areaScale() {
+        const scale = Math.sqrt((width * height) / (1440 * 900));
+        return clamp(scale * (width < 720 ? 0.72 : 1), 0.48, 1.35);
+    }
+
+    function activeIntensity() {
+        let value = intensityScale[state.intensity] || 1;
+        if (state.mode === 'bubbles' && state.idleBoost && performance.now() - lastInputAt > 12000) {
+            value *= 1.35;
+        }
+        return value;
+    }
+
+    function targetCount(mode = state.mode) {
+        const target = Math.round((modeCounts[mode] || 0) * areaScale() * activeIntensity());
+        return Math.min(modeLimits[mode] || 0, Math.max(0, target));
+    }
+
+    function ensureSurface() {
         if (canvas) return;
 
-        vignette = document.createElement('div');
-        vignette.className = 'desktop-effects-vignette';
-        document.body.appendChild(vignette);
+        atmosphere = document.createElement('div');
+        atmosphere.className = 'desktop-effects-vignette';
+        atmosphere.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(atmosphere);
 
         canvas = document.createElement('canvas');
         canvas.className = 'desktop-effects-canvas';
         canvas.setAttribute('aria-hidden', 'true');
         document.body.appendChild(canvas);
-        ctx = canvas.getContext('2d', { alpha: true });
-        if (ctx) ctx.imageSmoothingEnabled = false;
+        context = canvas.getContext('2d', { alpha: true, desynchronized: true });
 
-        resizeCanvas();
+        resizeSurface();
         bindEvents();
+    }
+
+    function resizeSurface() {
+        if (!canvas || !context) return;
+        width = Math.max(1, window.innerWidth);
+        height = Math.max(1, window.innerHeight);
+        dpr = clamp(Math.min(window.devicePixelRatio || 1, qualityDpr[state.quality] || 1.6), 1, 2);
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function bindEvents() {
         window.addEventListener('resize', () => {
-            resizeCanvas();
-            reseedCurrentMode();
-        });
+            resizeSurface();
+            seedMode(true);
+        }, { passive: true });
 
         document.addEventListener('visibilitychange', () => {
             hiddenPaused = document.hidden;
             if (!hiddenPaused) {
-                lastTime = performance.now();
+                lastFrameAt = performance.now();
                 startLoop();
             }
         });
 
-        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel'].forEach((eventName) => {
+        window.addEventListener('pointermove', (event) => {
+            pointer.dx = event.clientX - pointer.x;
+            pointer.dy = event.clientY - pointer.y;
+            pointer.x = event.clientX;
+            pointer.y = event.clientY;
+            pointer.activeUntil = performance.now() + 180;
+            lastInputAt = performance.now();
+        }, { passive: true });
+
+        ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach((eventName) => {
             window.addEventListener(eventName, () => {
                 lastInputAt = performance.now();
             }, { passive: true });
@@ -186,584 +170,462 @@
 
         document.getElementById('ctx-effects')?.addEventListener('click', () => {
             api.openSettings();
-            const contextMenu = document.getElementById('context-menu');
-            if (contextMenu) contextMenu.style.display = 'none';
+            const menu = document.getElementById('context-menu');
+            if (menu) menu.style.display = 'none';
         });
-    }
-
-    function resizeCanvas() {
-        if (!canvas || !ctx) return;
-        const qualityDpr = qualityScale[state.quality] || qualityScale.high;
-        dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, qualityDpr));
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = Math.max(1, Math.floor(width * dpr));
-        canvas.height = Math.max(1, Math.floor(height * dpr));
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.imageSmoothingEnabled = false;
     }
 
     function applyBodyMode() {
         document.body.classList.toggle('effects-active', state.mode !== 'off');
         document.body.classList.toggle('effects-night', state.mode === 'stars');
+        document.body.dataset.effect = state.mode;
         if (canvas) {
-            canvas.style.display = state.mode === 'off' ? 'none' : 'block';
+            canvas.hidden = state.mode === 'off';
             canvas.style.opacity = String(opacityScale[state.opacity] || opacityScale.standard);
-        }
-    }
-
-    function reseedCurrentMode() {
-        particles = [];
-        meteors = [];
-        lastMode = state.mode;
-
-        if (state.mode === 'sakura') seedSakura();
-        if (state.mode === 'stars') seedStars();
-        if (state.mode === 'bubbles') seedBubbles(false);
-    }
-
-    function getAreaFactor() {
-        return Math.sqrt((width * height) / (1440 * 900)) * mobileScale();
-    }
-
-    function getIntensity() {
-        let scale = intensityScale[state.intensity] || intensityScale.standard;
-        if (state.mode === 'bubbles' && state.idleBoost && performance.now() - lastInputAt > 10000) {
-            scale *= 1.55;
-        }
-        return scale;
-    }
-
-    function targetCount(mode = state.mode) {
-        const area = getAreaFactor();
-        const intensity = getIntensity();
-        const base = {
-            sakura: 96,
-            stars: 170,
-            bubbles: 28
-        }[mode] || 0;
-        const max = {
-            sakura: 230,
-            stars: 420,
-            bubbles: 68
-        }[mode] || 0;
-        return Math.min(max, Math.max(0, Math.round(base * area * intensity)));
-    }
-
-    function randomBetween(min, max) {
-        return min + Math.random() * (max - min);
-    }
-
-    function seedSakura() {
-        const count = targetCount('sakura');
-        for (let i = 0; i < count; i += 1) {
-            particles.push(createSakura(true));
         }
     }
 
     function createSakura(anywhere = false) {
         const depth = Math.random();
-        const spawn = anywhere ? null : getSakuraSpawnPoint(depth);
+        const fromLeft = !anywhere && Math.random() < 0.18;
+        const size = random(3.2, 6.5) + depth * 3.6;
         return {
             kind: 'sakura',
-            x: anywhere ? randomBetween(-40, width + 120) : spawn.x,
-            y: anywhere ? randomBetween(-80, height + 40) : spawn.y,
+            x: anywhere ? random(-30, width + 30) : (fromLeft ? random(-70, -12) : random(-40, width * 0.96)),
+            y: anywhere ? random(-50, height + 20) : (fromLeft ? random(-40, height * 0.3) : random(-110, -12)),
             depth,
-            baseSize: randomBetween(1.6, 3.8) + depth * 2.3,
-            vx: randomBetween(38, 82) + depth * 78,
-            vy: randomBetween(32, 74) + depth * 72,
-            phase: Math.random() * Math.PI * 2,
-            spin: randomBetween(-1.6, 1.6),
-            sway: randomBetween(12, 36) + depth * 18,
-            sprite: Math.floor(Math.random() * sakuraSprites.length),
-            palette: Math.floor(Math.random() * sakuraPalettes.length),
-            flip: Math.random() > 0.5 ? 1 : -1
+            size,
+            vx: random(-5, 9),
+            vy: random(16, 30) + depth * 26,
+            phase: random(0, Math.PI * 2),
+            sway: random(10, 24) + depth * 12,
+            rotation: random(0, Math.PI * 2),
+            spin: random(-1.25, 1.25),
+            flip: random(0, Math.PI * 2),
+            flipSpeed: random(1.2, 2.8),
+            tint: Math.floor(random(0, 5))
         };
     }
 
-    function getSakuraSpawnPoint(depth) {
-        const edge = Math.random();
-        const driftMargin = 120 + depth * 120;
-
-        if (edge < 0.58) {
-            return {
-                x: randomBetween(-driftMargin * 0.35, width + driftMargin),
-                y: randomBetween(-160, -16)
-            };
-        }
-
-        return {
-            x: randomBetween(width + 16, width + driftMargin),
-            y: randomBetween(-80, height * 0.92)
-        };
-    }
-
-    function resetSakura(p) {
-        const next = createSakura(false);
-        Object.assign(p, next);
+    function windAt(particle, now) {
+        const slowBreeze = 13 + Math.sin(now * 0.00022) * 5;
+        const localBreeze = Math.sin(particle.y * 0.012 + now * 0.00075) * 4;
+        const gustWave = Math.max(0, Math.sin(now * 0.00017 - 1.2));
+        const gust = Math.pow(gustWave, 7) * 34;
+        return slowBreeze + localBreeze + gust;
     }
 
     function updateSakura(dt, now) {
-        syncParticleCount('sakura');
-        const speed = speedScale[state.speed] || speedScale.standard;
-        const gust = 1 + Math.sin(now * 0.00045) * 0.18 + Math.sin(now * 0.0017) * 0.08;
+        syncCount('sakura');
+        const speed = speedScale[state.speed] || 1;
+        const pointerLive = now < pointer.activeUntil;
 
-        particles.forEach((p) => {
-            p.phase += dt * (1.2 + p.depth * 1.4);
-            const flutter = Math.sin(p.phase) * p.sway;
-            p.x -= (p.vx * gust * speed + flutter * 0.18) * dt;
-            p.y += (p.vy * (0.88 + gust * 0.12) * speed + Math.cos(p.phase * 0.72) * 13) * dt;
+        particles.forEach((petal) => {
+            petal.phase += dt * (0.7 + petal.depth * 0.9);
+            petal.flip += dt * petal.flipSpeed;
+            petal.rotation += dt * petal.spin;
 
-            if (p.x < -90 || p.y > height + 90) resetSakura(p);
+            if (pointerLive) {
+                const dx = petal.x - pointer.x;
+                const dy = petal.y - pointer.y;
+                const distance = Math.hypot(dx, dy);
+                if (distance < 105) {
+                    const influence = (1 - distance / 105) * (0.4 + petal.depth * 0.6);
+                    petal.vx += pointer.dx * influence * 0.12;
+                    petal.vy += pointer.dy * influence * 0.055;
+                }
+            }
+
+            const lateral = Math.sin(petal.phase) * petal.sway;
+            petal.x += (windAt(petal, now) * (0.52 + petal.depth * 0.68) + petal.vx + lateral * 0.16) * dt * speed;
+            petal.y += (petal.vy + Math.cos(petal.phase * 1.35) * 6) * dt * speed;
+            petal.vx *= Math.pow(0.22, dt);
+            petal.vy = petal.vy * Math.pow(0.8, dt) + (18 + petal.depth * 28) * (1 - Math.pow(0.8, dt));
+
+            if (petal.x > width + 80 || petal.y > height + 70) {
+                Object.assign(petal, createSakura(false));
+            }
         });
     }
 
-    function drawSakura(now) {
-        const breezeAlpha = state.opacity === 'high' ? 0.2 : 0.13;
-        const gradient = ctx.createLinearGradient(width, 0, 0, height);
-        gradient.addColorStop(0, `rgba(255, 214, 232, ${breezeAlpha})`);
-        gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
-        gradient.addColorStop(1, 'rgba(255, 190, 217, 0.06)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
+    function drawSakuraPetal(petal) {
+        const colors = ['#ffd8e8', '#f8b9d2', '#fff0f5', '#ef9fc1', '#ffe5ed'];
+        const edgeColors = ['#df7da8', '#db8baa', '#e79aba', '#cc6f9c', '#e2a1b3'];
+        const flipScale = 0.18 + Math.abs(Math.cos(petal.flip)) * 0.82;
+        const size = petal.size;
 
+        context.save();
+        context.translate(petal.x, petal.y);
+        context.rotate(petal.rotation);
+        context.scale(1, flipScale);
+        context.globalAlpha = 0.38 + petal.depth * 0.54;
+
+        context.beginPath();
+        context.moveTo(0, size * 0.92);
+        context.bezierCurveTo(-size * 0.72, size * 0.38, -size * 0.78, -size * 0.5, -size * 0.15, -size);
+        context.quadraticCurveTo(0, -size * 0.7, size * 0.15, -size);
+        context.bezierCurveTo(size * 0.78, -size * 0.5, size * 0.72, size * 0.38, 0, size * 0.92);
+        context.closePath();
+        context.fillStyle = colors[petal.tint];
+        context.fill();
+
+        context.lineWidth = Math.max(0.45, size * 0.085);
+        context.strokeStyle = edgeColors[petal.tint];
+        context.stroke();
+
+        context.globalAlpha *= 0.58;
+        context.beginPath();
+        context.moveTo(0, size * 0.72);
+        context.quadraticCurveTo(-size * 0.08, 0, -size * 0.04, -size * 0.66);
+        context.strokeStyle = '#c86f99';
+        context.lineWidth = Math.max(0.4, size * 0.055);
+        context.stroke();
+        context.restore();
+    }
+
+    function drawSakura() {
         particles
             .slice()
             .sort((a, b) => a.depth - b.depth)
-            .forEach((p) => {
-                drawPixelPetal(p, now);
-            });
-    }
-
-    function drawPixelPetal(p, now) {
-        const sprite = sakuraSprites[p.sprite];
-        const palette = sakuraPalettes[p.palette];
-        const scale = Math.max(1.2, p.baseSize);
-        const rot = Math.sin(p.phase * 0.8) * 0.55 + p.spin * now * 0.0005;
-        const alpha = 0.42 + p.depth * 0.46;
-
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.translate(p.x, p.y);
-        ctx.rotate(rot);
-        ctx.scale(p.flip, 1);
-
-        for (let y = 0; y < sprite.length; y += 1) {
-            for (let x = 0; x < sprite[y].length; x += 1) {
-                const idx = Number(sprite[y][x]);
-                if (!idx) continue;
-                ctx.fillStyle = palette[idx - 1] || palette[0];
-                ctx.fillRect((x - sprite[y].length / 2) * scale, (y - sprite.length / 2) * scale, scale, scale);
-            }
-        }
-
-        ctx.restore();
-    }
-
-    function seedStars() {
-        const count = targetCount('stars');
-        for (let i = 0; i < count; i += 1) {
-            particles.push(createStar());
-        }
+            .forEach(drawSakuraPetal);
     }
 
     function createStar() {
         const depth = Math.random();
-        const typeRand = Math.random();
+        const bright = Math.random() > 0.82;
         return {
             kind: 'star',
-            x: Math.random() * width,
-            y: Math.random() * height,
+            x: random(0, width),
+            y: random(0, height),
             depth,
-            size: typeRand > 0.86 ? randomBetween(1.35, 2.15) : randomBetween(0.85, 1.45),
-            phase: Math.random() * Math.PI * 2,
-            twinkle: randomBetween(1.6, 4.6),
-            type: typeRand > 0.78 ? 'burst' : (typeRand > 0.48 ? 'cross' : 'dot'),
-            drift: randomBetween(0.015, 0.08),
-            sprite: typeRand > 0.86 ? 0 : (typeRand > 0.72 ? 2 : Math.floor(randomBetween(1, starSprites.length))),
-            palette: Math.floor(Math.random() * starPalettes.length),
-            flashOffset: Math.random() * 0.7,
-            glint: Math.random() > 0.72
+            radius: bright ? random(1.1, 1.9) : random(0.45, 1.15),
+            phase: random(0, Math.PI * 2),
+            pulse: random(0.7, 2.2),
+            drift: random(0.3, 2.3),
+            bright,
+            warm: Math.random() > 0.78
+        };
+    }
+
+    function createMeteor() {
+        const speed = random(420, 610);
+        const angle = random(0.22, 0.34);
+        return {
+            x: random(width * 0.56, width + 50),
+            y: random(20, height * 0.27),
+            vx: -Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: random(0.62, 0.9),
+            maxLife: 0.9,
+            length: random(70, 115)
         };
     }
 
     function updateStars(dt, now) {
-        syncParticleCount('stars');
-        particles.forEach((p) => {
-            p.phase += dt * p.twinkle;
-            p.x += p.drift * dt * 8;
-            if (p.x > width + 8) p.x = -8;
+        syncCount('stars');
+        const speed = speedScale[state.speed] || 1;
+        particles.forEach((star) => {
+            star.phase += dt * star.pulse * speed;
+            star.x += star.drift * dt * speed;
+            if (star.x > width + 4) star.x = -4;
         });
 
-        if (meteors.length < 3 && Math.random() < dt * 0.16 * getIntensity()) {
-            meteors.push(createMeteor());
+        if (transients.length < 2 && Math.random() < dt * 0.045 * activeIntensity()) {
+            transients.push(createMeteor());
         }
-
-        meteors = meteors.filter((m) => {
-            m.life -= dt;
-            m.x += m.vx * dt;
-            m.y += m.vy * dt;
-            return m.life > 0 && m.x > -160 && m.y < height + 160;
+        transients = transients.filter((meteor) => {
+            meteor.life -= dt;
+            meteor.x += meteor.vx * dt * speed;
+            meteor.y += meteor.vy * dt * speed;
+            return meteor.life > 0;
         });
-    }
-
-    function createMeteor() {
-        const angle = randomBetween(0.18, 0.34);
-        const speed = randomBetween(520, 760);
-        return {
-            x: randomBetween(width * 0.55, width + 80),
-            y: randomBetween(20, height * 0.34),
-            vx: -Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            life: randomBetween(0.72, 1.15),
-            maxLife: 1.15,
-            size: randomBetween(1.2, 2.0),
-            hue: Math.random() > 0.5 ? 198 : 48,
-            trail: randomBetween(82, 132)
-        };
     }
 
     function drawStars() {
-        const bg = ctx.createLinearGradient(0, 0, 0, height);
-        bg.addColorStop(0, 'rgba(3, 9, 24, 0.45)');
-        bg.addColorStop(0.55, 'rgba(3, 22, 35, 0.22)');
-        bg.addColorStop(1, 'rgba(0, 40, 44, 0.12)');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, width, height);
+        const wash = context.createLinearGradient(0, 0, 0, height);
+        wash.addColorStop(0, 'rgba(2, 8, 22, .5)');
+        wash.addColorStop(0.62, 'rgba(3, 21, 32, .28)');
+        wash.addColorStop(1, 'rgba(0, 35, 38, .12)');
+        context.fillStyle = wash;
+        context.fillRect(0, 0, width, height);
 
-        particles.forEach((p) => {
-            drawPixelStar(p);
-        });
-        ctx.globalAlpha = 1;
+        particles.forEach((star) => {
+            const pulse = 0.28 + Math.pow((Math.sin(star.phase) + 1) / 2, 2.4) * 0.72;
+            const alpha = pulse * (0.52 + star.depth * 0.42);
+            const radius = star.radius + star.depth * 0.75;
+            context.globalAlpha = alpha;
+            context.fillStyle = star.warm ? '#ffe7b0' : '#e7f7ff';
+            context.fillRect(Math.round(star.x), Math.round(star.y), Math.max(1, Math.round(radius)), Math.max(1, Math.round(radius)));
 
-        meteors.forEach(drawPixelMeteor);
-    }
-
-    function drawPixelStar(p) {
-        const pulse = (Math.sin(p.phase) + 1) / 2;
-        const flash = Math.pow(pulse, 2.8);
-        const soft = 0.26 + flash * 0.74;
-        const alpha = Math.min(1, soft + p.depth * 0.18);
-        const scale = Math.max(1, Math.round(p.size + p.depth * 1.2 + flash * (p.glint ? 1.15 : 0.55)));
-        const sprite = starSprites[p.sprite] || starSprites[0];
-        const palette = starPalettes[p.palette] || starPalettes[0];
-        const x0 = Math.round(p.x - (sprite[0].length * scale) / 2);
-        const y0 = Math.round(p.y - (sprite.length * scale) / 2);
-
-        if (p.type !== 'dot') {
-            ctx.globalAlpha = alpha * 0.22;
-            ctx.fillStyle = palette[1];
-            ctx.fillRect(Math.round(p.x - scale * 3), Math.round(p.y), scale * 7, scale);
-            ctx.fillRect(Math.round(p.x), Math.round(p.y - scale * 3), scale, scale * 7);
-        }
-
-        ctx.globalAlpha = alpha;
-        for (let y = 0; y < sprite.length; y += 1) {
-            for (let x = 0; x < sprite[y].length; x += 1) {
-                const idx = Number(sprite[y][x]);
-                if (!idx) continue;
-                ctx.globalAlpha = alpha * (idx === 1 ? 0.42 : idx === 2 ? 0.72 : 1);
-                ctx.fillStyle = palette[Math.min(idx - 1, palette.length - 1)];
-                ctx.fillRect(x0 + x * scale, y0 + y * scale, scale, scale);
+            if (star.bright && pulse > 0.68) {
+                context.globalAlpha = (pulse - 0.58) * 0.6;
+                context.fillRect(Math.round(star.x - radius * 3), Math.round(star.y), Math.round(radius * 7), 1);
+                context.fillRect(Math.round(star.x), Math.round(star.y - radius * 3), 1, Math.round(radius * 7));
             }
-        }
+        });
 
-        if (flash > 0.74 && p.glint) {
-            ctx.globalAlpha = (flash - 0.74) * 1.8;
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(Math.round(p.x - scale), Math.round(p.y - scale), scale * 2, scale * 2);
-        }
-        ctx.globalAlpha = 1;
-    }
-
-    function drawPixelMeteor(m) {
-        const age = 1 - m.life / m.maxLife;
-        const alpha = Math.sin(Math.PI * Math.max(0, Math.min(1, 1 - age))) * 0.95;
-        const len = Math.hypot(m.vx, m.vy) || 1;
-        const backX = -m.vx / len;
-        const backY = -m.vy / len;
-        const px = -backY;
-        const py = backX;
-        const block = Math.max(1, Math.round(m.size));
-
-        for (let i = 0; i < 18; i += 1) {
-            const t = i / 17;
-            const widthFactor = Math.max(1, Math.round(block * (1.9 - t * 1.35)));
-            const a = alpha * Math.pow(1 - t, 1.8);
-            const x = Math.round(m.x + backX * m.trail * t);
-            const y = Math.round(m.y + backY * m.trail * t);
-            ctx.globalAlpha = a;
-            ctx.fillStyle = m.hue === 48 ? '#fff1a8' : '#d9f9ff';
-            ctx.fillRect(Math.round(x - px * widthFactor), Math.round(y - py * widthFactor), widthFactor + block, widthFactor + block);
-        }
-
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(Math.round(m.x - block * 1.5), Math.round(m.y - block * 1.5), block * 3, block * 3);
-        ctx.globalAlpha = alpha * 0.55;
-        ctx.fillStyle = m.hue === 48 ? '#ffd16d' : '#77dfff';
-        ctx.fillRect(Math.round(m.x - block * 3), Math.round(m.y), block * 7, block);
-        ctx.fillRect(Math.round(m.x), Math.round(m.y - block * 3), block, block * 7);
-        ctx.globalAlpha = 1;
-    }
-
-    function seedBubbles(anywhere = true) {
-        const count = targetCount('bubbles');
-        for (let i = 0; i < count; i += 1) {
-            particles.push(createBubble(anywhere));
-        }
+        transients.forEach((meteor) => {
+            const magnitude = Math.hypot(meteor.vx, meteor.vy) || 1;
+            const tailX = -meteor.vx / magnitude;
+            const tailY = -meteor.vy / magnitude;
+            const gradient = context.createLinearGradient(
+                meteor.x,
+                meteor.y,
+                meteor.x + tailX * meteor.length,
+                meteor.y + tailY * meteor.length
+            );
+            const alpha = clamp(meteor.life / meteor.maxLife, 0, 1);
+            gradient.addColorStop(0, `rgba(255,255,255,${alpha})`);
+            gradient.addColorStop(0.18, `rgba(172,226,255,${alpha * 0.72})`);
+            gradient.addColorStop(1, 'rgba(94,190,255,0)');
+            context.strokeStyle = gradient;
+            context.lineWidth = 1.5;
+            context.beginPath();
+            context.moveTo(meteor.x, meteor.y);
+            context.lineTo(meteor.x + tailX * meteor.length, meteor.y + tailY * meteor.length);
+            context.stroke();
+        });
+        context.globalAlpha = 1;
     }
 
     function createBubble(anywhere = false) {
         const depth = Math.random();
-        const radius = Math.min(width, height) < 520
-            ? randomBetween(14, 42) + depth * 22
-            : randomBetween(22, 70) + depth * 34;
-        const spawnPad = radius + 6;
-        const cornerX = randomBetween(Math.max(spawnPad, width - radius * 5.2), Math.max(spawnPad, width - spawnPad));
-        const cornerY = randomBetween(Math.max(spawnPad, height - radius * 4.2), Math.max(spawnPad, height - spawnPad));
+        const radius = random(14, 38) + depth * 34;
         return {
             kind: 'bubble',
-            x: anywhere ? randomBetween(radius, Math.max(radius, width - radius)) : cornerX,
-            y: anywhere ? randomBetween(radius, Math.max(radius, height - radius)) : cornerY,
-            r: radius,
-            vx: -randomBetween(10, 48) + randomBetween(-10, 14),
-            vy: -randomBetween(22, 66) - depth * 30,
+            x: random(radius, Math.max(radius, width - radius)),
+            y: anywhere ? random(radius, Math.max(radius, height - radius - 36)) : height + radius + random(0, 120),
+            radius,
             depth,
-            hue: randomBetween(176, 225),
-            phase: Math.random() * Math.PI * 2,
-            wobble: randomBetween(0.5, 1.6),
-            mass: radius * radius,
-            age: anywhere ? randomBetween(0.5, 6) : -Math.pow(Math.random(), 1.7) * 2.8
+            vx: random(-7, 7),
+            vy: -(random(12, 25) + depth * 18),
+            phase: random(0, Math.PI * 2),
+            wobble: random(0.55, 1.25),
+            hue: random(178, 226),
+            delay: anywhere ? random(-2, 0) : random(0, 5),
+            mass: radius * radius
         };
     }
 
-    function resetBubble(p) {
-        Object.assign(p, createBubble(false));
+    function constrainBubbleSpeed(bubble) {
+        const max = 78 + bubble.depth * 42;
+        const magnitude = Math.hypot(bubble.vx, bubble.vy);
+        if (magnitude <= max) return;
+        bubble.vx = bubble.vx / magnitude * max;
+        bubble.vy = bubble.vy / magnitude * max;
     }
 
-    function updateBubbles(dt) {
-        syncParticleCount('bubbles');
-        const speed = speedScale[state.speed] || speedScale.standard;
-        const step = Math.min(dt, 0.024);
-        particles.forEach((p) => {
-            p.age += dt;
-            if (p.age < 0) return;
-            p.phase += dt * p.wobble;
-            p.vx += Math.sin(p.phase) * 2.2 * step;
-            p.vy += Math.cos(p.phase * 0.7) * 1.1 * step;
-            p.x += p.vx * speed * step;
-            p.y += p.vy * speed * step;
+    function collideBubbles() {
+        for (let i = 0; i < particles.length; i += 1) {
+            const a = particles[i];
+            if (a.delay > 0) continue;
+            for (let j = i + 1; j < particles.length; j += 1) {
+                const b = particles[j];
+                if (b.delay > 0) continue;
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const minimum = a.radius + b.radius;
+                const distanceSquared = dx * dx + dy * dy;
+                if (distanceSquared <= 0 || distanceSquared >= minimum * minimum) continue;
 
-            if (p.x < p.r) {
-                p.x = p.r;
-                p.vx = Math.abs(p.vx) * 0.92;
+                const distance = Math.sqrt(distanceSquared);
+                const nx = dx / distance;
+                const ny = dy / distance;
+                const overlap = minimum - distance;
+                const inverseA = 1 / a.mass;
+                const inverseB = 1 / b.mass;
+                const inverseSum = inverseA + inverseB;
+
+                a.x -= nx * overlap * inverseA / inverseSum;
+                a.y -= ny * overlap * inverseA / inverseSum;
+                b.x += nx * overlap * inverseB / inverseSum;
+                b.y += ny * overlap * inverseB / inverseSum;
+
+                const relativeX = b.vx - a.vx;
+                const relativeY = b.vy - a.vy;
+                const velocity = relativeX * nx + relativeY * ny;
+                if (velocity > 0) continue;
+                const impulse = -(1 + 0.88) * velocity / inverseSum;
+                a.vx -= impulse * nx * inverseA;
+                a.vy -= impulse * ny * inverseA;
+                b.vx += impulse * nx * inverseB;
+                b.vy += impulse * ny * inverseB;
             }
-            if (p.x > width - p.r) {
-                p.x = width - p.r;
-                p.vx = -Math.abs(p.vx) * 0.92;
+        }
+    }
+
+    function updateBubbles(dt, now) {
+        syncCount('bubbles');
+        const speed = speedScale[state.speed] || 1;
+        const pointerLive = now < pointer.activeUntil;
+
+        particles.forEach((bubble) => {
+            bubble.delay -= dt;
+            if (bubble.delay > 0) return;
+            bubble.phase += dt * bubble.wobble;
+            bubble.vx += Math.sin(bubble.phase) * dt * 3.6;
+            bubble.x += bubble.vx * dt * speed;
+            bubble.y += bubble.vy * dt * speed;
+
+            if (pointerLive) {
+                const dx = bubble.x - pointer.x;
+                const dy = bubble.y - pointer.y;
+                const distance = Math.hypot(dx, dy) || 1;
+                const range = bubble.radius + 64;
+                if (distance < range) {
+                    const force = (1 - distance / range) * 22;
+                    bubble.vx += dx / distance * force;
+                    bubble.vy += dy / distance * force;
+                }
             }
-            if (p.y < p.r) {
-                p.y = p.r;
-                p.vy = Math.abs(p.vy) * 0.92;
+
+            if (bubble.x < bubble.radius) {
+                bubble.x = bubble.radius;
+                bubble.vx = Math.abs(bubble.vx) * 0.84;
+            } else if (bubble.x > width - bubble.radius) {
+                bubble.x = width - bubble.radius;
+                bubble.vx = -Math.abs(bubble.vx) * 0.84;
             }
-            if (p.y > height - p.r - 32) {
-                p.y = height - p.r - 32;
-                p.vy = -Math.abs(p.vy) * 0.92;
+
+            if (bubble.y < -bubble.radius * 1.5) {
+                Object.assign(bubble, createBubble(false));
             }
-            limitBubbleSpeed(p);
+            constrainBubbleSpeed(bubble);
         });
+        collideBubbles();
+    }
 
-        resolveBubbleCollisions();
+    function drawBubble(bubble) {
+        if (bubble.delay > 0) return;
+        const alpha = 0.18 + bubble.depth * 0.26;
+        const gradient = context.createRadialGradient(
+            bubble.x - bubble.radius * 0.35,
+            bubble.y - bubble.radius * 0.42,
+            bubble.radius * 0.06,
+            bubble.x,
+            bubble.y,
+            bubble.radius
+        );
+        gradient.addColorStop(0, `hsla(${bubble.hue + 36},100%,96%,${alpha * 1.7})`);
+        gradient.addColorStop(0.22, `hsla(${bubble.hue},100%,86%,${alpha * 0.18})`);
+        gradient.addColorStop(0.74, `hsla(${bubble.hue + 80},100%,74%,${alpha * 0.12})`);
+        gradient.addColorStop(0.94, `hsla(${bubble.hue - 32},100%,84%,${alpha * 0.74})`);
+        gradient.addColorStop(1, `rgba(255,255,255,${alpha})`);
+
+        context.save();
+        context.globalCompositeOperation = 'screen';
+        context.fillStyle = gradient;
+        context.beginPath();
+        context.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+        context.fill();
+        context.strokeStyle = `hsla(${bubble.hue + 15},100%,90%,${alpha * 1.8})`;
+        context.lineWidth = Math.max(0.8, bubble.radius * 0.025);
+        context.stroke();
+
+        context.fillStyle = `rgba(255,255,255,${alpha * 1.9})`;
+        context.beginPath();
+        context.ellipse(
+            bubble.x - bubble.radius * 0.33,
+            bubble.y - bubble.radius * 0.39,
+            bubble.radius * 0.19,
+            bubble.radius * 0.065,
+            -0.65,
+            0,
+            Math.PI * 2
+        );
+        context.fill();
+        context.restore();
     }
 
     function drawBubbles() {
-        const wash = ctx.createLinearGradient(0, height, width, 0);
-        wash.addColorStop(0, 'rgba(255, 255, 255, 0.03)');
-        wash.addColorStop(0.5, 'rgba(183, 231, 255, 0.08)');
-        wash.addColorStop(1, 'rgba(255, 210, 239, 0.05)');
-        ctx.fillStyle = wash;
-        ctx.fillRect(0, 0, width, height);
-
         particles
             .slice()
             .sort((a, b) => a.depth - b.depth)
             .forEach(drawBubble);
     }
 
-    function drawBubble(p) {
-        if (p.age < 0) return;
-        const alpha = 0.24 + p.depth * 0.22;
-        const ring = ctx.createRadialGradient(
-            p.x - p.r * 0.34,
-            p.y - p.r * 0.42,
-            p.r * 0.08,
-            p.x,
-            p.y,
-            p.r
-        );
-        ring.addColorStop(0, `hsla(${p.hue + 36}, 100%, 94%, ${alpha * 1.6})`);
-        ring.addColorStop(0.28, `hsla(${p.hue}, 100%, 88%, ${alpha * 0.42})`);
-        ring.addColorStop(0.68, `hsla(${p.hue + 72}, 100%, 74%, ${alpha * 0.22})`);
-        ring.addColorStop(0.9, `hsla(${p.hue - 28}, 100%, 86%, ${alpha * 0.72})`);
-        ring.addColorStop(1, `rgba(255, 255, 255, ${alpha * 0.92})`);
-
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.fillStyle = ring;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = `hsla(${p.hue + 18}, 100%, 86%, ${alpha * 1.6})`;
-        ctx.lineWidth = Math.max(1, p.r * 0.045);
-        ctx.stroke();
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 1.8})`;
-        ctx.beginPath();
-        ctx.ellipse(p.x - p.r * 0.34, p.y - p.r * 0.38, p.r * 0.22, p.r * 0.1, -0.72, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = `rgba(255, 178, 232, ${alpha * 0.92})`;
-        ctx.lineWidth = Math.max(1, p.r * 0.018);
-        ctx.beginPath();
-        ctx.arc(p.x + p.r * 0.08, p.y + p.r * 0.08, p.r * 0.74, Math.PI * 0.15, Math.PI * 0.72);
-        ctx.stroke();
-        ctx.restore();
-    }
-
-    function limitBubbleSpeed(p) {
-        const max = 112 + p.depth * 46;
-        const speed = Math.hypot(p.vx, p.vy);
-        if (speed <= max) return;
-        p.vx = (p.vx / speed) * max;
-        p.vy = (p.vy / speed) * max;
-    }
-
-    function resolveBubbleCollisions() {
-        for (let i = 0; i < particles.length; i += 1) {
-            const a = particles[i];
-            if (a.kind !== 'bubble' || a.age < 0) continue;
-            for (let j = i + 1; j < particles.length; j += 1) {
-                const b = particles[j];
-                if (b.kind !== 'bubble' || b.age < 0) continue;
-
-                const dx = b.x - a.x;
-                const dy = b.y - a.y;
-                const minDist = a.r + b.r;
-                const distSq = dx * dx + dy * dy;
-                if (distSq <= 0 || distSq >= minDist * minDist) continue;
-
-                const dist = Math.sqrt(distSq);
-                const nx = dx / dist;
-                const ny = dy / dist;
-                const overlap = minDist - dist;
-                const invMassA = 1 / a.mass;
-                const invMassB = 1 / b.mass;
-                const invSum = invMassA + invMassB;
-
-                a.x -= nx * overlap * (invMassA / invSum) * 0.82;
-                a.y -= ny * overlap * (invMassA / invSum) * 0.82;
-                b.x += nx * overlap * (invMassB / invSum) * 0.82;
-                b.y += ny * overlap * (invMassB / invSum) * 0.82;
-
-                const rvx = b.vx - a.vx;
-                const rvy = b.vy - a.vy;
-                const velAlongNormal = rvx * nx + rvy * ny;
-                if (velAlongNormal > 0) continue;
-
-                const restitution = 0.93;
-                const impulse = (-(1 + restitution) * velAlongNormal) / invSum;
-                const ix = impulse * nx;
-                const iy = impulse * ny;
-
-                a.vx -= ix * invMassA;
-                a.vy -= iy * invMassA;
-                b.vx += ix * invMassB;
-                b.vy += iy * invMassB;
-
-                limitBubbleSpeed(a);
-                limitBubbleSpeed(b);
-            }
+    function seedMode(anywhere = true) {
+        particles = [];
+        transients = [];
+        currentMode = state.mode;
+        const count = targetCount();
+        for (let index = 0; index < count; index += 1) {
+            if (state.mode === 'sakura') particles.push(createSakura(anywhere));
+            if (state.mode === 'stars') particles.push(createStar());
+            if (state.mode === 'bubbles') particles.push(createBubble(anywhere));
         }
     }
 
-    function syncParticleCount(mode) {
+    function syncCount(mode) {
         const target = targetCount(mode);
-        if (particles.length < target) {
-            const addCount = Math.min(4, target - particles.length);
-            for (let i = 0; i < addCount; i += 1) {
-                if (mode === 'sakura') particles.push(createSakura(false));
-                if (mode === 'stars') particles.push(createStar());
-                if (mode === 'bubbles') particles.push(createBubble(false));
-            }
-        } else if (particles.length > target) {
-            particles.splice(target);
+        while (particles.length < target) {
+            if (mode === 'sakura') particles.push(createSakura(false));
+            if (mode === 'stars') particles.push(createStar());
+            if (mode === 'bubbles') particles.push(createBubble(false));
         }
+        if (particles.length > target) particles.length = target;
     }
 
-    function clearCanvas() {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, width, height);
+    function clearSurface() {
+        context?.clearRect(0, 0, width, height);
     }
 
     function tick(now) {
         if (paused || hiddenPaused || state.mode === 'off') {
-            rafId = null;
+            frameId = null;
             return;
         }
 
-        const dt = Math.min(0.04, Math.max(0.001, (now - (lastTime || now)) / 1000));
-        lastTime = now;
-
-        if (lastMode !== state.mode) reseedCurrentMode();
-        clearCanvas();
+        const dt = clamp((now - (lastFrameAt || now)) / 1000, 0.001, 0.035);
+        lastFrameAt = now;
+        if (currentMode !== state.mode) seedMode(true);
+        clearSurface();
 
         if (state.mode === 'sakura') {
             updateSakura(dt, now);
-            drawSakura(now);
+            drawSakura();
         } else if (state.mode === 'stars') {
             updateStars(dt, now);
             drawStars();
         } else if (state.mode === 'bubbles') {
-            updateBubbles(dt);
+            updateBubbles(dt, now);
             drawBubbles();
         }
 
-        rafId = requestAnimationFrame(tick);
+        pointer.dx *= 0.72;
+        pointer.dy *= 0.72;
+        frameId = requestAnimationFrame(tick);
     }
 
     function startLoop() {
-        if (rafId || paused || hiddenPaused || state.mode === 'off') return;
-        lastTime = performance.now();
-        rafId = requestAnimationFrame(tick);
+        if (frameId || paused || hiddenPaused || state.mode === 'off') return;
+        lastFrameAt = performance.now();
+        frameId = requestAnimationFrame(tick);
     }
 
     function stopLoop() {
-        if (rafId) cancelAnimationFrame(rafId);
-        rafId = null;
+        if (frameId) cancelAnimationFrame(frameId);
+        frameId = null;
     }
 
     function applyState(options = {}) {
-        ensureCanvas();
+        ensureSurface();
         applyBodyMode();
-        resizeCanvas();
-        if (options.reseed !== false) reseedCurrentMode();
+        resizeSurface();
+        if (options.reseed !== false) seedMode(true);
         saveState();
         syncSettingsControls();
+
         if (state.mode === 'off') {
             stopLoop();
-            clearCanvas();
+            clearSurface();
         } else {
             startLoop();
         }
     }
 
     function setMode(mode) {
-        const allowed = ['off', 'sakura', 'stars', 'bubbles'];
-        state.mode = allowed.includes(mode) ? mode : 'off';
+        state.mode = ['off', 'sakura', 'stars', 'bubbles'].includes(mode) ? mode : 'off';
         applyState();
     }
 
@@ -778,23 +640,24 @@
     function syncSettingsControls() {
         const win = document.getElementById(settingsWindowId);
         if (!win) return;
-        const setValue = (id, value) => {
-            const el = win.querySelector(`#${id}`);
-            if (!el) return;
-            if (el.type === 'checkbox') el.checked = !!value;
-            else el.value = value;
+        const assign = (id, value) => {
+            const control = win.querySelector(`#${id}`);
+            if (!control) return;
+            if (control.type === 'checkbox') control.checked = !!value;
+            else control.value = value;
         };
-        setValue('effects-mode', state.mode);
-        setValue('effects-intensity', state.intensity);
-        setValue('effects-speed', state.speed);
-        setValue('effects-opacity', state.opacity);
-        setValue('effects-quality', state.quality);
-        setValue('effects-idle-boost', state.idleBoost);
+        assign('effects-mode', state.mode);
+        assign('effects-intensity', state.intensity);
+        assign('effects-speed', state.speed);
+        assign('effects-opacity', state.opacity);
+        assign('effects-quality', state.quality);
+        assign('effects-idle-boost', state.idleBoost);
+        const preview = win.querySelector('[data-effect-preview]');
+        if (preview) preview.dataset.mode = state.mode;
     }
 
     function openSettings() {
-        if (typeof createWindow !== 'function') return;
-
+        if (typeof window.createWindow !== 'function') return;
         const existing = document.getElementById(settingsWindowId);
         if (existing) {
             openWindow(settingsWindowId);
@@ -802,79 +665,49 @@
             return;
         }
 
-        createWindow({
+        window.createWindow({
             id: settingsWindowId,
-            title: '桌面特效',
+            title: '桌面动态环境',
             icon: 'assets/icon/settings_gear-4.png',
-            width: 430,
+            width: 440,
             content: `
                 <div class="effects-settings">
                     <fieldset>
-                        <legend>视觉模式</legend>
-                        <div class="field-row">
-                            <label for="effects-mode">模式</label>
-                            <select id="effects-mode">
-                                <option value="off">关闭</option>
-                                <option value="sakura">像素樱花</option>
-                                <option value="stars">闪烁星空</option>
-                                <option value="bubbles">Windows 泡泡</option>
-                            </select>
-                        </div>
-                        <div class="field-row">
-                            <label for="effects-intensity">强度</label>
-                            <select id="effects-intensity">
-                                <option value="light">轻</option>
-                                <option value="standard">标准</option>
-                                <option value="lush">华丽</option>
-                            </select>
-                        </div>
-                        <div class="field-row">
-                            <label for="effects-speed">速度</label>
-                            <select id="effects-speed">
-                                <option value="slow">慢</option>
-                                <option value="standard">标准</option>
-                                <option value="fast">快</option>
-                            </select>
-                        </div>
-                        <div class="field-row">
-                            <label for="effects-opacity">透明度</label>
-                            <select id="effects-opacity">
-                                <option value="low">低</option>
-                                <option value="standard">标准</option>
-                                <option value="high">高</option>
-                            </select>
-                        </div>
-                        <div class="field-row">
-                            <label for="effects-quality">画质</label>
-                            <select id="effects-quality">
-                                <option value="balanced">均衡</option>
-                                <option value="high">高</option>
-                                <option value="ultra">极致</option>
-                            </select>
-                        </div>
-                        <div class="field-row">
-                            <label for="effects-idle-boost">空闲增强</label>
-                            <span><input id="effects-idle-boost" type="checkbox"> 屏保感泡泡密度</span>
-                        </div>
-                        <div class="effects-settings-preview" aria-hidden="true"></div>
+                        <legend>屏幕保护与环境效果</legend>
+                        <div class="effects-settings-preview" data-effect-preview aria-hidden="true"><i></i><i></i><i></i></div>
+                        <div class="field-row"><label for="effects-mode">模式</label><select id="effects-mode">
+                            <option value="off">关闭</option>
+                            <option value="sakura">风中樱落</option>
+                            <option value="stars">深夜星图</option>
+                            <option value="bubbles">经典泡泡屏保</option>
+                        </select></div>
+                        <div class="field-row"><label for="effects-intensity">密度</label><select id="effects-intensity">
+                            <option value="light">克制</option><option value="standard">标准</option><option value="lush">繁盛</option>
+                        </select></div>
+                        <div class="field-row"><label for="effects-speed">时间</label><select id="effects-speed">
+                            <option value="slow">慢速</option><option value="standard">自然</option><option value="fast">快速</option>
+                        </select></div>
+                        <div class="field-row"><label for="effects-opacity">存在感</label><select id="effects-opacity">
+                            <option value="low">轻微</option><option value="standard">标准</option><option value="high">清晰</option>
+                        </select></div>
+                        <div class="field-row"><label for="effects-quality">渲染</label><select id="effects-quality">
+                            <option value="balanced">均衡</option><option value="high">高分屏</option><option value="ultra">精细</option>
+                        </select></div>
+                        <div class="field-row"><label for="effects-idle-boost">屏保行为</label><span><input id="effects-idle-boost" type="checkbox"> 空闲时增加泡泡</span></div>
                     </fieldset>
                     <div class="message-box-buttons">
-                        <button id="effects-defaults" type="button">默认</button>
+                        <button id="effects-defaults" type="button">恢复默认</button>
                         <button id="effects-close" type="button">确定</button>
                     </div>
-                    <div class="status-bar" style="margin-top: 10px;">
-                        <p class="status-bar-field">Canvas 2D / High DPI</p>
-                        <p class="status-bar-field">不拦截鼠标</p>
-                    </div>
+                    <div class="status-bar"><p class="status-bar-field">Canvas 2D / Pointer wind field</p></div>
                 </div>
             `
         });
 
-        setTimeout(() => {
+        window.setTimeout(() => {
             const win = document.getElementById(settingsWindowId);
             if (!win) return;
             syncSettingsControls();
-
             const readControls = () => ({
                 mode: win.querySelector('#effects-mode')?.value || state.mode,
                 intensity: win.querySelector('#effects-intensity')?.value || state.intensity,
@@ -883,19 +716,14 @@
                 quality: win.querySelector('#effects-quality')?.value || state.quality,
                 idleBoost: !!win.querySelector('#effects-idle-boost')?.checked
             });
-
             win.querySelectorAll('select, input').forEach((control) => {
                 control.addEventListener('change', () => setPreset(readControls()));
             });
-
             win.querySelector('#effects-defaults')?.addEventListener('click', () => {
-                state = { ...defaults, mode: reduceMotion ? 'off' : 'sakura' };
+                state = { ...defaults, mode: 'sakura' };
                 applyState();
             });
-
-            win.querySelector('#effects-close')?.addEventListener('click', () => {
-                closeWindow(settingsWindowId);
-            });
+            win.querySelector('#effects-close')?.addEventListener('click', () => closeWindow(settingsWindowId));
         }, 30);
     }
 
@@ -917,11 +745,10 @@
         resume,
         getState: () => ({ ...state })
     };
-
     window.desktopEffects = api;
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => applyState({ reseed: true }));
+        document.addEventListener('DOMContentLoaded', () => applyState({ reseed: true }), { once: true });
     } else {
         applyState({ reseed: true });
     }

@@ -5,14 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>扫雷</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            padding: 20px;
+            min-height: 100vh;
+            padding: 12px;
             background: #c0c0c0;
             font-family: "MS Sans Serif", Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             user-select: none;
         }
 
@@ -62,6 +68,7 @@
 
         .face-button:active {
             border-color: #808080 #ffffff #ffffff #808080;
+            transform: translate(1px, 1px);
         }
 
         .game-board {
@@ -85,6 +92,11 @@
             font-weight: bold;
             font-size: 18px;
             cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .cell:not(.revealed):active {
+            border: 1px solid #808080;
         }
 
         .cell.revealed {
@@ -128,6 +140,14 @@
         .cell[data-count="6"] { color: #008080; }
         .cell[data-count="7"] { color: #000000; }
         .cell[data-count="8"] { color: #808080; }
+
+        @media (max-width: 360px), (max-height: 410px) {
+            body { padding: 5px; justify-content: flex-start; }
+            .game-container { padding: 7px; }
+            .game-header { padding: 7px; margin-bottom: 7px; }
+            .counter { font-size: 26px; min-width: 55px; }
+            .face-button { width: 42px; height: 42px; font-size: 26px; }
+        }
     </style>
 </head>
 <body>
@@ -270,12 +290,15 @@
             handleClick(row, col) {
                 // Notify parent of activity
                 if (window.parent !== window) {
-                    window.parent.postMessage({ type: 'minesweeper-active' }, '*');
+                    window.parent.postMessage({ type: 'minesweeper-active' }, window.location.origin);
                 }
 
                 if (this.gameOver || this.gameWon) return;
                 if (this.flagged[row][col]) return;
-                if (this.revealed[row][col]) return;
+                if (this.revealed[row][col]) {
+                    this.chordReveal(row, col);
+                    return;
+                }
                 if (this.firstClick) {
                     this.placeMines(row, col);
                     this.calculateNumbers();
@@ -291,8 +314,44 @@
                     this.endGame(false);
                 } else {
                     this.reveal(row, col);
+                    this.render();
                     this.checkWin();
                 }
+            }
+
+            // 经典扫雷的快速展开：数字周围旗帜数正确时，单击数字即可翻开其余邻格。
+            chordReveal(row, col) {
+                const value = this.board[row][col];
+                if (!Number.isInteger(value) || value <= 0) return;
+
+                let nearbyFlags = 0;
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nextRow = row + dr;
+                        const nextCol = col + dc;
+                        if (nextRow >= 0 && nextRow < this.rows && nextCol >= 0 && nextCol < this.cols && this.flagged[nextRow][nextCol]) {
+                            nearbyFlags++;
+                        }
+                    }
+                }
+                if (nearbyFlags !== value) return;
+
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nextRow = row + dr;
+                        const nextCol = col + dc;
+                        if (nextRow < 0 || nextRow >= this.rows || nextCol < 0 || nextCol >= this.cols) continue;
+                        if (this.flagged[nextRow][nextCol] || this.revealed[nextRow][nextCol]) continue;
+                        if (this.board[nextRow][nextCol] === -1) {
+                            this.revealMine(nextRow, nextCol);
+                            this.endGame(false);
+                            return;
+                        }
+                        this.reveal(nextRow, nextCol);
+                    }
+                }
+                this.render();
+                this.checkWin();
             }
 
             handleRightClick(row, col) {
@@ -325,8 +384,6 @@
                         }
                     }
                 }
-                
-                this.render();
             }
 
             revealMine(row, col) {
@@ -346,7 +403,7 @@
                     this.saveBestTime();
                     // Notify parent of win with time
                     if (window.parent !== window) {
-                        window.parent.postMessage({ type: 'minesweeper-win', time: this.timer }, '*');
+                        window.parent.postMessage({ type: 'minesweeper-win', time: this.timer }, window.location.origin);
                     }
                 } else {
                     this.resetButton.textContent = '😵';
@@ -359,7 +416,7 @@
                     }
                     // Notify parent of loss
                     if (window.parent !== window) {
-                        window.parent.postMessage({ type: 'minesweeper-loss' }, '*');
+                        window.parent.postMessage({ type: 'minesweeper-loss' }, window.location.origin);
                     }
                 }
                 

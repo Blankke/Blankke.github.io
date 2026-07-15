@@ -2,6 +2,7 @@
 
 let activeWindowId = null;
 const taskbarWindowsEl = document.getElementById('taskbar-windows');
+const prefersReducedWindowMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
 
 function getWindowMeta(win) {
     const title = win.dataset.windowTitle || win.id;
@@ -55,27 +56,54 @@ function removeTaskbarButton(windowId) {
 
 function setActiveWindow(windowId) {
     activeWindowId = windowId;
+    document.querySelectorAll('.window').forEach(win => {
+        win.classList.toggle('is-active', win.id === windowId);
+    });
     if (!taskbarWindowsEl) return;
     taskbarWindowsEl.querySelectorAll('.taskbar-window-btn').forEach(btn => {
         btn.classList.toggle('is-active', btn.dataset.windowId === windowId);
     });
 }
 
+function activateTopVisibleWindow(excludedId = null) {
+    const visible = Array.from(document.querySelectorAll('.window.window-open'))
+        .filter(win => win.id !== excludedId)
+        .sort((a, b) => (parseInt(b.style.zIndex || '0', 10) - parseInt(a.style.zIndex || '0', 10)));
+    setActiveWindow(visible[0]?.id || null);
+}
+
 function minimizeWindow(id) {
     const win = document.getElementById(id);
     if (!win) return;
-    win.classList.remove('window-open');
-    win.classList.add('window-minimized');
-    if (activeWindowId === id) {
-        setActiveWindow(null);
+    const finish = () => {
+        win.classList.remove('window-open', 'is-active');
+        win.classList.add('window-minimized');
+        if (activeWindowId === id) activateTopVisibleWindow(id);
+    };
+
+    const taskButton = taskbarWindowsEl?.querySelector(`[data-window-id="${id}"]`);
+    if (prefersReducedWindowMotion || typeof win.animate !== 'function' || !taskButton) {
+        finish();
+        return;
     }
+
+    const from = win.getBoundingClientRect();
+    const to = taskButton.getBoundingClientRect();
+    const deltaX = to.left + to.width / 2 - (from.left + from.width / 2);
+    const deltaY = to.top + to.height / 2 - (from.top + from.height / 2);
+    const animation = win.animate([
+        { transform: 'translate3d(0,0,0) scale(1)', opacity: 1 },
+        { transform: `translate3d(${deltaX}px,${deltaY}px,0) scale(.14)`, opacity: 0.22 }
+    ], { duration: 150, easing: 'cubic-bezier(.4,0,.6,1)' });
+    animation.finished.then(finish).catch(finish);
 }
 
 function toggleMaximizeWindow(id) {
     const win = document.getElementById(id);
     if (!win) return;
-    const taskbarHeight = 32;
+    const { height: availableHeight } = getWindowViewportBounds();
     const isMax = win.classList.contains('window-maximized');
+    win.classList.add('window-geometry-animating');
 
     if (!isMax) {
         // Save current geometry
@@ -88,7 +116,7 @@ function toggleMaximizeWindow(id) {
         win.style.left = '0px';
         win.style.top = '0px';
         win.style.width = `${window.innerWidth}px`;
-        win.style.height = `${window.innerHeight - taskbarHeight}px`;
+        win.style.height = `${availableHeight}px`;
     } else {
         win.classList.remove('window-maximized');
         win.style.left = win.dataset.restoreLeft || '20%';
@@ -96,6 +124,8 @@ function toggleMaximizeWindow(id) {
         win.style.width = win.dataset.restoreWidth || '400px';
         win.style.height = win.dataset.restoreHeight || '';
     }
+
+    window.setTimeout(() => win.classList.remove('window-geometry-animating'), 190);
 
     bringToFront(win);
 }
@@ -139,7 +169,12 @@ function openWindow(id) {
     if (!win) return;
     ensureTaskbarButton(win);
     win.classList.remove('window-minimized');
+    win.classList.remove('window-closing');
     win.classList.add('window-open');
+    if (win._closeTimer) {
+        window.clearTimeout(win._closeTimer);
+        win._closeTimer = null;
+    }
     bringToFront(win);
     
     // Center window if it's the first open (simple check)
@@ -163,6 +198,13 @@ function openWindow(id) {
 
     clampWindowToViewport(win);
 
+    if (!prefersReducedWindowMotion) {
+        win.classList.remove('window-opening');
+        void win.offsetWidth;
+        win.classList.add('window-opening');
+        window.setTimeout(() => win.classList.remove('window-opening'), 170);
+    }
+
     // Run hooks (for apps like Recycle Bin or Wisdom Tree to react)
     _openWindowHooks.forEach(hook => hook(id));
 }
@@ -174,126 +216,165 @@ function addOpenWindowHook(fn) {
 function closeWindow(id) {
     const win = document.getElementById(id);
     if (!win) return;
-    win.classList.remove('window-open');
-    win.classList.remove('window-minimized');
-    win.classList.remove('window-maximized');
-    removeTaskbarButton(id);
-    if (activeWindowId === id) setActiveWindow(null);
+    const finish = () => {
+        if (win.classList.contains('window-maximized')) {
+            win.style.left = win.dataset.restoreLeft || '20%';
+            win.style.top = win.dataset.restoreTop || '20%';
+            win.style.width = win.dataset.restoreWidth || '400px';
+            win.style.height = win.dataset.restoreHeight || '';
+        }
+        win.classList.remove('window-open', 'window-minimized', 'window-maximized', 'window-closing', 'is-active');
+        removeTaskbarButton(id);
+        if (activeWindowId === id) activateTopVisibleWindow(id);
+        win._closeTimer = null;
+    };
+
+    if (prefersReducedWindowMotion || !win.classList.contains('window-open')) {
+        finish();
+        return;
+    }
+    win.classList.add('window-closing');
+    win._closeTimer = window.setTimeout(finish, 135);
 }
 
 function bringToFront(element) {
+    if (!element) return;
     if (typeof zIndexCounter === 'undefined') zIndexCounter = 100;
     zIndexCounter++;
     element.style.zIndex = zIndexCounter;
     if (element?.id) setActiveWindow(element.id);
 }
 
-// Make clicking inside a window focus it
-document.querySelectorAll('.window').forEach(win => {
-    win.addEventListener('mousedown', () => bringToFront(win));
-});
+// 使用 Pointer Events 与 requestAnimationFrame 合并拖拽更新，避免每次移动都触发布局。
+const windowGesture = {
+    type: null,
+    pointerId: null,
+    target: null,
+    captureTarget: null,
+    startX: 0,
+    startY: 0,
+    startLeft: 0,
+    startTop: 0,
+    startWidth: 0,
+    startHeight: 0,
+    nextLeft: 0,
+    nextTop: 0,
+    nextWidth: 0,
+    nextHeight: 0,
+    frame: null
+};
 
-// Dragging Logic
-let isDragging = false;
-let currentWindow = null;
-let offset = { x: 0, y: 0 };
-
-// Use event delegation for dragging to support dynamic windows
-document.addEventListener('mousedown', (e) => {
-    // 1. Window Focus (bring to front)
-    const clickedWindow = e.target.closest('.window');
-    if (clickedWindow) {
-        bringToFront(clickedWindow);
+function resetWindowGesture() {
+    if (windowGesture.frame) cancelAnimationFrame(windowGesture.frame);
+    windowGesture.target?.classList.remove('window-moving', 'window-resizing');
+    if (windowGesture.target && windowGesture.type === 'move') {
+        windowGesture.target.style.transform = '';
     }
+    windowGesture.type = null;
+    windowGesture.pointerId = null;
+    windowGesture.target = null;
+    windowGesture.captureTarget = null;
+    windowGesture.frame = null;
+}
 
-    // 2. Dragging (Title Bar)
-    const titleBar = e.target.closest('.title-bar');
-    if (titleBar) {
-        const win = titleBar.closest('.window');
-        // Ignore if clicking buttons in title bar
-        if (e.target.tagName === 'BUTTON') return;
-        
-        if (win && !win.classList.contains('window-maximized')) {
-            isDragging = true;
-            currentWindow = win;
-            offset.x = e.clientX - win.offsetLeft;
-            offset.y = e.clientY - win.offsetTop;
-            e.preventDefault(); // Prevent text selection
-        }
+function renderWindowGesture() {
+    windowGesture.frame = null;
+    const win = windowGesture.target;
+    if (!win) return;
+    if (windowGesture.type === 'move') {
+        const dx = windowGesture.nextLeft - windowGesture.startLeft;
+        const dy = windowGesture.nextTop - windowGesture.startTop;
+        win.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+    } else if (windowGesture.type === 'resize') {
+        win.style.width = `${windowGesture.nextWidth}px`;
+        win.style.height = `${windowGesture.nextHeight}px`;
     }
+}
+
+function scheduleWindowGesture() {
+    if (!windowGesture.frame) windowGesture.frame = requestAnimationFrame(renderWindowGesture);
+}
+
+document.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    const clickedWindow = event.target.closest('.window');
+    if (clickedWindow) bringToFront(clickedWindow);
+
+    const resizeHandle = event.target.closest('.resize-handle');
+    const titleBar = event.target.closest('.title-bar');
+    const win = resizeHandle?.closest('.window') || titleBar?.closest('.window');
+    if (!win || event.target.closest('.title-bar-controls')) return;
+    if (titleBar && win.classList.contains('window-maximized')) return;
+
+    windowGesture.type = resizeHandle ? 'resize' : 'move';
+    windowGesture.pointerId = event.pointerId;
+    windowGesture.target = win;
+    windowGesture.captureTarget = resizeHandle || titleBar;
+    windowGesture.startX = event.clientX;
+    windowGesture.startY = event.clientY;
+    windowGesture.startLeft = win.offsetLeft;
+    windowGesture.startTop = win.offsetTop;
+    windowGesture.startWidth = win.offsetWidth;
+    windowGesture.startHeight = win.offsetHeight;
+    windowGesture.nextLeft = win.offsetLeft;
+    windowGesture.nextTop = win.offsetTop;
+    windowGesture.nextWidth = win.offsetWidth;
+    windowGesture.nextHeight = win.offsetHeight;
+    win.classList.add(resizeHandle ? 'window-resizing' : 'window-moving');
+    windowGesture.captureTarget.setPointerCapture?.(event.pointerId);
+    event.preventDefault();
 });
 
-document.addEventListener('mousemove', (e) => {
-    if (isDragging && currentWindow) {
-        e.preventDefault();
-        const bounds = getWindowViewportBounds();
-        const margin = 0;
-        const left = Math.max(margin, Math.min(e.clientX - offset.x, bounds.width - currentWindow.offsetWidth));
-        const top = Math.max(margin, Math.min(e.clientY - offset.y, bounds.height - 24));
-        currentWindow.style.left = left + 'px';
-        currentWindow.style.top = top + 'px';
-    }
-});
+document.addEventListener('pointermove', (event) => {
+    if (!windowGesture.target || event.pointerId !== windowGesture.pointerId) return;
+    const bounds = getWindowViewportBounds();
+    const dx = event.clientX - windowGesture.startX;
+    const dy = event.clientY - windowGesture.startY;
 
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-    currentWindow = null;
-    isResizing = false;
-    resizingWindow = null;
-});
-
-// Resizing Logic
-let isResizing = false;
-let resizingWindow = null;
-let resizeStartX = 0;
-let resizeStartY = 0;
-let resizeStartWidth = 0;
-let resizeStartHeight = 0;
-
-// Use event delegation for resizing
-document.addEventListener('mousedown', (e) => {
-    if (e.target.classList.contains('resize-handle')) {
-        e.stopPropagation(); // Prevent window dragging
-        isResizing = true;
-        resizingWindow = e.target.closest('.window');
-        bringToFront(resizingWindow);
-        
-        resizeStartX = e.clientX;
-        resizeStartY = e.clientY;
-        resizeStartWidth = resizingWindow.offsetWidth;
-        resizeStartHeight = resizingWindow.offsetHeight;
-    }
-});
-
-document.addEventListener('mousemove', (e) => {
-    if (isResizing && resizingWindow) {
-        e.preventDefault();
-        
-        const deltaX = e.clientX - resizeStartX;
-        const deltaY = e.clientY - resizeStartY;
-        
-        const bounds = getWindowViewportBounds();
-        const currentLeft = resizingWindow.offsetLeft;
-        const currentTop = resizingWindow.offsetTop;
-        const newWidth = Math.min(
-            Math.max(300, resizeStartWidth + deltaX),
-            Math.max(300, bounds.width - currentLeft)
+    if (windowGesture.type === 'move') {
+        windowGesture.nextLeft = Math.max(0, Math.min(windowGesture.startLeft + dx, bounds.width - windowGesture.startWidth));
+        windowGesture.nextTop = Math.max(0, Math.min(windowGesture.startTop + dy, bounds.height - 24));
+    } else {
+        windowGesture.nextWidth = Math.min(
+            Math.max(300, windowGesture.startWidth + dx),
+            Math.max(300, bounds.width - windowGesture.startLeft)
         );
-        const newHeight = Math.min(
-            Math.max(200, resizeStartHeight + deltaY),
-            Math.max(200, bounds.height - currentTop)
+        windowGesture.nextHeight = Math.min(
+            Math.max(200, windowGesture.startHeight + dy),
+            Math.max(200, bounds.height - windowGesture.startTop)
         );
-        
-        resizingWindow.style.width = newWidth + 'px';
-        resizingWindow.style.height = newHeight + 'px';
     }
+    scheduleWindowGesture();
+});
+
+function finishWindowGesture(event) {
+    if (!windowGesture.target || event.pointerId !== windowGesture.pointerId) return;
+    if (windowGesture.frame) {
+        cancelAnimationFrame(windowGesture.frame);
+        renderWindowGesture();
+    }
+    if (windowGesture.type === 'move') {
+        windowGesture.target.style.left = `${windowGesture.nextLeft}px`;
+        windowGesture.target.style.top = `${windowGesture.nextTop}px`;
+    }
+    resetWindowGesture();
+}
+
+document.addEventListener('pointerup', finishWindowGesture);
+document.addEventListener('pointercancel', finishWindowGesture);
+
+document.addEventListener('dblclick', (event) => {
+    const titleBar = event.target.closest('.title-bar');
+    const win = titleBar?.closest('.window');
+    if (win && !event.target.closest('.title-bar-controls')) toggleMaximizeWindow(win.id);
 });
 
 // Keep maximized window fit on resize
 window.addEventListener('resize', () => {
     document.querySelectorAll('.window.window-maximized').forEach(win => {
+        const bounds = getWindowViewportBounds();
         win.style.width = `${window.innerWidth}px`;
-        win.style.height = `${window.innerHeight - 32}px`;
+        win.style.height = `${bounds.height}px`;
     });
     document.querySelectorAll('.window.window-open:not(.window-maximized)').forEach(clampWindowToViewport);
 });
@@ -499,6 +580,8 @@ window.openBrowser = function(url) {
     if (!browserWindow || !browserIframe) return;
     
     if (browserAddress) browserAddress.value = url;
+    const browserStatus = document.getElementById('browser-status');
+    if (browserStatus) browserStatus.textContent = '正在连接…';
     browserIframe.src = url;
     
     openWindow('window-browser');

@@ -7,6 +7,7 @@ class DesktopPet {
         this.y = 100;
         this.isDragging = false;
         this.dialogQueue = [];
+        this.dialogTimer = null;
         this.currentState = 'idle';
         this.minesweeperCleared = !!window.quest?.hasFlag('minesweeper_fast_clear');
         this.dialogShown = {};
@@ -139,38 +140,56 @@ class DesktopPet {
     }
 
     bindEvents() {
-        // 拖拽功能
-        this.element.addEventListener('mousedown', (e) => {
+        // Pointer Events 让鼠标与触屏共用一套拖拽逻辑，并避免拖完后误触发对话。
+        this.element.style.touchAction = 'none';
+        this.element.addEventListener('pointerdown', (e) => {
+            if (e.button !== 0) return;
             this.isDragging = true;
+            let moved = false;
+            let nextX = this.x;
+            let nextY = this.y;
+            let frame = null;
             this.element.style.cursor = 'grabbing';
             this.element.style.transition = 'none';
-            
             const offsetX = e.clientX - this.x;
             const offsetY = e.clientY - this.y;
+            this.element.setPointerCapture?.(e.pointerId);
             
-            const onMouseMove = (e) => {
-                if (this.isDragging) {
-                    this.setPosition(e.clientX - offsetX, e.clientY - offsetY);
-                }
+            const render = () => {
+                frame = null;
+                this.setPosition(nextX, nextY);
             };
-            
-            const onMouseUp = () => {
+
+            const onPointerMove = (moveEvent) => {
+                if (!this.isDragging || moveEvent.pointerId !== e.pointerId) return;
+                nextX = moveEvent.clientX - offsetX;
+                nextY = moveEvent.clientY - offsetY;
+                moved ||= Math.abs(moveEvent.clientX - e.clientX) + Math.abs(moveEvent.clientY - e.clientY) > 4;
+                if (!frame) frame = requestAnimationFrame(render);
+            };
+
+            const onPointerUp = (upEvent) => {
+                if (upEvent.pointerId !== e.pointerId) return;
+                if (frame) {
+                    cancelAnimationFrame(frame);
+                    render();
+                }
                 this.isDragging = false;
                 this.element.style.cursor = 'grab';
                 this.element.style.transition = 'left 0.3s ease, top 0.3s ease';
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
+                document.removeEventListener('pointermove', onPointerMove);
+                document.removeEventListener('pointerup', onPointerUp);
+                document.removeEventListener('pointercancel', onPointerUp);
+                if (!moved) this.showRandomDialog();
             };
             
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+            document.addEventListener('pointercancel', onPointerUp);
         });
-        
-        // 点击宠物显示对话
-        this.element.addEventListener('click', (e) => {
-            if (!this.isDragging) {
-                this.showRandomDialog();
-            }
+
+        window.addEventListener('resize', () => {
+            this.setPosition(this.x, this.y);
         });
     }
 
@@ -182,7 +201,8 @@ class DesktopPet {
         this.updateDialogPosition();
         
         // 自动隐藏
-        setTimeout(() => {
+        if (this.dialogTimer) clearTimeout(this.dialogTimer);
+        this.dialogTimer = setTimeout(() => {
             this.hideDialog();
         }, duration);
     }

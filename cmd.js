@@ -4,8 +4,9 @@ class TerminalSystem {
         this.commandHistory = [];
         this.historyIndex = -1;
         this.currentPath = 'C:\\Users\\Blankke';
-        this.unlocked = false; // 是否已经解锁（获得快捷键 token）
-        this.radioTokenFound = false; // 是否找到收音机 token
+        this.unlocked = !!window.quest?.hasFlag('cmd_unlocked');
+        this.acceptedKey = window.quest?.get('diary_token', null) || null;
+        this.radioTokenFound = !!(this.acceptedKey || window.quest?.hasFlag('diary_key_accepted'));
         
         // Tab 补全状态
         this.tabState = {
@@ -160,7 +161,19 @@ Microsoft(R) Windows 98
         // 将刚才的输入行（提示符+命令）添加到输出区域
         const commandLine = document.createElement('div');
         commandLine.className = 'terminal-line';
-        commandLine.innerHTML = `<span class="terminal-prompt"><span class="prompt-path">${this.currentPath}</span><span class="prompt-symbol">&gt;</span></span><span class="terminal-input">${input}</span>`;
+        const prompt = document.createElement('span');
+        prompt.className = 'terminal-prompt';
+        const path = document.createElement('span');
+        path.className = 'prompt-path';
+        path.textContent = this.currentPath;
+        const symbol = document.createElement('span');
+        symbol.className = 'prompt-symbol';
+        symbol.textContent = '>';
+        const typed = document.createElement('span');
+        typed.className = 'terminal-input';
+        typed.textContent = input;
+        prompt.append(path, symbol);
+        commandLine.append(prompt, typed);
         this.terminalOutput.appendChild(commandLine);
 
         if (!trimmedInput) {
@@ -467,6 +480,7 @@ Microsoft(R) Windows 98
     }
     
     showFullDiary() {
+        window.quest?.setFlag('diary_read', true);
         this.print('');
         this.print('===========================================', 'system');
         this.print('  DIARY.BIN: DECRYPTED', 'success');
@@ -509,7 +523,7 @@ Microsoft(R) Windows 98
         this.print('');
         
         const token = this.acceptedKey || 'YOUR_KEY';
-        const url = `https://blankke.caozc1108.workers.dev/?token=${token}`;
+        const url = `https://blankke.caozc1108.workers.dev/?token=${encodeURIComponent(token)}`;
         
         // Manually create link element
         const line = document.createElement('div');
@@ -591,6 +605,7 @@ Microsoft(R) Windows 98
                 this.acceptedKey = key;
                 if (!this.radioTokenFound) {
                     this.radioTokenFound = true;
+                    window.quest?.set('diary_token', key);
                     window.quest?.setFlag('diary_key_accepted', true);
                     this.print('');
                     this.print('Permission Granted.', 'success');

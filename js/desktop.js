@@ -3,7 +3,6 @@
 
 const desktop = document.getElementById('desktop');
 const DESKTOP_STATE_KEY = window.BLANKKE_STATE_KEYS?.desktop || 'blankke_desktop_v2';
-const LEGACY_DESKTOP_STATE_KEY = 'win98_desktop_icons';
 const DESKTOP_ICON_LAYOUT = {
     baseScale: 1,
     minScale: 0.65,
@@ -117,8 +116,10 @@ function arrangeDesktopIcons(options = {}) {
 
     icons.forEach((icon, index) => {
         const position = getArrangedIconPosition(index, scale, rowsPerColumn);
+        icon.classList.add('icon-layout-animating');
         icon.style.left = `${position.left}px`;
         icon.style.top = `${position.top}px`;
+        window.setTimeout(() => icon.classList.remove('icon-layout-animating'), 220);
         if (persist) {
             saveIconPosition(icon);
         }
@@ -144,13 +145,8 @@ function keepIconsInViewport() {
 function loadIconPositions() {
     let saved = {};
     try {
-        saved = JSON.parse(localStorage.getItem(DESKTOP_STATE_KEY) || 'null');
-        if (!saved || typeof saved !== 'object') {
-            saved = JSON.parse(localStorage.getItem(LEGACY_DESKTOP_STATE_KEY) || '{}');
-            if (saved && typeof saved === 'object') {
-                localStorage.setItem(DESKTOP_STATE_KEY, JSON.stringify(saved));
-            }
-        }
+        saved = JSON.parse(localStorage.getItem(DESKTOP_STATE_KEY) || '{}');
+        if (!saved || typeof saved !== 'object') saved = {};
     } catch {
         saved = {};
     }
@@ -190,6 +186,12 @@ let iconDragOffsetX = 0;
 let iconDragOffsetY = 0;
 let iconDownX = 0;
 let iconDownY = 0;
+let iconStartLeft = 0;
+let iconStartTop = 0;
+let iconNextLeft = 0;
+let iconNextTop = 0;
+let iconPointerId = null;
+let iconDragFrame = null;
 let selectedIcon = null;
 
 function selectIcon(icon) {
@@ -227,14 +229,20 @@ function bindIconInteractions(icon) {
         selectIcon(icon);
     });
 
-    icon.addEventListener('mousedown', (e) => {
+    icon.addEventListener('pointerdown', (e) => {
         if (e.button !== 0) return;
         isDraggingIcon = true;
         draggingIcon = icon;
+        iconPointerId = e.pointerId;
         iconDownX = e.clientX;
         iconDownY = e.clientY;
-        iconDragOffsetX = e.clientX - icon.offsetLeft;
-        iconDragOffsetY = e.clientY - icon.offsetTop;
+        iconStartLeft = icon.offsetLeft;
+        iconStartTop = icon.offsetTop;
+        iconNextLeft = iconStartLeft;
+        iconNextTop = iconStartTop;
+        iconDragOffsetX = e.clientX - iconStartLeft;
+        iconDragOffsetY = e.clientY - iconStartTop;
+        icon.setPointerCapture?.(e.pointerId);
         selectIcon(icon);
     });
 }
@@ -244,8 +252,16 @@ document.querySelectorAll('.icon[data-icon-id]').forEach(icon => {
     bindIconInteractions(icon);
 });
 
-document.addEventListener('mousemove', (e) => {
-    if (!isDraggingIcon || !draggingIcon) return;
+function renderIconDrag() {
+    iconDragFrame = null;
+    if (!draggingIcon) return;
+    const dx = iconNextLeft - iconStartLeft;
+    const dy = iconNextTop - iconStartTop;
+    draggingIcon.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+}
+
+document.addEventListener('pointermove', (e) => {
+    if (!isDraggingIcon || !draggingIcon || e.pointerId !== iconPointerId) return;
     const moved = Math.abs(e.clientX - iconDownX) + Math.abs(e.clientY - iconDownY);
     if (moved < 3) return;
     e.preventDefault();
@@ -256,21 +272,35 @@ document.addEventListener('mousemove', (e) => {
     
     const maxLeft = window.innerWidth - draggingIcon.offsetWidth;
     const maxTop = window.innerHeight - 28 - draggingIcon.offsetHeight;
-    const left = clamp(e.clientX - iconDragOffsetX, 0, maxLeft);
-    const top = clamp(e.clientY - iconDragOffsetY, 0, maxTop);
-    draggingIcon.style.left = `${left}px`;
-    draggingIcon.style.top = `${top}px`;
+    iconNextLeft = clamp(e.clientX - iconDragOffsetX, 0, maxLeft);
+    iconNextTop = clamp(e.clientY - iconDragOffsetY, 0, maxTop);
+    if (!iconDragFrame) iconDragFrame = requestAnimationFrame(renderIconDrag);
 });
 
-document.addEventListener('mouseup', () => {
+function finishIconDrag(e) {
+    if (!isDraggingIcon || e.pointerId !== iconPointerId) return;
     if (isDraggingIcon && draggingIcon) {
+        if (iconDragFrame) {
+            cancelAnimationFrame(iconDragFrame);
+            renderIconDrag();
+        }
+        if (draggingIcon.classList.contains('dragging')) {
+            draggingIcon.style.left = `${iconNextLeft}px`;
+            draggingIcon.style.top = `${iconNextTop}px`;
+        }
+        draggingIcon.style.transform = '';
         draggingIcon.classList.remove('dragging');
         clampIconToViewport(draggingIcon);
         saveIconPosition(draggingIcon);
     }
     isDraggingIcon = false;
     draggingIcon = null;
-});
+    iconPointerId = null;
+    iconDragFrame = null;
+}
+
+document.addEventListener('pointerup', finishIconDrag);
+document.addEventListener('pointercancel', finishIconDrag);
 
 window.addEventListener('resize', () => {
     keepIconsInViewport();
@@ -346,7 +376,7 @@ function hideIconContextMenu() {
     contextMenuTargetIcon = null;
 }
 
-function escapeHtml(value) {
+function escapeDesktopHtml(value) {
     return String(value)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -528,11 +558,9 @@ document.getElementById('icon-ctx-delete')?.addEventListener('click', async () =
             
             // Clear PVZ/Readme restored flag
             if (iconId === 'pvz') {
-                localStorage.removeItem('pvz_restored_v1');
                 window.quest?.setFlag('pvz_restored', false);
             }
             if (iconId === 'readme') {
-                localStorage.removeItem('readme_restored_v1');
                 window.quest?.setFlag('readme_restored', false);
             }
             
@@ -574,7 +602,7 @@ document.getElementById('icon-ctx-properties')?.addEventListener('click', async 
             ['位置', `(${contextMenuTargetIcon.offsetLeft}, ${contextMenuTargetIcon.offsetTop})`]
         ].filter(Boolean);
         const message = properties
-            .map(([label, value]) => `<div>${escapeHtml(label)}: ${escapeHtml(value)}</div>`)
+            .map(([label, value]) => `<div>${escapeDesktopHtml(label)}: ${escapeDesktopHtml(value)}</div>`)
             .join('');
         const fallbackText = properties.map(([label, value]) => `${label}: ${value}`).join('\n');
 

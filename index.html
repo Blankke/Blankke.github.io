@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dent du Lion：一台仍在缓慢运行的个人 Windows 98 桌面。">
+    <meta name="theme-color" content="#006b6b">
     <!-- Open Graph / Social Media Meta Tags -->
     <meta property="og:title" content="Dent Du Lion">
     <meta property="og:description" content="Welcome to my personal website.">
@@ -17,11 +19,8 @@
     <link rel="shortcut icon" href="assets/icon/web_logo.png">
     <!-- 98.css for the core look and feel -->
     <link rel="stylesheet" href="https://unpkg.com/98.css">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=6">
     <link rel="stylesheet" href="style-gallery.css">
-    <!-- Waline (Anonymous Comment System) -->
-    <link rel="stylesheet" href="https://unpkg.com/@waline/client@v2/dist/waline.css" />
-    <script src="https://unpkg.com/@waline/client@v2/dist/waline.js"></script>
 </head>
 
 <body>
@@ -71,6 +70,7 @@
             ondblclick="openWindow('window-recyclebin')">
             <img id="recyclebin-desktop-icon" src="assets/icon/recycle_bin_full.png" alt="Recycle Bin">
             <div class="icon-text">回收站</div>
+            <span class="icon-badge" id="recyclebin-item-count" aria-label="回收站项目数量">2</span>
         </div>
 
         <div class="icon" id="icon-gallery" data-icon-id="gallery" data-default-left="120" data-default-top="110"
@@ -93,7 +93,7 @@
 
         <div class="icon" id="icon-blog" data-icon-id="blog" data-default-left="120" data-default-top="380"
             data-item-type="VitePress 个人博客"
-            data-description="记录学习、实践与开源路上的一点积累。首页当前展示 6 篇文章，包含 Matmul Fusion 专题、博客搭建、Hello World、Punica 等内容。"
+            data-description="记录学习、实践与开源路上的长期积累。"
             data-url="https://my-blog-gamma-puce.vercel.app/"
             data-opens-with="站内博客窗口"
             ondblclick="openWindow('window-blog')">
@@ -102,16 +102,25 @@
         </div>
     </div>
 
-    <!-- Top Right Info -->
-    <div id="top-right-info">
+    <!-- 恢复旧版右上角信息：访问计数和最近更新时间。 -->
+    <aside id="top-right-info" aria-label="站点访问信息">
         <div id="visitor-counter">
-            You are the <a href="https://www.easycounter.com/"><img
-                    src="https://www.easycounter.com/counter.php?blankke" border="0" alt="page counter"></a> th visitor.
+            You are the <a href="https://www.easycounter.com/" target="_blank" rel="noopener noreferrer"><img
+                    src="https://www.easycounter.com/counter.php?blankke" alt="page counter"></a> th visitor.
         </div>
-        <div id="last-updated">
-            Last updated: <span id="last-updated-time"></span>
-        </div>
-    </div>
+        <div id="last-updated">last update : <span id="last-updated-time">loading...</span></div>
+    </aside>
+
+    <!-- 解密信号只作短暂通知；收起后仍可通过任务栏问号重新打开。 -->
+    <button id="mystery-signal" class="mystery-signal" type="button" aria-label="查看磁盘异常信号"
+        aria-hidden="true" tabindex="-1">
+        <span class="mystery-signal-led" aria-hidden="true"></span>
+        <span class="mystery-signal-copy">
+            <strong>检测到未索引数据</strong>
+            <small id="mystery-signal-status">隐藏路线尚未开始</small>
+        </span>
+        <span id="mystery-signal-progress" class="mystery-signal-progress">0/5</span>
+    </button>
 
     <!-- Window: My Computer (Personal Info) -->
     <div id="window-computer" class="window" data-window-title="我的电脑" data-window-icon="assets/icon/computer_explorer-4.png"
@@ -183,7 +192,6 @@
     <!-- Window: Recycle Bin -->
     <div id="window-recyclebin" class="window" data-window-title="回收站" data-window-icon="assets/icon/recycle_bin_full.png"
         style="width: 420px; height: 320px;">
-        <div class="window-description-bar" style="border-bottom: 1px solid #808080;">不是每个文件都有右键菜单。</div>
         <div class="title-bar">
             <div class="title-bar-text">回收站</div>
             <div class="title-bar-controls">
@@ -192,6 +200,7 @@
                 <button aria-label="Close" onclick="closeWindow('window-recyclebin')"></button>
             </div>
         </div>
+        <div class="window-description-bar" id="recyclebin-description">ScanDisk 提示：这里仍有 2 个未索引对象，可以尝试还原。</div>
         <div class="window-body">
             <div class="recyclebin-layout">
                 <div class="recyclebin-list" id="recyclebin-list" aria-label="Recycle Bin Items"></div>
@@ -216,7 +225,6 @@
     <!-- Window: Gallery -->
     <div id="window-gallery" class="window" data-window-title="我的相册" data-window-icon="assets/icon/directory_open_file_mydocs-4.png"
         style="width: 800px; height: 600px;">
-        <div class="window-description-bar" style="border-bottom: 1px solid #808080;">一些需要用魔法才能访问的照片？</div>
         <div class="title-bar">
             <div class="title-bar-text">我的相册 - 图片查看器</div>
             <div class="title-bar-controls">
@@ -225,6 +233,7 @@
                 <button aria-label="Close" onclick="closeWindow('window-gallery')"></button>
             </div>
         </div>
+        <div class="window-description-bar">一些需要用魔法才能访问的照片？</div>
         <div class="window-body" style="padding: 0; background: #fff; overflow-y: auto;">
             <div id="gallery-content" class="gallery-content">
                 <!-- 瀑布流内容将由 JS 动态生成 -->
@@ -246,7 +255,8 @@
         </div>
         <div class="window-body">
             <div class="window-description-bar">一些书，一些句子，一些尚未整理完的精神角落。</div>
-            <iframe src="library/index.html" frameborder="0" class="library-frame" title="私人图书馆"></iframe>
+            <iframe src="about:blank" data-src="library/index.html" class="library-frame" title="私人图书馆"
+                loading="lazy"></iframe>
         </div>
         <div class="resize-handle"></div>
     </div>
@@ -263,9 +273,9 @@
             </div>
         </div>
         <div class="window-body">
-            <div class="window-description-bar">记录学习、实践与开源路上的一点积累；首页当前展示 6 篇文章，包含 Matmul Fusion 专题、博客搭建和 Hello World 等内容。</div>
-            <iframe src="https://my-blog-gamma-puce.vercel.app/" frameborder="0" class="blog-frame" title="Blankke's Blog"
-                style="flex: 1; width: 100%; height: 100%; min-height: 0; border: 2px inset #dfdfdf; box-sizing: border-box; background: white;"></iframe>
+            <div class="window-description-bar">记录学习、实践与开源路上的长期积累；内容在首次打开时连接。</div>
+            <iframe src="about:blank" data-src="https://my-blog-gamma-puce.vercel.app/" class="blog-frame"
+                title="Blankke's Blog" loading="lazy"></iframe>
         </div>
         <div class="resize-handle"></div>
     </div>
@@ -291,7 +301,6 @@
     <!-- Window: Wisdom Tree (PVZ-like) -->
     <div id="window-wisdomtree" class="window" data-window-title="植物大战僵尸" data-window-icon="assets/icon/pvz_icon.png"
         style="width: 640px; height: 460px;">
-        <div class="window-description-bar" style="border-bottom: 1px solid #808080;">他可能可以被施肥？</div>
         <div class="title-bar">
             <div class="title-bar-text">Plants vs Zombies (Lite)</div>
             <div class="title-bar-controls">
@@ -300,6 +309,7 @@
                 <button aria-label="Close" onclick="closeWindow('window-wisdomtree')"></button>
             </div>
         </div>
+        <div class="window-description-bar">这个程序不在“添加或删除程序”的清单里；它可能可以被施肥？</div>
         <div class="window-body" style="padding: 0;">
             <div id="pvz-tree" class="pvz-tree">
                 <div class="pvz-tree-topbar">
@@ -342,7 +352,7 @@
                 <button id="resume-zoom-reset" type="button">重置</button>
             </div>
             <div class="resume-container">
-                <iframe id="resume-frame" src="apps/resume.html" frameborder="0"></iframe>
+                <iframe id="resume-frame" src="about:blank" data-src="apps/resume.html" loading="lazy"></iframe>
             </div>
         </div>
         <div class="resize-handle"></div>
@@ -360,7 +370,8 @@
             </div>
         </div>
         <div class="window-body" style="padding: 0; overflow: hidden;">
-            <iframe src="apps/minesweeper.html" frameborder="0" style="width: 100%; height: 100%; border: none;"></iframe>
+            <iframe src="about:blank" data-src="apps/minesweeper.html" class="minesweeper-frame" title="扫雷"
+                loading="lazy"></iframe>
         </div>
         <div class="resize-handle"></div>
     </div>
@@ -448,14 +459,20 @@
             </div>
         </div>
         <div class="window-body" style="display: flex; flex-direction: column; height: 100%; padding: 0;">
-            <div class="window-description-bar" style="border-bottom: 1px solid #808080;">我小时候就是拿这个玩4399的（。</div>
-            <div style="padding: 4px; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #808080;">
+            <div class="browser-command-bar">
+                <button id="browser-back" type="button">← 后退</button>
+                <button id="browser-home" type="button">⌂ 主页</button>
+                <button id="browser-open-external" type="button">↗ 新窗口</button>
+            </div>
+            <div class="browser-address-bar">
                 <span>地址(D):</span>
-                <input type="text" id="browser-address" style="flex: 1;" readonly>
+                <input type="text" id="browser-address" aria-label="浏览器地址">
+                <button id="browser-go" type="button">转到</button>
             </div>
             <div style="flex: 1; position: relative;">
                 <iframe id="browser-iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
+            <div class="status-bar browser-status"><p class="status-bar-field" id="browser-status">完成</p><p class="status-bar-field">Internet</p></div>
         </div>
         <div class="resize-handle"></div>
     </div>
@@ -468,7 +485,7 @@
         <div class="start-menu-items" id="start-menu-items">
             <!-- Visible apps are rendered by js/app-registry.js. Hidden puzzle apps are intentionally excluded. -->
             <hr style="width: 100%; border-top: 1px solid #808080; border-bottom: 1px solid #fff;">
-            <div class="menu-item" onclick="window.close()">
+            <div class="menu-item" id="start-shutdown" onclick="showShutdownDialog()">
                 <img src="assets/icon/shut_down_normal-4.png">
                 <span>关闭系统...</span>
             </div>
@@ -497,6 +514,10 @@
             <div class="tray-icon" id="tray-qq" title="QQ">
                 <img src="assets/icon/Bootstrap-Bootstrap-Bootstrap-tencent-qq.512.png" alt="QQ">
             </div>
+            <button class="tray-icon tray-mystery" id="tray-mystery" type="button" title="磁盘异常信号">
+                <span aria-hidden="true">?</span>
+                <span class="tray-mystery-dot" aria-hidden="true"></span>
+            </button>
             <div class="taskbar-time" id="taskbar-time">12:00 PM</div>
         </div>
     </div>
@@ -514,7 +535,7 @@
             <span>桌面特效...</span>
         </div>
         <div class="context-menu-separator"></div>
-        <div class="context-menu-item" id="ctx-paste" class="disabled">
+        <div class="context-menu-item disabled" id="ctx-paste">
             <span>粘贴</span>
         </div>
         <div class="context-menu-separator"></div>
@@ -546,15 +567,16 @@
 
     <!-- Modularized Scripts -->
     <script src="js/core.js?v=3"></script>
-    <script src="js/window-manager.js?v=3"></script>
-    <script src="js/desktop.js?v=4"></script>
-    <script src="js/desktop-effects.js?v=3"></script>
+    <script src="js/window-manager.js?v=4"></script>
+    <script src="js/system-experience.js?v=2"></script>
+    <script src="js/desktop.js?v=5"></script>
+    <script src="js/desktop-effects.js?v=4"></script>
     <script src="js/app-registry.js?v=4"></script>
     <script src="js/recycle-bin.js?v=4"></script>
-    <script src="js/apps.js?v=3"></script>
+    <script src="js/apps.js?v=4"></script>
     <script src="js/gallery-data.js?v=3"></script>
     <script src="js/gallery.js?v=3"></script>
-    <script src="js/main.js?v=3"></script>
+    <script src="js/main.js?v=4"></script>
 </body>
 
 </html>

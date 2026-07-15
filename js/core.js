@@ -12,7 +12,7 @@ window.BLANKKE_STATE_KEYS = {
     quest: 'blankke_quest_v2',
     library: 'blankke_library_v2',
     minesweeper: 'blankke_minesweeper_v2',
-    effects: 'blankke_effects_v1'
+    effects: 'blankke_effects_v2'
 };
 
 window.quest = (function() {
@@ -68,24 +68,6 @@ function updateTime() {
 setInterval(updateTime, 1000);
 updateTime();
 
-// Boot toast (bottom-right)
-function showBootToast() {
-    // Use navigation timing as a pseudo "boot time"
-    const seconds = Math.max(0.6, Math.round((performance.now() / 1000) * 10) / 10);
-    const percent = Math.max(1, Math.min(99, Math.round(99 - seconds * 6)));
-
-    const toast = document.createElement('div');
-    toast.className = 'boot-toast';
-    toast.textContent = `欢迎回来！本次开机用时 ${seconds} 秒，超越全球 ${percent}% 用户 :)`;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 6500);
-}
-
-showBootToast();
-
 // Start Menu
 const startButton = document.getElementById('start-button');
 const startMenu = document.getElementById('start-menu');
@@ -93,13 +75,13 @@ const startMenu = document.getElementById('start-menu');
 if (startButton && startMenu) {
     startButton.addEventListener('click', (e) => {
         e.stopPropagation();
-        startMenu.style.display = startMenu.style.display === 'block' ? 'none' : 'block';
-        startButton.classList.toggle('active');
+        const isOpen = startMenu.classList.toggle('is-open');
+        startButton.classList.toggle('active', isOpen);
     });
 
     document.addEventListener('click', (e) => {
         if (!startMenu.contains(e.target) && e.target !== startButton) {
-            startMenu.style.display = 'none';
+            startMenu.classList.remove('is-open');
             startButton.classList.remove('active');
         }
     });
@@ -159,7 +141,6 @@ window.openSettingsWindow = function() {
 
         document.getElementById('settings-reset-desktop')?.addEventListener('click', () => {
             localStorage.removeItem(window.BLANKKE_STATE_KEYS.desktop);
-            localStorage.removeItem('win98_desktop_icons');
             if (typeof loadIconPositions === 'function') loadIconPositions();
         });
 

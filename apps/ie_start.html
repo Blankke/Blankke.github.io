@@ -1,93 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <title>Welcome to Internet Explorer</title>
     <style>
+        * { box-sizing: border-box; }
         body {
-            background-color: #fff;
-            font-family: "MS Sans Serif", Tahoma, sans-serif;
+            min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 14px;
+            color: #151515;
+            background:
+                linear-gradient(90deg, rgba(0, 0, 128, .035) 1px, transparent 1px),
+                linear-gradient(rgba(0, 0, 128, .035) 1px, transparent 1px),
+                #fffff5;
+            background-size: 8px 8px;
+            font-family: "MS Sans Serif", Tahoma, sans-serif;
             font-size: 12px;
+        }
+        .page-shell {
+            max-width: 920px;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #828282;
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, .18);
         }
         .header {
             display: flex;
             align-items: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            min-height: 82px;
+            padding: 12px 16px;
+            color: #fff;
+            background: linear-gradient(110deg, #000065, #005ca8 68%, #21a4ba);
+            border-bottom: 4px solid #f1cc42;
+        }
+        .header img {
+            width: 54px;
+            height: 54px;
+            image-rendering: pixelated;
         }
         .logo {
-            font-size: 24px;
+            font: italic bold 25px/1.05 Georgia, serif;
             font-weight: bold;
-            color: #003399;
-            margin-right: 10px;
-            font-style: italic;
+            color: #fff;
+            text-shadow: 2px 2px #002658;
+        }
+        .header small {
+            display: block;
+            margin-top: 5px;
+            color: #c9edff;
+            font-family: "Courier New", monospace;
+            letter-spacing: .08em;
+        }
+        .channel-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            color: #fff;
+            background: #000080;
+            border-bottom: 1px solid #000;
+        }
+        .channel-bar span {
+            padding: 5px 11px;
+            border-right: 1px solid #fff;
+            font-weight: bold;
+        }
+        .page-body {
+            padding: 16px;
         }
         .search-box {
-            background: #ececec;
-            padding: 15px;
-            border: 1px solid #808080;
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: minmax(180px, .7fr) 1fr;
+            gap: 18px;
+            padding: 14px;
+            margin-bottom: 16px;
+            background: linear-gradient(90deg, #e4edf9, #f4f4f4);
+            border: 2px solid;
+            border-color: #fff #777 #777 #fff;
         }
         h1 {
-            font-size: 16px;
+            color: #000080;
+            font: bold 20px/1.1 Georgia, serif;
             margin-top: 0;
+            margin-bottom: 5px;
+        }
+        .search-copy p {
+            margin: 0;
+            color: #555;
+            line-height: 1.5;
+        }
+        form {
+            align-self: center;
         }
         input[type="text"] {
-            width: 200px;
-            padding: 2px;
+            width: min(260px, 62%);
+            padding: 4px;
+            border: 2px inset #ddd;
         }
         button {
             cursor: pointer;
+            padding: 3px 10px;
+            background: #c0c0c0;
+            border: 2px outset #fff;
         }
         .links {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 12px;
+        }
+        .link-group {
+            min-width: 0;
+            background: #fff;
+            border: 1px solid #b4b4b4;
         }
         .link-group h3 {
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            color: #003399;
+            margin: 0;
+            padding: 6px 9px;
+            color: #fff;
+            background: linear-gradient(90deg, #000080, #1680be);
+            border-bottom: 2px solid #f1cc42;
+            font-size: 12px;
         }
         ul {
             list-style-type: square;
-            padding-left: 20px;
+            margin: 0;
+            padding: 10px 12px 10px 28px;
         }
         li {
-            margin-bottom: 5px;
+            margin-bottom: 7px;
         }
         a {
             color: #0000ff;
             text-decoration: underline;
         }
         .footer {
-            margin-top: 30px;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
+            margin-top: 16px;
+            padding: 8px;
+            color: #d3e8ff;
+            background: #000080;
+            border-top: 3px solid #f1cc42;
             text-align: center;
-            color: #666;
+            font: 10px "Courier New", monospace;
+        }
+        .marquee {
+            overflow: hidden;
+            padding: 5px 8px;
+            color: #603d00;
+            background: #fff7c9;
+            border-bottom: 1px solid #9b7b20;
+            white-space: nowrap;
+            font-family: "Courier New", monospace;
+        }
+        @media (max-width: 620px) {
+            body { padding: 0; }
+            .page-shell { border: 0; }
+            .search-box, .links { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo">Microsoft Internet Explorer</div>
-        <div>Home Page</div>
-    </div>
+    <div class="page-shell">
+        <div class="header">
+            <img src="../assets/icon/msie1-0.png" alt="">
+            <div>
+                <div class="logo">Dent du Lion Internet Guide</div>
+                <small>YOUR SLOW GATEWAY TO A SMALLER WEB</small>
+            </div>
+        </div>
+        <div class="channel-bar"><span>首页</span><span>本机</span><span>收藏夹</span><span>个人频道</span></div>
+        <div class="marquee">欢迎回到互联网。建议分辨率 800 × 600 · 最佳浏览器 Internet Explorer 5.0 · 请耐心等待页面载入</div>
 
+        <div class="page-body">
     <div class="search-box">
-        <h1>Search the Internet</h1>
+        <div class="search-copy"><h1>Search the Internet</h1><p>慢一点输入，也许你会留意到平时忽略的东西。</p></div>
         <form action="https://www.bing.com/search" method="GET" target="_blank">
             <label>Find:</label>
             <input type="text" name="q" placeholder="Type here...">
             <button type="submit">Search</button>
             <br>
-            <small style="color: #666; margin-top: 5px; display: block;">(Opens in a new window)</small>
+            <small style="color: #666; margin-top: 5px; display: block;">将在新窗口中打开</small>
         </form>
     </div>
 
@@ -115,7 +208,9 @@
     </div>
 
     <div class="footer">
-        &copy; 1998 Microsoft Corporation. All rights reserved.
+        DENT DU LION NETWORK SERVICES · BEST VIEWED WITH CURIOSITY · 1998—FOREVER
+    </div>
+        </div>
     </div>
 
 </body>

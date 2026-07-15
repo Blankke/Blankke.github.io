@@ -76,8 +76,8 @@ const musicTimeEl = document.getElementById('music-time');
 const musicVolumeEl = document.getElementById('music-volume');
 const musicVolumeLabelEl = document.getElementById('music-volume-label');
 
-window.mewmewTalkEnabled = false;
-// No persistence for MewMew talk state - resets on reload
+// “恢复对话”属于解密链路状态，刷新页面后也应继续有效。
+window.mewmewTalkEnabled = !!window.quest?.hasFlag('pet_voice_restored');
 
 let trackContextMenu = null;
 
@@ -112,7 +112,7 @@ function formatTime(seconds) {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-function escapeHtml(value) {
+function escapeAppHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, (char) => ({
         '&': '&amp;',
         '<': '&lt;',
@@ -183,8 +183,8 @@ function showTrackProperties(index, fallbackTrack = null) {
     const title = track.title || track.file || 'Unknown Track';
     const matchSource = `${track.title || ''} ${track.file || ''}`.toLowerCase().replace(/[^a-z0-9]/g, '');
     const isAmericanPie = matchSource.includes('americanpie');
-    const fileName = escapeHtml(track.file || 'Unknown');
-    const displayTitle = escapeHtml(title);
+    const fileName = escapeAppHtml(track.file || 'Unknown');
+    const displayTitle = escapeAppHtml(title);
     const displaySize = formatFileSize(track.sizeBytes);
 
     const existingWindow = document.getElementById('window-track-properties');
@@ -261,6 +261,7 @@ function showTrackProperties(index, fallbackTrack = null) {
                     toggle.checked = window.mewmewTalkEnabled;
                     toggle.addEventListener('change', () => {
                         window.mewmewTalkEnabled = toggle.checked;
+                        window.quest?.setFlag('pet_voice_restored', toggle.checked);
                     });
                 }
             }
@@ -391,6 +392,7 @@ if (musicAudioEl) {
     musicAudioEl.addEventListener('timeupdate', syncMusicProgress);
     musicAudioEl.addEventListener('durationchange', syncMusicProgress);
     musicAudioEl.addEventListener('ended', () => {
+        document.querySelector('.music-now')?.classList.remove('is-playing');
         if (musicLoopEl?.checked) {
             musicStatusEl.textContent = '循环播放';
             return;
@@ -399,11 +401,13 @@ if (musicAudioEl) {
         playNext();
     });
     musicAudioEl.addEventListener('pause', () => {
+        document.querySelector('.music-now')?.classList.remove('is-playing');
         if (musicAudioEl.currentTime > 0 && !musicAudioEl.ended) {
             musicStatusEl.textContent = '已暂停';
         }
     });
     musicAudioEl.addEventListener('play', () => {
+        document.querySelector('.music-now')?.classList.add('is-playing');
         musicStatusEl.textContent = '播放中...';
     });
 }
@@ -457,20 +461,54 @@ musicPlayEl?.addEventListener('click', () => {
 });
 musicPauseEl?.addEventListener('click', () => musicAudioEl?.pause());
 
-// Waline (Guestbook)
-// 文档: https://waline.js.org/
-function initWaline() {
-    const container = document.querySelector('#waline-container');
-    if (!container) return;
+// Waline 留言板：只在窗口首次打开时加载，避免桌面启动阶段访问外部服务。
+let walineLoadPromise = null;
+let walineInitialized = false;
 
-    if (typeof Waline === 'undefined') {
-        console.error('Waline script not loaded.');
-        container.innerHTML = '<div style="padding: 10px; color: red;">评论系统加载失败，请检查网络或刷新页面。</div>';
+function loadWalineAssets() {
+    if (window.Waline) return Promise.resolve();
+    if (walineLoadPromise) return walineLoadPromise;
+
+    if (!document.querySelector('link[data-waline-style]')) {
+        const style = document.createElement('link');
+        style.rel = 'stylesheet';
+        style.href = 'https://unpkg.com/@waline/client@v2/dist/waline.css';
+        style.dataset.walineStyle = 'true';
+        document.head.appendChild(style);
+    }
+
+    walineLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/@waline/client@v2/dist/waline.js';
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Waline 资源加载失败'));
+        document.head.appendChild(script);
+    });
+    return walineLoadPromise;
+}
+
+async function initWaline() {
+    const container = document.querySelector('#waline-container');
+    if (!container || walineInitialized) return;
+
+    container.innerHTML = '<div class="guestbook-loading">正在连接旧互联网留言服务…</div>';
+
+    try {
+        await loadWalineAssets();
+    } catch (error) {
+        container.innerHTML = `<div class="win98-error">留言服务资源加载失败。<br>${escapeAppHtml(error.message)}</div>`;
+        return;
+    }
+
+    if (typeof window.Waline === 'undefined') {
+        container.innerHTML = '<div class="win98-error">留言服务未能初始化，请稍后再试。</div>';
         return;
     }
 
     try {
-        Waline.init({
+        container.innerHTML = '';
+        window.Waline.init({
             el: '#waline-container',
             serverURL: 'https://gitpage-three.vercel.app/', 
             emoji: [
@@ -480,18 +518,17 @@ function initWaline() {
             placeholder: '欢迎留言！(无需登录)',
             dark: 'body[data-theme="dark"]',
         });
-        console.log('Waline initialized');
+        walineInitialized = true;
     } catch (e) {
         console.error("Waline init failed:", e);
-        container.innerHTML = `<div style="padding: 10px; color: red;">评论系统初始化错误: ${e.message}</div>`;
+        container.innerHTML = `<div class="win98-error">留言系统初始化错误：${escapeAppHtml(e.message)}</div>`;
     }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initWaline);
-} else {
-    initWaline();
+if (typeof addOpenWindowHook === 'function') {
+    addOpenWindowHook((id) => {
+        if (id === 'window-guestbook') initWaline();
+    });
 }
 
 // Shortcuts
@@ -505,6 +542,9 @@ document.addEventListener('keydown', (e) => {
 
 // Minesweeper Message Listener
 window.addEventListener('message', (event) => {
+    const minesweeperFrame = document.querySelector('#window-minesweeper iframe');
+    if (!minesweeperFrame || event.source !== minesweeperFrame.contentWindow) return;
+    if (!event.data || typeof event.data.type !== 'string') return;
     if (!window.desktopPet) return;
 
     if (event.data.type === 'minesweeper-win') {
