@@ -8,6 +8,9 @@
     const SIGNAL_VISIBLE_MS = 6000;
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
     let signalDismissTimer = 0;
+    const GITHUB_REPO = 'Blankke/Blankke.github.io';
+    const COMMIT_CACHE_KEY = 'blankke_lastupdate_commit_v1';
+    const COMMIT_CACHE_TTL_MS = 30 * 60 * 1000;
 
     const questStages = [
         {
@@ -171,15 +174,81 @@
         window.addOpenWindowHook((windowId) => hydrateFrameForWindow(windowId));
     }
 
-    function updateLocalSystemInfo() {
+    function readCommitCache() {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(COMMIT_CACHE_KEY) || 'null');
+            if (!parsed || typeof parsed !== 'object') return null;
+            if (!Number.isFinite(parsed.savedAt) || Date.now() - parsed.savedAt > COMMIT_CACHE_TTL_MS) {
+                return null;
+            }
+            return parsed;
+        } catch {
+            return null;
+        }
+    }
+
+    function writeCommitCache(value) {
+        try {
+            localStorage.setItem(COMMIT_CACHE_KEY, JSON.stringify({
+                ...value,
+                savedAt: Date.now()
+            }));
+        } catch {
+            // 缓存写入失败时不影响页面展示。
+        }
+    }
+
+    async function fetchLatestCommitInfo() {
+        const cached = readCommitCache();
+        if (cached) return cached;
+
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits?per_page=1`, {
+            headers: { Accept: 'application/vnd.github+json' },
+            cache: 'no-store'
+        });
+
+        if (!response.ok) throw new Error(`commit fetch failed: ${response.status}`);
+
+        const commits = await response.json();
+        const commit = Array.isArray(commits) ? commits[0] : null;
+        const commitHash = typeof commit?.sha === 'string' ? commit.sha.slice(0, 7) : '';
+        const commitMessage = typeof commit?.commit?.message === 'string' ? commit.commit.message : '';
+        const commitDate = typeof commit?.commit?.author?.date === 'string' ? commit.commit.author.date : '';
+
+        if (!commitHash && !commitMessage && !commitDate) return null;
+
+        const info = { commitHash, commitMessage, commitDate };
+        writeCommitCache(info);
+        return info;
+    }
+
+    async function updateLocalSystemInfo() {
         const updatedEl = document.getElementById('last-updated-time');
 
-        if (updatedEl) {
-            const modified = new Date(document.lastModified);
-            updatedEl.textContent = Number.isNaN(modified.getTime())
-                ? '未知'
-                : modified.toLocaleString('zh-CN', { dateStyle: 'medium', timeStyle: 'short' });
+        if (!updatedEl) return;
+
+        try {
+            const meta = await fetchLatestCommitInfo();
+            const commitHash = typeof meta?.commitHash === 'string' ? meta.commitHash.trim() : '';
+            const commitMessage = typeof meta?.commitMessage === 'string' ? meta.commitMessage.trim() : '';
+            const commitDate = typeof meta?.commitDate === 'string' ? new Date(meta.commitDate) : null;
+            const formattedDate = commitDate && !Number.isNaN(commitDate.getTime())
+                    ? commitDate.toLocaleString('zh-CN', { dateStyle: 'medium', timeStyle: 'short' })
+                    : '';
+
+            if (commitHash || commitMessage || formattedDate) {
+                updatedEl.textContent = [commitHash, formattedDate].filter(Boolean).join(' · ') || '未知';
+                updatedEl.title = commitMessage || commitHash || '最近提交';
+                return;
+            }
+        } catch {
+            // 回退到文件修改时间。
         }
+
+        const modified = new Date(document.lastModified);
+        updatedEl.textContent = Number.isNaN(modified.getTime())
+            ? '未知'
+            : modified.toLocaleString('zh-CN', { dateStyle: 'medium', timeStyle: 'short' });
     }
 
     // 右下角信号停留数秒后缓慢滑入任务栏下方；托盘问号保留永久入口。
@@ -292,7 +361,7 @@
     function init() {
         bindLazyApplications();
         renderSignalSummary();
-        updateLocalSystemInfo();
+        void updateLocalSystemInfo();
         showBootScreen();
 
         const mysterySignal = document.getElementById('mystery-signal');
