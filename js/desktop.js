@@ -236,7 +236,11 @@ function canStartDesktopSelection(target) {
         '#icon-context-menu',
         '#top-right-info',
         '.mystery-signal',
-        '.message-box-overlay'
+        '.message-box-overlay',
+        // 桌宠自己负责拖动；动作菜单也不能被桌面框选逻辑抢走。
+        '.desktop-pet',
+        '.pet-action-menu',
+        '#pet-dialog'
     ].join(','));
 }
 

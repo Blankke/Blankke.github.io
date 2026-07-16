@@ -26,7 +26,10 @@ const scriptFiles = [
     'js/system-experience.js',
     'js/window-manager.js',
     'library/books-data.js',
-    'library/script.js'
+    'library/script.js',
+    'scripts/align-pet-sheets.mjs',
+    'scripts/serve.mjs',
+    'scripts/test-pet.mjs'
 ];
 const htmlFiles = [
     'index.html',

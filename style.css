@@ -2546,6 +2546,156 @@ html[data-visual-theme="arcade"] #waline-container {
   color: var(--arcade-ink);
 }
 
+/* 夜游桌宠：Canvas 内部固定 256 像素，外层只做整数像素定位。 */
+.desktop-pet {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+  will-change: transform;
+  filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, 0.34));
+}
+
+.desktop-pet.is-dragging {
+  cursor: grabbing;
+  filter: drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.42));
+}
+
+.desktop-pet canvas,
+.desktop-pet > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  outline: none;
+}
+
+.desktop-pet canvas {
+  cursor: inherit;
+}
+
+.desktop-pet > img {
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.desktop-pet canvas:focus-visible {
+  filter: drop-shadow(0 0 5px #ffe178);
+}
+
+.pet-dialog {
+  position: fixed;
+  display: none;
+  z-index: 10000;
+  min-width: 100px;
+  max-width: 280px;
+  padding: 8px 10px;
+  color: #000;
+  background: #fff;
+  border: 2px solid #000;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+  animation: pet-dialog-fade-in 0.12s ease;
+}
+
+.pet-dialog-arrow {
+  position: absolute;
+  right: calc(50% - 10px);
+  bottom: -10px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid #000;
+  border-right: 10px solid transparent;
+  border-left: 10px solid transparent;
+}
+
+.pet-dialog-arrow::after {
+  position: absolute;
+  top: -12px;
+  left: -9px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid #fff;
+  border-right: 9px solid transparent;
+  border-left: 9px solid transparent;
+  content: "";
+}
+
+@keyframes pet-dialog-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pet-action-menu {
+  position: fixed;
+  z-index: 10001;
+  width: min(320px, calc(100vw - 16px));
+  max-height: min(560px, calc(100vh - 16px));
+  overflow: auto;
+  padding: 6px;
+  color: #f7efcf;
+  background: rgba(7, 27, 38, 0.97);
+  border: 2px solid #d5b76b;
+  border-radius: 8px;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.42);
+  font: 14px/1.25 ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+.pet-action-menu[hidden] {
+  display: none;
+}
+
+.pet-action-menu__heading {
+  padding: 8px 8px 4px;
+  color: #ffe178;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.pet-action-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 76px;
+  padding: 5px 8px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pet-action-menu__item:hover,
+.pet-action-menu__item:focus-visible {
+  color: #fff7d1;
+  background: #1f5549;
+  outline: 2px solid #ffe178;
+  outline-offset: -2px;
+}
+
+.pet-action-menu__item img {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 640px) {
+  .pet-action-menu {
+    width: min(292px, calc(100vw - 16px));
+  }
+}
+
 @media (max-width: 760px) {
   #top-right-info {
     display: none;
