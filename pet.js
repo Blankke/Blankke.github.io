@@ -1001,6 +1001,7 @@ class DesktopPet {
             window.setTimeout(() => this.showDialog('那我就告诉你一个秘密吧~', 4000), 10000);
             window.setTimeout(() => this.showDialog('我主人说……高手都用键盘，菜鸟才点鼠标。', 5000), 15000);
             window.setTimeout(() => this.showDialog('试试看……同时按下几个你平时不会一起按的键？', 6000), 21000);
+            window.setTimeout(() => this.showDialog('Ctrl……Alt……我主人姓什么来着?', 6000), 21000);
             return;
         }
         this.showDialog(`又是 ${time} 秒！保持这个速度！`, 3000);
@@ -1016,7 +1017,7 @@ class DesktopPet {
     triggerDialog(dialogId) {
         const dialogs = {
             cmd_hint: '有时候，命令行比图形界面更强大……',
-            radio_hint: '我的主人喜欢听广播，特别是那个格拉斯哥的电台……',
+            radio_hint: '我的主人喜欢听广播，特别是那个城市之声的电台……',
             secret_found: '你找到了！真不简单！'
         };
         if (dialogs[dialogId]) this.showDialog(dialogs[dialogId], 5000);
